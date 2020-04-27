@@ -23,7 +23,7 @@ package dev.scarisey.bastion.derivation.encode
 
 package object auto {
 //  implicit def deriveEncode[T]: Encode[T] = macro Magnolia.gen[T]
-  implicit val autoUnlock:AutoUnlock = new AutoUnlock {}
+  implicit val autoUnlock: AutoUnlock = new AutoUnlock {}
 }
 
 sealed trait AutoUnlock

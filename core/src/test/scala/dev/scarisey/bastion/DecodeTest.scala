@@ -94,8 +94,8 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     case class SubB2(anInt: Int)
     case class RecB(sub1: SubB1, sub2: SubB2)
 
-    implicit val genA: Encode[RecA]      = deriveEncode[RecA]
-    implicit val genB: Decode[RecB]      = deriveDecoder[RecB]
+    implicit val genA: Encode[RecA] = deriveEncode[RecA]
+    implicit val genB: Decode[RecB] = deriveDecoder[RecB]
 
     RecA(SubA1("toto"), SubA2(42)).convert[RecB] shouldEqual Right(RecB(SubB1("toto"), SubB2(42)))
   }

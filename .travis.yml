@@ -1,3 +1,14 @@
 language: scala
 scala:
+  - 2.12.11
   - 2.13.1
+before_install:
+  - git fetch --tags
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION headerCheckAll scalafmtCheckAll compile scalafix unusedCompileDependenciesTest test
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt

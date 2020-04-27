@@ -2,12 +2,14 @@ import Dependencies._
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-lazy val supportedScalaVersions = List("2.12.11","2.13.1")
+lazy val supportedScalaVersions = List("2.12.11", "2.13.1")
 
 ThisBuild / organization := "dev.scarisey"
 ThisBuild / homepage := None
 ThisBuild / licenses += "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")
-ThisBuild / developers := List(Developer("scarisey", "Sylvain Carisey", "sylvain@carisey.dev", url("https://github.com/scarisey")))
+ThisBuild / developers := List(
+  Developer("scarisey", "Sylvain Carisey", "sylvain@carisey.dev", url("https://github.com/scarisey"))
+)
 ThisBuild / startYear := Some(2020)
 ThisBuild / dynverSeparator := "-"
 ThisBuild / scmInfo := Some(
@@ -68,14 +70,13 @@ lazy val core = (project in file("core"))
     ),
     scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2,v)) if v <= 12 => Seq("-Ypartial-unification")
-        case _ => Nil
+        case Some((2, v)) if v <= 12 => Seq("-Ypartial-unification")
+        case _                       => Nil
       }
     },
     addCompilerPlugin(scalafixSemanticdb),
     crossScalaVersions := supportedScalaVersions
   )
-  .settings(scalaMacroDependencies)
   .settings(
     libraryDependencies ++= Seq(
       magnolia,
@@ -88,7 +89,3 @@ lazy val root = (project in file("."))
   .aggregate(core)
   .settings(crossScalaVersions := Nil, publish / skip := true)
 
-lazy val scalaMacroDependencies: Seq[Setting[_]] = Seq(
-  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
-  libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
-)

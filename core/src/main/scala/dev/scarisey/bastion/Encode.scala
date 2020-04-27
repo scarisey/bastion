@@ -25,7 +25,8 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 
-import dev.scarisey.bastion.derivation.encode.{AutoUnlock, EncodeDerivation}
+import dev.scarisey.bastion.derivation.encode.AutoUnlock
+import dev.scarisey.bastion.derivation.encode.EncodeDerivation
 import magnolia._
 
 import language.experimental.macros
@@ -109,7 +110,7 @@ object Encode extends EncodeDerivation {
     override def to(a: Iterable[A]): DynamicRepr = IterableDynamicRepr(a.map(implicitly[Encode[A]].to(_)))
   }
 
-  implicit def deriveEncode[T](implicit u:AutoUnlock): Encode[T] = macro macroDeriveEncode[T]
+  implicit def deriveEncode[T](implicit u: AutoUnlock): Encode[T] = macro macroDeriveEncode[T]
 
   def macroDeriveEncode[T: c.WeakTypeTag](c: whitebox.Context)(u: c.Tree): c.Tree = {
     val _ = u

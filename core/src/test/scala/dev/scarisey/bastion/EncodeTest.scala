@@ -24,14 +24,19 @@ import derivation.encode.auto._
 
 class EncodeTest extends AnyFlatSpec with Matchers {
   trait Fixture {
-    case class SubA1 private(sub_string_1: String, sub_int_1: Int)
-    case class SubA2 private(sub_boolean_2: Boolean, sub_double_2: Double)
-    case class RecordA private(sub_2: SubA2, string_description: String, sub_1: SubA1)
-    case class RecordB private(stringDescription: String, subA1: Option[SubA1], subA2s: List[SubA2], recA: Either[String, RecordA])
+    case class SubA1 private (sub_string_1: String, sub_int_1: Int)
+    case class SubA2 private (sub_boolean_2: Boolean, sub_double_2: Double)
+    case class RecordA private (sub_2: SubA2, string_description: String, sub_1: SubA1)
+    case class RecordB private (
+      stringDescription: String,
+      subA1: Option[SubA1],
+      subA2s: List[SubA2],
+      recA: Either[String, RecordA]
+    )
 
 //    implicit val encodeA: Encode[RecordA]   = implicitly[Encode[RecordA]] //FIXME this does not work
-    implicit val encodeA: Encode[RecordA]   = deriveEncode[RecordA]
-    implicit val encodeB: Encode[RecordB]   = deriveEncode[RecordB]
+    implicit val encodeA: Encode[RecordA] = deriveEncode[RecordA]
+    implicit val encodeB: Encode[RecordB] = deriveEncode[RecordB]
   }
 
   it should "convert to a generic representation" in new Fixture {
