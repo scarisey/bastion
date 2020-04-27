@@ -7,13 +7,13 @@ lazy val supportedScalaVersions = List("2.12.11","2.13.1")
 ThisBuild / organization := "dev.scarisey"
 ThisBuild / homepage := None
 ThisBuild / licenses += "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")
-ThisBuild / developers := List(Developer("scarisey", "Sylvain Carisey", "sylvain@carisey.dev", url("https://carisey.dev")))
+ThisBuild / developers := List(Developer("scarisey", "Sylvain Carisey", "sylvain@carisey.dev", url("https://github.com/scarisey")))
 ThisBuild / startYear := Some(2020)
 ThisBuild / dynverSeparator := "-"
 ThisBuild / scmInfo := Some(
   ScmInfo(
-    url("https://github.com/scarisey/" + name.value),
-    "scm:git:git@github.com/scarisey/" + name.value + ".git"
+    url("https://github.com/scarisey/bastion" + name.value),
+    "scm:git:git@github.com/scarisey/bastion" + name.value + ".git"
   )
 )
 
@@ -23,7 +23,7 @@ lazy val createProductHelper = taskKey[Unit]("Generate code for ProductHelper.sc
 
 createProductHelper := {
   val productBuilderFile =
-    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "converter" / "ProductHelper.scala"
+    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "bastion" / "ProductHelper.scala"
   val resource = (resourceManaged in Compile).value / "scalaFmt" / "temporary"
   val scalaFmt = baseDirectory.value / ".scalafmt.conf"
 
@@ -40,7 +40,7 @@ lazy val createResultHelper = taskKey[Unit]("Generate code for ResultHelper.scal
 
 createResultHelper := {
   val file =
-    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "converter" / "ResultHelper.scala"
+    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "bastion" / "ResultHelper.scala"
   val resource = (resourceManaged in Compile).value / "scalaFmt" / "temporary"
   val scalaFmt = baseDirectory.value / ".scalafmt.conf"
 
@@ -55,7 +55,7 @@ createResultHelper := {
 
 lazy val core = (project in file("core"))
   .settings(
-    moduleName := "converter",
+    moduleName := "bastion-core",
     scalacOptions := Seq(
       "-feature",
       "-language:higherKinds,implicitConversions",
