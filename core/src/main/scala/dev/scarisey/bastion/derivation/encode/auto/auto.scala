@@ -16,13 +16,7 @@
 
 package dev.scarisey.bastion.derivation.encode
 
-//import dev.scarisey.converter._
-//import magnolia._
-//
-//import scala.language.experimental.macros
-
 package object auto {
-//  implicit def deriveEncode[T]: Encode[T] = macro Magnolia.gen[T]
   implicit val autoUnlock: AutoUnlock = new AutoUnlock {}
 }
 

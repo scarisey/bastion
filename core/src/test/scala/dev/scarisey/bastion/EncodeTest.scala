@@ -39,7 +39,9 @@ class EncodeTest extends AnyFlatSpec with Matchers {
     implicit val encodeB: Encode[RecordB] = deriveEncode[RecordB]
   }
 
-  it should "convert to a generic representation" in new Fixture {
+  behavior of "Encode"
+
+  it should "convert to a dynamic representation" in new Fixture {
     val recordA = RecordA(SubA2(true, 2.0), "toto", SubA1("s1", 42))
     val repr    = encodeA.to(recordA)
     repr match {
@@ -55,7 +57,7 @@ class EncodeTest extends AnyFlatSpec with Matchers {
     repr.sub_X.sub_string_1 shouldBe NilDynamicRepr
   }
 
-  it should "convert an ADT to a generic representation" in {
+  it should "convert an ADT to a dynamic representation" in {
     sealed trait RecC
 //    object RecC { FIXME find out why it does not work
     final case class RecC1(aDouble: Double) extends RecC
@@ -73,6 +75,30 @@ class EncodeTest extends AnyFlatSpec with Matchers {
     repr.aDouble shouldBe NilDynamicRepr
     repr.anInt shouldBe NilDynamicRepr
     repr.aString shouldBe ValueDynamicRepr("a string")
+  }
+
+  it should "convert a recursive ADT to a dynamic representation" in {
+    sealed trait Rec
+    final case class RecM(text: String)  extends Rec
+    final case class RecR(rs: List[Rec]) extends Rec
+
+    val encode: Encode[Rec] = deriveEncode[Rec]
+    val record              = RecR(List(RecM("foo"), RecM("bar")))
+    val repr                = encode.to(record)
+    repr match {
+      case ProductDynamicRepr(a) => a shouldBe record
+      case _                     => fail()
+    }
+    repr.rs match {
+      case IterableDynamicRepr(items) =>
+        items match {
+          case ProductDynamicRepr(a) :: ProductDynamicRepr(b) :: Nil => {
+            a shouldBe record.rs(0)
+            b shouldBe record.rs(1)
+          }
+        }
+      case _ => fail()
+    }
   }
 
   it should "be case insensitive" in new Fixture {

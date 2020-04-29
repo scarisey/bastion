@@ -38,10 +38,10 @@ trait DecodeDerivation {
       ctx.subtypes
         .foldLeft(Option.empty[Result[T]]) { (res, sub) =>
           res match {
-            case Some(value) => Some(value)
+            case s @ Some(_) => s
             case None =>
               sub.typeclass.from(g) match {
-                case Right(value) => Some(Right(value))
+                case r @ Right(_) => Some(r)
                 case _            => None
               }
           }

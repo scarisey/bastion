@@ -42,6 +42,8 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     implicit val default = Configuration.default
   }
 
+  behavior of "Decode"
+
   it should "convert a flat structure to another one - same shape" in new Fixture {
     case class RecA(aString: String, anInt: Int, aBoolean: Boolean)
     case class RecB(anInt: Int, aBoolean: Boolean, aString: String)
@@ -69,9 +71,9 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       eitherIOrS: Either[Int, String],
       eitherJustString: String
     )
-    implicit val encA: Encode[RecA]  = deriveEncode[RecA]
-    implicit val convWrapped         = Decode.instance(g => g.apply(Wrapped(_)))
-    implicit val convB: Decode[RecB] = deriveDecoder[RecB]
+    implicit val encA: Encode[RecA]           = deriveEncode[RecA]
+    implicit val convWrapped: Decode[Wrapped] = Decode.instance(g => g.apply(Wrapped(_)))
+    implicit val convB: Decode[RecB]          = deriveDecoder[RecB]
     RecA("toto", 42, true, List("foo", "bar"), Some("content"), Right("baz"), Left("titi")).convert[RecB] shouldEqual Right(
       RecB(42, Wrapped("toto"), List(Wrapped("foo"), Wrapped("bar")), Some(Wrapped("content")), Right("baz"), "titi")
     )
@@ -116,6 +118,24 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     RecA1("toto").convert[RecB] shouldEqual Right(RecB1("toto"))
     RecA2(42).convert[RecB] shouldEqual Right(RecB2(42))
     RecA3(2.0).convert[RecB] shouldEqual Left(IncorrectSubtype)
+  }
+
+  //FIXME see https://github.com/propensive/magnolia/issues/216
+  ignore should "convert from a recursive structure to another one" in new Fixture {
+    sealed trait Specific
+    final case class SpecificM(text: String)       extends Specific
+    final case class SpecificR(rs: List[Specific]) extends Specific
+
+    sealed trait Target
+    final case class TargetM(text: String)     extends Target
+    final case class TargetR(rs: List[Target]) extends Target
+
+    implicit val encS: Encode[Specific] = deriveEncode[Specific]
+    implicit val decT: Decode[Target]   = deriveDecoder[Target]
+
+    SpecificR(List(SpecificM("foo"), SpecificM("bar"))).convert[Target] shouldEqual Right(
+      TargetR(List(TargetM("foo"), TargetM("bar")))
+    )
   }
 
   it should "convert a flat structure to another one, using smart constructor" in new Fixture {
