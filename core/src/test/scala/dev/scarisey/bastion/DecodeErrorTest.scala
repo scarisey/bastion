@@ -19,19 +19,20 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class DecodeErrorTest extends AnyFlatSpec with Matchers {
+  val d = ValueDynamicRepr(42)
   it should "combine errors" in {
-    CumulatedErrors(List(IncorrectPathOrType("foo"))).combine(IncorrectPathOrType("bar")) shouldEqual CumulatedErrors(
-      List(IncorrectPathOrType("foo"), IncorrectPathOrType("bar"))
+    CumulatedErrors(List(IncorrectPathOrType(d, "foo"))).combine(IncorrectPathOrType(d, "bar")) shouldEqual CumulatedErrors(
+      List(IncorrectPathOrType(d, "foo"), IncorrectPathOrType(d, "bar"))
     )
-    IncorrectPathOrType("foo").combine(IncorrectSubtype) shouldEqual CumulatedErrors(
-      List(IncorrectPathOrType("foo"), IncorrectSubtype)
+    IncorrectPathOrType(d, "foo").combine(IncorrectSubtype) shouldEqual CumulatedErrors(
+      List(IncorrectPathOrType(d, "foo"), IncorrectSubtype)
     )
-    IncorrectPathOrType("foo").combine(CumulatedErrors(List(IncorrectSubtype))) shouldEqual CumulatedErrors(
-      List(IncorrectPathOrType("foo"), IncorrectSubtype)
+    IncorrectPathOrType(d, "foo").combine(CumulatedErrors(List(IncorrectSubtype))) shouldEqual CumulatedErrors(
+      List(IncorrectPathOrType(d, "foo"), IncorrectSubtype)
     )
-    CumulatedErrors(List(IncorrectPathOrType("foo")))
+    CumulatedErrors(List(IncorrectPathOrType(d, "foo")))
       .combine(CumulatedErrors(List(IncorrectSubtype))) shouldEqual CumulatedErrors(
-      List(IncorrectPathOrType("foo"), IncorrectSubtype)
+      List(IncorrectPathOrType(d, "foo"), IncorrectSubtype)
     )
 
   }

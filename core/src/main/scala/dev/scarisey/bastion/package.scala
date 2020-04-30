@@ -20,10 +20,10 @@ package object bastion extends ProductHelper {
   type Result[T] = Either[DecodeError, T]
 
   implicit class ConverterSyntax[A](a: A) {
-    def convert[B](implicit genConv: Decode[B], genA: Encode[A]): Result[B] = genConv.from(genA.to(a))
+    def convert[B](implicit decode: Decode[B], encode: Encode[A]): Result[B] = decode.from(encode.to(a))
   }
 
   implicit class DynamicReprConverter(d: DynamicRepr) {
-    def convert[A](implicit genericConverter: Decode[A]): Result[A] = genericConverter.from(d)
+    def convert[A](implicit decode: Decode[A]): Result[A] = decode.from(d)
   }
 }

@@ -56,27 +56,8 @@ createResultHelper := {
 }
 
 lazy val core = (project in file("core"))
-  .settings(
-    moduleName := "bastion-core",
-    scalacOptions := Seq(
-      "-feature",
-      "-language:higherKinds,implicitConversions",
-      "-deprecation",
-      "-unchecked",
-      "-opt:l:inline",
-      "-opt-inline-from:dev.carisey.converter.**",
-      "-Ywarn-unused",
-      "-Yrangepos"
-    ),
-    scalacOptions ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, v)) if v <= 12 => Seq("-Ypartial-unification")
-        case _                       => Nil
-      }
-    },
-    addCompilerPlugin(scalafixSemanticdb),
-    crossScalaVersions := supportedScalaVersions
-  )
+  .settings(moduleName := "bastion-core")
+  .settings(buildSettings)
   .settings(
     libraryDependencies ++= Seq(
       magnolia,
@@ -85,7 +66,33 @@ lazy val core = (project in file("core"))
     )
   )
 
-lazy val root = (project in file("."))
-  .aggregate(core)
-  .settings(crossScalaVersions := Nil, publish / skip := true)
+lazy val examples = (project in file("examples"))
+  .settings(moduleName := "bastion-examples")
+  .settings(buildSettings)
+  .settings(publish / skip := true)
+  .dependsOn(core)
 
+lazy val buildSettings = Seq(
+  scalacOptions := Seq(
+    "-feature",
+    "-language:higherKinds,implicitConversions",
+    "-deprecation",
+    "-unchecked",
+    "-opt:l:inline",
+    "-opt-inline-from:dev.carisey.converter.**",
+    "-Ywarn-unused",
+    "-Yrangepos"
+  ),
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, v)) if v <= 12 => Seq("-Ypartial-unification")
+      case _                       => Nil
+    }
+  },
+  addCompilerPlugin(scalafixSemanticdb),
+  crossScalaVersions := supportedScalaVersions
+)
+
+lazy val root = (project in file("."))
+  .aggregate(core,examples)
+  .settings(crossScalaVersions := Nil, publish / skip := true)

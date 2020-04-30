@@ -24,10 +24,13 @@ sealed trait DecodeError {
     case (xs, ys)                                   => CumulatedErrors(List(xs, ys))
   }
 }
-final case class IncorrectPathOrType(message: String) extends DecodeError {
+final case class IncorrectPathOrType(d: DynamicRepr, message: String) extends DecodeError {
   override def toString: String = s"IncorrectPathOrType($message)"
 }
-case object IncorrectSubtype                                extends DecodeError
-case object IncorrectPath                                   extends DecodeError
+case object IncorrectSubtype extends DecodeError
+case object IncorrectPath    extends DecodeError
+final case class UnexpectedEncodeValue(d: DynamicRepr, decodeType: String) extends DecodeError {
+  override def toString: String = s"UnexpectedEncodeValue(actualType:${d},expected:${decodeType})"
+}
 final case class WrappedError[T](t: T)                      extends DecodeError
 final case class CumulatedErrors(errors: List[DecodeError]) extends DecodeError

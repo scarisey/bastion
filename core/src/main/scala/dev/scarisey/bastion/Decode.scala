@@ -37,60 +37,93 @@ object Decode {
 
   def instance[A](f: DynamicRepr => Result[A]): Decode[A] = (g: DynamicRepr) => f(g)
 
+  def wrap[A: Decode, R](f: A => R): Decode[R]                = (g: DynamicRepr) => g.apply(f)
+  def wrapE[A: Decode, L, R](f: A => Either[L, R]): Decode[R] = (g: DynamicRepr) => g.applyE(f)
+  def wrapO[A: Decode, R](f: A => Option[R]): Decode[R]       = (g: DynamicRepr) => g.applyO(f)
+  def wrapT[A: Decode, R](f: A => Try[R]): Decode[R]          = (g: DynamicRepr) => g.applyT(f)
+
   /*
    * AnyVal specific instances
    */
   implicit val genConvByte: Decode[Byte] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[Byte] =>
-      Try(a.asInstanceOf[Byte]).toEither.left.map(_ => IncorrectPathOrType("Byte"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Byte => Right(x)
+        case _       => Left(UnexpectedEncodeValue(d, "Byte"))
+      }
     case _ => Left(IncorrectPath)
   }
 
   implicit val genConvInt: Decode[Int] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[Int] =>
-      Try(a.asInstanceOf[Int]).toEither.left.map(_ => IncorrectPathOrType("Int"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Int => Right(x)
+        case _      => Left(UnexpectedEncodeValue(d, "Int"))
+      }
     case _ => Left(IncorrectPath)
   }
 
   implicit val genConvShort: Decode[Short] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[Short] =>
-      Try(a.asInstanceOf[Short]).toEither.left.map(_ => IncorrectPathOrType("Short"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Short => Right(x)
+        case _        => Left(UnexpectedEncodeValue(d, "Short"))
+      }
     case _ => Left(IncorrectPath)
   }
 
   implicit val genConvLong: Decode[Long] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[Long] =>
-      Try(a.asInstanceOf[Long]).toEither.left.map(_ => IncorrectPathOrType("Long"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Long => Right(x)
+        case _       => Left(UnexpectedEncodeValue(d, "Long"))
+      }
     case _ => Left(IncorrectPath)
   }
 
   implicit val genConvFloat: Decode[Float] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[Float] =>
-      Try(a.asInstanceOf[Float]).toEither.left.map(_ => IncorrectPathOrType("Float"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Float => Right(x)
+        case _        => Left(UnexpectedEncodeValue(d, "Float"))
+      }
     case _ => Left(IncorrectPath)
   }
 
   implicit val genConvChar: Decode[Char] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[Char] =>
-      Try(a.asInstanceOf[Char]).toEither.left.map(_ => IncorrectPathOrType("Char"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Char => Right(x)
+        case _       => Left(UnexpectedEncodeValue(d, "Char"))
+      }
     case _ => Left(IncorrectPath)
   }
 
   implicit val genConvBoolean: Decode[Boolean] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[Boolean] =>
-      Try(a.asInstanceOf[Boolean]).toEither.left.map(_ => IncorrectPathOrType("Boolean"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Boolean => Right(x)
+        case _          => Left(UnexpectedEncodeValue(d, "Boolean"))
+      }
     case _ => Left(IncorrectPath)
   }
 
   implicit val genConvDouble: Decode[Double] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[Double] =>
-      Try(a.asInstanceOf[Double]).toEither.left.map(_ => IncorrectPathOrType("Double"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Double => Right(x)
+        case _         => Left(UnexpectedEncodeValue(d, "Double"))
+      }
     case _ => Left(IncorrectPath)
   }
 
   implicit val genConvUnit: Decode[Unit] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[Unit] => Right(())
-    case _                                           => Left(IncorrectPath)
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Unit => Right(x)
+        case _       => Left(UnexpectedEncodeValue(d, "Unit"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
   /*
@@ -98,95 +131,120 @@ object Decode {
    */
 
   implicit val genConvBigInt: Decode[BigInt] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[BigInt] =>
-      Try(a.asInstanceOf[BigInt]).toEither.left.map(_ => IncorrectPathOrType("BigInt"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: BigInt => Right(x)
+        case _         => Left(UnexpectedEncodeValue(d, "BigInt"))
+      }
     case _ => Left(IncorrectPath)
   }
 
   implicit val genConvBigDecimal: Decode[BigDecimal] = {
-    case ValueDynamicRepr(a) if a.isInstanceOf[BigDecimal] =>
-      Try(a.asInstanceOf[BigDecimal]).toEither.left.map(_ => IncorrectPathOrType("BigDecimal"))
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: BigDecimal => Right(x)
+        case _             => Left(UnexpectedEncodeValue(d, "BigDecimal"))
+      }
     case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvString: Decode[String] = new Decode[String] {
-    override def from(g: DynamicRepr): Result[String] = g match {
-      case ValueDynamicRepr(a) if a.isInstanceOf[String] =>
-        Try(a.asInstanceOf[String]).toEither.left.map(_ => IncorrectPathOrType("String"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvString: Decode[String] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: String => Right(x)
+        case _         => Left(UnexpectedEncodeValue(d, "String"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvUri: Decode[URI] = new Decode[URI] {
-    override def from(g: DynamicRepr): Result[URI] = g match {
-      case ValueDynamicRepr(a) =>
-        Try(URI.create(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType("URI"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvUri: Decode[URI] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: URI    => Right(x)
+        case x: String => Try(URI.create(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType(d, "URI"))
+        case _         => Left(UnexpectedEncodeValue(d, "URI"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvUrl: Decode[URL] = new Decode[URL] {
-    override def from(g: DynamicRepr): Result[URL] = g match {
-      case ValueDynamicRepr(a) =>
-        Try(URI.create(a.asInstanceOf[String]).toURL).toEither.left.map(_ => IncorrectPathOrType("URL"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvUrl: Decode[URL] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: URL    => Right(x)
+        case x: String => Try(URI.create(a.asInstanceOf[String]).toURL).toEither.left.map(_ => IncorrectPathOrType(d, "URL"))
+        case _         => Left(UnexpectedEncodeValue(d, "URL"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvDuration: Decode[Duration] = new Decode[Duration] {
-    override def from(g: DynamicRepr): Result[Duration] = g match {
-      case ValueDynamicRepr(a) =>
-        Try(Duration(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType("Duration"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvDuration: Decode[Duration] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Duration => Right(x)
+        case x: String   => Right(Duration(x))
+        case _           => Left(UnexpectedEncodeValue(d, "Duration"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvUuid: Decode[UUID] = new Decode[UUID] {
-    override def from(g: DynamicRepr): Result[UUID] = g match {
-      case ValueDynamicRepr(a) =>
-        Try(UUID.fromString(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType("UUID"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvUuid: Decode[UUID] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: UUID   => Right(x)
+        case x: String => Right(UUID.fromString(x))
+        case _         => Left(UnexpectedEncodeValue(d, "UUID"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvInstant: Decode[Instant] = new Decode[Instant] {
-    override def from(g: DynamicRepr): Result[Instant] = g match {
-      case ValueDynamicRepr(a) =>
-        Try(Instant.parse(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType("Instant"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvInstant: Decode[Instant] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: Instant => Right(x)
+        case x: String  => Right(Instant.parse(x))
+        case _          => Left(UnexpectedEncodeValue(d, "Instant"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvLocalDate: Decode[LocalDate] = new Decode[LocalDate] {
-    override def from(g: DynamicRepr): Result[LocalDate] = g match {
-      case ValueDynamicRepr(a) =>
-        Try(LocalDate.parse(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType("LocalDate"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvLocalDate: Decode[LocalDate] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: LocalDate => Right(x)
+        case x: String    => Right(LocalDate.parse(x))
+        case _            => Left(UnexpectedEncodeValue(d, "LocalDate"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvLocalDateTime: Decode[LocalDateTime] = new Decode[LocalDateTime] {
-    override def from(g: DynamicRepr): Result[LocalDateTime] = g match {
-      case ValueDynamicRepr(a) =>
-        Try(LocalDateTime.parse(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType("LocalDateTime"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvLocalDateTime: Decode[LocalDateTime] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: LocalDateTime => Right(x)
+        case x: String        => Right(LocalDateTime.parse(x))
+        case _                => Left(UnexpectedEncodeValue(d, "LocalDateTime"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvLocalTime: Decode[LocalTime] = new Decode[LocalTime] {
-    override def from(g: DynamicRepr): Result[LocalTime] = g match {
-      case ValueDynamicRepr(a) =>
-        Try(LocalTime.parse(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType("LocalTime"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvLocalTime: Decode[LocalTime] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: LocalTime => Right(x)
+        case x: String    => Right(LocalTime.parse(x))
+        case _            => Left(UnexpectedEncodeValue(d, "LocalTime"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
-  implicit val genConvFile: Decode[File] = new Decode[File] {
-    override def from(g: DynamicRepr): Result[File] = g match {
-      case ValueDynamicRepr(a) =>
-        Try(new File(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType("File"))
-      case _ => Left(IncorrectPath)
-    }
+  implicit val genConvFile: Decode[File] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: File   => Right(x)
+        case x: String => Right(new File(x))
+        case _         => Left(UnexpectedEncodeValue(d, "File"))
+      }
+    case _ => Left(IncorrectPath)
   }
 
   implicit def genConvOption[A: Decode]: Decode[Option[A]] = new Decode[Option[A]] {
@@ -205,8 +263,7 @@ object Decode {
           case Left(_)      => implicitly[Decode[R]].from(g).map(Right(_))
           case r @ Right(_) => r
         }
-      case IterableDynamicRepr(_) => Left(IncorrectPathOrType("Either"))
-      case NilDynamicRepr         => Left(IncorrectPath)
+      case d => Left(UnexpectedEncodeValue(d, "Either"))
     }
   }
 
@@ -219,7 +276,7 @@ object Decode {
           .foldLeft(Right(Seq()).asInstanceOf[Result[List[A]]]) {
             case (acc, res) => acc.flatMap(xs => res.map(x => xs ++ Seq(x)))
           }
-      case NilDynamicRepr => Left(IncorrectPath)
+      case d => Left(UnexpectedEncodeValue(d, "List"))
     }
   }
 
