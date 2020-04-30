@@ -42,7 +42,7 @@ class EncodeTest extends AnyFlatSpec with Matchers {
   behavior of "Encode"
 
   it should "convert to a dynamic representation" in new Fixture {
-    val recordA = RecordA(SubA2(true, 2.0), "toto", SubA1("s1", 42))
+    val recordA = RecordA(SubA2(true, 2.0), "foo", SubA1("s1", 42))
     val repr    = encodeA.to(recordA)
     repr match {
       case ProductDynamicRepr(a) => a shouldBe recordA
@@ -102,7 +102,7 @@ class EncodeTest extends AnyFlatSpec with Matchers {
   }
 
   it should "be case insensitive" in new Fixture {
-    val recordA = RecordA(SubA2(true, 2.0), "toto", SubA1("s1", 42))
+    val recordA = RecordA(SubA2(true, 2.0), "foo", SubA1("s1", 42))
     val repr    = encodeA.to(recordA)
     repr match {
       case ProductDynamicRepr(a) => a shouldBe recordA

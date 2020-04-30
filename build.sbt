@@ -55,6 +55,8 @@ createResultHelper := {
   )
 }
 
+lazy val tryBuild = taskKey[Unit]("Build like it should on CI")
+
 lazy val core = (project in file("core"))
   .settings(moduleName := "bastion-core")
   .settings(buildSettings)
@@ -65,6 +67,13 @@ lazy val core = (project in file("core"))
       scalaTest % Test
     )
   )
+  .settings(tryBuild := {
+    (headerCheckAll in Compile).value
+    scalafmtCheckAll.value
+    (compile in Compile).value
+    unusedCompileDependenciesTest.value
+    (test in Test).value
+  })
 
 lazy val examples = (project in file("examples"))
   .settings(moduleName := "bastion-examples")

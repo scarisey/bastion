@@ -1,1 +1,0 @@
-sbt clean headerCheckAll scalafmtCheckAll compile scalafix unusedCompileDependenciesTest test

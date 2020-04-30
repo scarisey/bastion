@@ -42,73 +42,44 @@ object Encode extends EncodeDerivation {
   /*
   Any val implicits
    */
-  implicit val genByte: Encode[Byte]   = new Encode[Byte]  { override def to(a: Byte): DynamicRepr  = ValueDynamicRepr(a) }
-  implicit val genInt: Encode[Int]     = new Encode[Int]   { override def to(a: Int): DynamicRepr   = ValueDynamicRepr(a) }
-  implicit val genShort: Encode[Short] = new Encode[Short] { override def to(a: Short): DynamicRepr = ValueDynamicRepr(a) }
-  implicit val genLong: Encode[Long]   = new Encode[Long]  { override def to(a: Long): DynamicRepr  = ValueDynamicRepr(a) }
-  implicit val genFloat: Encode[Float] = new Encode[Float] { override def to(a: Float): DynamicRepr = ValueDynamicRepr(a) }
-  implicit val genChar: Encode[Char]   = new Encode[Char]  { override def to(a: Char): DynamicRepr  = ValueDynamicRepr(a) }
-  implicit val genBoolean: Encode[Boolean] = new Encode[Boolean] {
-    override def to(a: Boolean): DynamicRepr = ValueDynamicRepr(a)
-  }
-  implicit val genDouble: Encode[Double] = new Encode[Double] { override def to(a: Double): DynamicRepr = ValueDynamicRepr(a) }
-  implicit val genUnit: Encode[Unit]     = new Encode[Unit]   { override def to(a: Unit): DynamicRepr   = ValueDynamicRepr(a) }
-
-  implicit val genString: Encode[String] = new Encode[String] { override def to(a: String): DynamicRepr = ValueDynamicRepr(a) }
-
-  implicit val genBigInt: Encode[BigInt] = new Encode[BigInt] { override def to(a: BigInt): DynamicRepr = ValueDynamicRepr(a) }
-
-  implicit val genBigDecimal: Encode[BigDecimal] = new Encode[BigDecimal] {
-    override def to(a: BigDecimal): DynamicRepr = ValueDynamicRepr(a)
-  }
+  implicit val genByte: Encode[Byte]       = (a: Byte) => ValueDynamicRepr(a)
+  implicit val genInt: Encode[Int]         = (a: Int) => ValueDynamicRepr(a)
+  implicit val genShort: Encode[Short]     = (a: Short) => ValueDynamicRepr(a)
+  implicit val genLong: Encode[Long]       = (a: Long) => ValueDynamicRepr(a)
+  implicit val genFloat: Encode[Float]     = (a: Float) => ValueDynamicRepr(a)
+  implicit val genChar: Encode[Char]       = (a: Char) => ValueDynamicRepr(a)
+  implicit val genBoolean: Encode[Boolean] = (a: Boolean) => ValueDynamicRepr(a)
+  implicit val genDouble: Encode[Double]   = (a: Double) => ValueDynamicRepr(a)
+  implicit val genUnit: Encode[Unit]       = (a: Unit) => ValueDynamicRepr(a)
 
   /*
   Other basic types
    */
+  implicit val genString: Encode[String]               = (a: String) => ValueDynamicRepr(a)
+  implicit val genBigInt: Encode[BigInt]               = (a: BigInt) => ValueDynamicRepr(a)
+  implicit val genBigDecimal: Encode[BigDecimal]       = (a: BigDecimal) => ValueDynamicRepr(a)
+  implicit val genUri: Encode[URI]                     = (a: URI) => ValueDynamicRepr(a)
+  implicit val genUrl: Encode[URL]                     = (a: URL) => ValueDynamicRepr(a)
+  implicit val genDuration: Encode[Duration]           = (a: Duration) => ValueDynamicRepr(a)
+  implicit val genUUID: Encode[UUID]                   = (a: UUID) => ValueDynamicRepr(a)
+  implicit val genInstant: Encode[Instant]             = (a: Instant) => ValueDynamicRepr(a)
+  implicit val genLocalDate: Encode[LocalDate]         = (a: LocalDate) => ValueDynamicRepr(a)
+  implicit val genLocalTime: Encode[LocalTime]         = (a: LocalTime) => ValueDynamicRepr(a)
+  implicit val genLocalDateTime: Encode[LocalDateTime] = (a: LocalDateTime) => ValueDynamicRepr(a)
+  implicit val genFile: Encode[File]                   = (a: File) => ValueDynamicRepr(a)
 
-  implicit val genUri: Encode[URI] = new Encode[URI] { override def to(a: URI): DynamicRepr = ValueDynamicRepr(a.toString) }
-
-  implicit val genUrl: Encode[URL] = new Encode[URL] { override def to(a: URL): DynamicRepr = ValueDynamicRepr(a.toString) }
-
-  implicit val genDuration: Encode[Duration] = new Encode[Duration] {
-    override def to(a: Duration): DynamicRepr = ValueDynamicRepr(a.toString)
+  implicit def genOption[A: Encode]: Encode[Option[A]] = {
+    case Some(value) => implicitly[Encode[A]].to(value)
+    case None        => NilDynamicRepr
   }
 
-  implicit val genUUID: Encode[UUID] = new Encode[UUID] { override def to(a: UUID): DynamicRepr = ValueDynamicRepr(a.toString) }
-
-  implicit val genInstant: Encode[Instant] = new Encode[Instant] {
-    override def to(a: Instant): DynamicRepr = ValueDynamicRepr(a.toString)
+  implicit def genEither[L: Encode, R: Encode]: Encode[Either[L, R]] = {
+    case Left(value)  => implicitly[Encode[L]].to(value)
+    case Right(value) => implicitly[Encode[R]].to(value)
   }
 
-  implicit val genLocalDate: Encode[LocalDate] = new Encode[LocalDate] {
-    override def to(a: LocalDate): DynamicRepr = ValueDynamicRepr(a.toString)
-  }
-  implicit val genLocalTime: Encode[LocalTime] = new Encode[LocalTime] {
-    override def to(a: LocalTime): DynamicRepr = ValueDynamicRepr(a.toString)
-  }
-  implicit val genLocalDateTime: Encode[LocalDateTime] = new Encode[LocalDateTime] {
-    override def to(a: LocalDateTime): DynamicRepr = ValueDynamicRepr(a.toString)
-  }
-
-  implicit val genFile: Encode[File] = new Encode[File] { override def to(a: File): DynamicRepr = ValueDynamicRepr(a.toString) }
-
-  implicit def genOption[A: Encode]: Encode[Option[A]] = new Encode[Option[A]] {
-    override def to(a: Option[A]): DynamicRepr = a match {
-      case Some(value) => implicitly[Encode[A]].to(value)
-      case None        => NilDynamicRepr
-    }
-  }
-
-  implicit def genEither[L: Encode, R: Encode]: Encode[Either[L, R]] = new Encode[Either[L, R]] {
-    override def to(a: Either[L, R]): DynamicRepr = a match {
-      case Left(value)  => implicitly[Encode[L]].to(value)
-      case Right(value) => implicitly[Encode[R]].to(value)
-    }
-  }
-
-  implicit def genIterable[A: Encode]: Encode[Iterable[A]] = new Encode[Iterable[A]] {
-    override def to(a: Iterable[A]): DynamicRepr = IterableDynamicRepr(a.map(implicitly[Encode[A]].to(_)))
-  }
+  implicit def genIterable[A: Encode]: Encode[Iterable[A]] =
+    (a: Iterable[A]) => IterableDynamicRepr(a.map(implicitly[Encode[A]].to(_)))
 
   implicit def deriveEncode[T](implicit u: AutoUnlock): Encode[T] = macro macroDeriveEncode[T]
 

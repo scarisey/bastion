@@ -15,28 +15,21 @@
  */
 
 package dev.scarisey.bastion
-import java.time.LocalDate
 
-import dev.scarisey.bastion._
+import dev.scarisey.bastion.Configuration.default
 import dev.scarisey.bastion.Encode._
 import dev.scarisey.bastion.derivation.encode.auto._
 import dev.scarisey.bastion.derivation.decode.auto._
-import Configuration.default
 
-object Mapping extends App {
-  final case class PersonExternal(
-    id: String,
-    firstName: String,
-    lastName: String,
-    birthdate: LocalDate,
-    posX: Double,
-    posY: Double
-  )
-  final case class Person(id: String, firstName: String, lastName: String, birthdate: LocalDate)
+object MappingNestedTypes extends App {
+  case class SubSource1(aString: String)
+  case class SubSource2(anInt: Int)
+  case class Source(sub1: SubSource1, sub2: SubSource2)
+  case class SubTarget1(aString: String)
+  case class SubTarget2(anInt: Int)
+  case class Target(sub1: SubTarget1, sub2: SubTarget2)
 
-  implicit val encode: Encode[PersonExternal] = deriveEncode[PersonExternal] //FIXME should not be needed
-  val person =
-    PersonExternal("anId", "firstName", "lastName", LocalDate.parse("1985-01-12"), 44.846565, -0.567351).convert[Person]
+  implicit val genA: Encode[Source] = deriveEncode[Source]
 
-  println(person)
+  println(Source(SubSource1("foo"), SubSource2(42)).convert[Target])
 }

@@ -49,7 +49,7 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     case class RecB(anInt: Int, aBoolean: Boolean, aString: String)
     implicit val convA: Encode[RecA] = deriveEncode[RecA]
     implicit val convB: Decode[RecB] = deriveDecoder[RecB]
-    RecA("toto", 42, true).convert[RecB] shouldEqual Right(RecB(42, true, "toto"))
+    RecA("foo", 42, true).convert[RecB] shouldEqual Right(RecB(42, true, "foo"))
   }
 
   it should "convert a flat structure to another one - part of shape and wrapped values" in new Fixture {
@@ -85,7 +85,7 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     case class RecB(an_int: Int, A_String: String)
     implicit val convA: Encode[RecA] = deriveEncode[RecA]
     implicit val convB: Decode[RecB] = deriveDecoder[RecB]
-    RecA("toto", 42, true).convert[RecB] shouldEqual Right(RecB(42, "toto"))
+    RecA("foo", 42, true).convert[RecB] shouldEqual Right(RecB(42, "foo"))
   }
 
   it should "convert a 2 levels structure to another one - same shape" in new Fixture {
@@ -99,7 +99,7 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     implicit val genA: Encode[RecA] = deriveEncode[RecA]
     implicit val genB: Decode[RecB] = deriveDecoder[RecB]
 
-    RecA(SubA1("toto"), SubA2(42)).convert[RecB] shouldEqual Right(RecB(SubB1("toto"), SubB2(42)))
+    RecA(SubA1("foo"), SubA2(42)).convert[RecB] shouldEqual Right(RecB(SubB1("foo"), SubB2(42)))
   }
 
   it should "convert a flat structure into an adt" in new Fixture {
@@ -115,7 +115,7 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     implicit val genA3: Encode[RecA3] = deriveEncode[RecA3]
     implicit val genB: Decode[RecB]   = deriveDecoder[RecB]
 
-    RecA1("toto").convert[RecB] shouldEqual Right(RecB1("toto"))
+    RecA1("foo").convert[RecB] shouldEqual Right(RecB1("foo"))
     RecA2(42).convert[RecB] shouldEqual Right(RecB2(42))
     RecA3(2.0).convert[RecB] shouldEqual Left(IncorrectSubtype)
   }
@@ -150,8 +150,8 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     implicit val convB: Decode[RecB] =
       Decode.instance(g => (g.anInt, g.aBoolean, g.aString).applyE(RecB.apply))
 
-    RecA("toto", 42, true).convert[RecB] shouldEqual RecB(42, true, "toto")
-    RecA("toto", 3, true).convert[RecB] shouldEqual Left(WrappedError(List("toto > 3")))
+    RecA("foo", 42, true).convert[RecB] shouldEqual RecB(42, true, "foo")
+    RecA("fooo", 3, true).convert[RecB] shouldEqual Left(WrappedError(List("fooo > 3")))
   }
 
   it should "convert a complex structure to another one using smart constructors" in new Fixture {
@@ -183,10 +183,10 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       Decode.instance(g => (g, g).apply(RecordB.apply))
     implicit val genRecordA: Encode[RecordA] = deriveEncode[RecordA]
 
-    val recordB     = RecordA(SubA2(true, 2.0), "toto", SubA1("s1", 42)).convert[RecordB]
-    val recordBNone = RecordA(SubA2(true, 2.0), "toto", SubA1("astring", 3)).convert[RecordB]
+    val recordB     = RecordA(SubA2(true, 2.0), "foo", SubA1("s1", 42)).convert[RecordB]
+    val recordBNone = RecordA(SubA2(true, 2.0), "foo", SubA1("astring", 3)).convert[RecordB]
 
-    recordB shouldEqual Right(RecordB(SubB1(42, "s1", "toto").get, SubB2(42, 2.0, true)))
+    recordB shouldEqual Right(RecordB(SubB1(42, "s1", "foo").get, SubB2(42, 2.0, true)))
     recordBNone shouldEqual Left(WrappedError("Smart constructor error - returned None"))
 
   }

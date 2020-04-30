@@ -18,9 +18,9 @@ package dev.scarisey.bastion
 import java.time.LocalDate
 import java.util.UUID
 
-import Configuration.default
-import Encode._
-import Decode._
+import dev.scarisey.bastion.Configuration.default
+import dev.scarisey.bastion.Encode._
+import dev.scarisey.bastion.Decode._
 import derivation.encode.auto._
 import dev.scarisey.bastion.SmartConstructors.Domain.DomainError.BlankCity
 import dev.scarisey.bastion.SmartConstructors.Domain.DomainError.BlankName

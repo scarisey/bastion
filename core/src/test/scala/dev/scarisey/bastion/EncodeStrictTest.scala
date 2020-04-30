@@ -34,7 +34,7 @@ class EncodeStrictTest extends AnyFlatSpec with Matchers {
   }
 
   it should "be case sensitive" in new Fixture {
-    val recordA = RecordA(SubA2(true, 2.0), "toto", SubA1("s1", 42))
+    val recordA = RecordA(SubA2(true, 2.0), "foo", SubA1("s1", 42))
     val repr    = encodeA.to(recordA)
     repr match {
       case ProductDynamicRepr(a) => a shouldBe recordA
@@ -42,7 +42,7 @@ class EncodeStrictTest extends AnyFlatSpec with Matchers {
     }
     repr.sub1.subString1 shouldBe NilDynamicRepr
     repr.sub_1.sub_string_1 shouldBe ValueDynamicRepr("s1")
-    repr.string_description shouldBe ValueDynamicRepr("toto")
+    repr.string_description shouldBe ValueDynamicRepr("foo")
     //incorrect path
     repr.subX.subString1 shouldBe NilDynamicRepr
     repr.subX.subString1 shouldBe NilDynamicRepr
