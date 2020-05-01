@@ -33,7 +33,6 @@ object SimpleMapping extends App {
   )
   final case class Person(id: String, firstName: String, lastName: String, birthdate: LocalDate)
 
-  implicit val encode: Encode[PersonExternal] = deriveEncode[PersonExternal] //FIXME should not be needed
   val person =
     PersonExternal("anId", "firstName", "lastName", LocalDate.parse("1985-01-12"), 44.846565, -0.567351).convert[Person]
 

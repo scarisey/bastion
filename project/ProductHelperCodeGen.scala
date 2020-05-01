@@ -24,7 +24,7 @@ object ProductHelperCodeGen {
          |      implicit $decoders
          |    ): Result[RR] = {
          |      val ($arguments) = tuple
-         |      product$n($convertN).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+         |      product$n($convertN).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
          |    }
          |
          |    def applyE[$genericArgs, RL, RR](f: ($genericArgs) => Either[RL, RR])(

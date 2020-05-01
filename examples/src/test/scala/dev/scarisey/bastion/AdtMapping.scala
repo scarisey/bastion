@@ -28,9 +28,6 @@ object AdtMapping extends App {
   case class RecB0(aBoolean: Boolean) extends RecB
   case class RecB1(aField1: String)   extends RecB
   case class RecB2(aField2: Int)      extends RecB
-  implicit val genA1: Encode[RecA1] = deriveEncode[RecA1]
-  implicit val genA2: Encode[RecA2] = deriveEncode[RecA2]
-  implicit val genA3: Encode[RecA3] = deriveEncode[RecA3]
 
   println(RecA1("foo").convert[RecB])
   println(RecA2(42).convert[RecB])

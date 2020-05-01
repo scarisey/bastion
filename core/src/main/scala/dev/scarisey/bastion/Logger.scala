@@ -21,7 +21,7 @@ import java.util.logging.Level
 // $COVERAGE-OFF$Utility class for internal use only
 private[bastion] object Logger {
   private val rootLogger = java.util.logging.Logger.getLogger("")
-  private val logger     = java.util.logging.Logger.getLogger("org.scarisey.converter")
+  private val logger     = java.util.logging.Logger.getLogger("dev.scarisey.bastion")
 
   def setLevel(level: Level): Unit = {
     logger.info(s"log level set to $level")

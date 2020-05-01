@@ -34,3 +34,4 @@ final case class UnexpectedEncodeValue(d: DynamicRepr, decodeType: String) exten
 }
 final case class WrappedError[T](t: T)                      extends DecodeError
 final case class CumulatedErrors(errors: List[DecodeError]) extends DecodeError
+final case object NilSmartConstructorError                  extends DecodeError

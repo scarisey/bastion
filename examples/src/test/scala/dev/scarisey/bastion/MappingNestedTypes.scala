@@ -29,7 +29,5 @@ object MappingNestedTypes extends App {
   case class SubTarget2(anInt: Int)
   case class Target(sub1: SubTarget1, sub2: SubTarget2)
 
-  implicit val genA: Encode[Source] = deriveEncode[Source]
-
   println(Source(SubSource1("foo"), SubSource2(42)).convert[Target])
 }

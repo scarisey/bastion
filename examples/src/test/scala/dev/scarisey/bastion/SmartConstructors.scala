@@ -83,8 +83,6 @@ object SmartConstructors extends App {
     final case class Person(identity: Identity, address: Address)
   }
 
-  implicit val encodePerson: Encode[Contract.Person] = deriveEncode[Contract.Person]
-
   implicit val decodePersonId: Decode[Domain.PersonId]         = Decode.wrap(Domain.PersonId.from)
   implicit val decodeName: Decode[Domain.Name]                 = Decode.wrapE(Domain.Name.apply)
   implicit val decodeStreetNumber: Decode[Domain.StreetNumber] = Decode.wrapE(Domain.StreetNumber.apply)

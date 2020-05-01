@@ -34,9 +34,8 @@ class EncodeTest extends AnyFlatSpec with Matchers {
       recA: Either[String, RecordA]
     )
 
-//    implicit val encodeA: Encode[RecordA]   = implicitly[Encode[RecordA]] //FIXME this does not work
-    implicit val encodeA: Encode[RecordA] = deriveEncode[RecordA]
-    implicit val encodeB: Encode[RecordB] = deriveEncode[RecordB]
+    implicit val encodeA = implicitly[Encode[RecordA]] //FIXME implicitly will fail with type ascription, returning null
+    implicit val encodeB = implicitly[Encode[RecordB]]
   }
 
   behavior of "Encode"
@@ -59,15 +58,15 @@ class EncodeTest extends AnyFlatSpec with Matchers {
 
   it should "convert an ADT to a dynamic representation" in {
     sealed trait RecC
-//    object RecC { FIXME find out why it does not work
-    final case class RecC1(aDouble: Double) extends RecC
-    final case class RecC2(aString: String) extends RecC
-    final case class RecC3(anInt: Int)      extends RecC
-//    }
+    object RecC {
+      final case class RecC1(aDouble: Double) extends RecC
+      final case class RecC2(aString: String) extends RecC
+      final case class RecC3(anInt: Int)      extends RecC
+    }
 
-    val encode: Encode[RecC] = deriveEncode[RecC]
-    val recordC              = RecC2("a string")
-    val repr                 = encode.to(recordC)
+    val encode  = implicitly[Encode[RecC]]
+    val recordC = RecC.RecC2("a string")
+    val repr    = encode.to(recordC)
     repr match {
       case ProductDynamicRepr(a) => a shouldBe recordC
       case _                     => fail()

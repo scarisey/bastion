@@ -37,8 +37,6 @@ trait Encode[-A] {
   def to(a: A): DynamicRepr
 }
 object Encode extends EncodeDerivation {
-//  def apply[A: Encode]: Encode[A] = implicitly[Encode[A]]
-
   /*
   Any val implicits
    */
@@ -81,10 +79,10 @@ object Encode extends EncodeDerivation {
   implicit def genIterable[A: Encode]: Encode[Iterable[A]] =
     (a: Iterable[A]) => IterableDynamicRepr(a.map(implicitly[Encode[A]].to(_)))
 
-  implicit def deriveEncode[T](implicit u: AutoUnlock): Encode[T] = macro macroDeriveEncode[T]
+  implicit def deriveEncode[T](implicit u: AutoUnlock, configuration: Configuration): Encode[T] = macro macroDeriveEncode[T]
 
-  def macroDeriveEncode[T: c.WeakTypeTag](c: whitebox.Context)(u: c.Tree): c.Tree = {
-    val _ = u
+  def macroDeriveEncode[T: c.WeakTypeTag](c: whitebox.Context)(u: c.Tree, configuration: c.Tree): c.Tree = {
+    val _ = (u, configuration)
     Magnolia.gen[T](c)
   }
 

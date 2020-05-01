@@ -35,7 +35,7 @@ trait ProductHelper {
     ): Result[RR] =
       for {
         tr1 <- t1.convert[A]
-        r   <- f(tr1).toRight(WrappedError("Smart constructor error - returned None"))
+        r   <- f(tr1).toRight(NilSmartConstructorError)
       } yield r
 
     def applyE[A, RL, RR](f: A => Either[RL, RR])(
@@ -72,7 +72,7 @@ trait ProductHelper {
       val (t1, t2) = tuple
       product2(t1.convert[A], t2.convert[B])
         .map(f.tupled)
-        .flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+        .flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, RL, RR](f: (A, B) => Either[RL, RR])(
@@ -110,7 +110,7 @@ trait ProductHelper {
       val (t1, t2, t3) = tuple
       product3(t1.convert[A], t2.convert[B], t3.convert[C])
         .map(f.tupled)
-        .flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+        .flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, RL, RR](f: (A, B, C) => Either[RL, RR])(
@@ -154,7 +154,7 @@ trait ProductHelper {
       val (t1, t2, t3, t4) = tuple
       product4(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D])
         .map(f.tupled)
-        .flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+        .flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, RL, RR](f: (A, B, C, D) => Either[RL, RR])(
@@ -202,7 +202,7 @@ trait ProductHelper {
       val (t1, t2, t3, t4, t5) = tuple
       product5(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E])
         .map(f.tupled)
-        .flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+        .flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, RL, RR](f: (A, B, C, D, E) => Either[RL, RR])(
@@ -256,7 +256,7 @@ trait ProductHelper {
       val (t1, t2, t3, t4, t5, t6) = tuple
       product6(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F])
         .map(f.tupled)
-        .flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+        .flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, RL, RR](f: (A, B, C, D, E, F) => Either[RL, RR])(
@@ -316,7 +316,7 @@ trait ProductHelper {
       val (t1, t2, t3, t4, t5, t6, t7) = tuple
       product7(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F], t7.convert[G])
         .map(f.tupled)
-        .flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+        .flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, RL, RR](f: (A, B, C, D, E, F, G) => Either[RL, RR])(
@@ -395,7 +395,7 @@ trait ProductHelper {
         t6.convert[F],
         t7.convert[G],
         t8.convert[H]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, RL, RR](f: (A, B, C, D, E, F, G, H) => Either[RL, RR])(
@@ -505,7 +505,7 @@ trait ProductHelper {
         t7.convert[G],
         t8.convert[H],
         t9.convert[I]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, RL, RR](f: (A, B, C, D, E, F, G, H, I) => Either[RL, RR])(
@@ -624,7 +624,7 @@ trait ProductHelper {
         t8.convert[H],
         t9.convert[I],
         t10.convert[J]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, RL, RR](f: (A, B, C, D, E, F, G, H, I, J) => Either[RL, RR])(
@@ -752,7 +752,7 @@ trait ProductHelper {
         t9.convert[I],
         t10.convert[J],
         t11.convert[K]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, RL, RR](f: (A, B, C, D, E, F, G, H, I, J, K) => Either[RL, RR])(
@@ -889,7 +889,7 @@ trait ProductHelper {
         t10.convert[J],
         t11.convert[K],
         t12.convert[L]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, RL, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L) => Either[RL, RR])(
@@ -1035,7 +1035,7 @@ trait ProductHelper {
         t11.convert[K],
         t12.convert[L],
         t13.convert[M]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, RL, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M) => Either[RL, RR])(
@@ -1190,7 +1190,7 @@ trait ProductHelper {
         t12.convert[L],
         t13.convert[M],
         t14.convert[N]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, RL, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N) => Either[RL, RR])(
@@ -1354,7 +1354,7 @@ trait ProductHelper {
         t13.convert[M],
         t14.convert[N],
         t15.convert[O]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, RL, RR](
@@ -1533,7 +1533,7 @@ trait ProductHelper {
         t14.convert[N],
         t15.convert[O],
         t16.convert[P]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, RL, RR](
@@ -1721,7 +1721,7 @@ trait ProductHelper {
         t15.convert[O],
         t16.convert[P],
         t17.convert[Q]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, RL, RR](
@@ -1920,7 +1920,7 @@ trait ProductHelper {
         t16.convert[P],
         t17.convert[Q],
         t18.convert[R]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, RL, RR](
@@ -2128,7 +2128,7 @@ trait ProductHelper {
         t17.convert[Q],
         t18.convert[R],
         t19.convert[S]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, RL, RR](
@@ -2345,7 +2345,7 @@ trait ProductHelper {
         t18.convert[R],
         t19.convert[S],
         t20.convert[T]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, RL, RR](
@@ -2571,7 +2571,7 @@ trait ProductHelper {
         t19.convert[S],
         t20.convert[T],
         t21.convert[U]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, RL, RR](
@@ -2806,7 +2806,7 @@ trait ProductHelper {
         t20.convert[T],
         t21.convert[U],
         t22.convert[V]
-      ).map(f.tupled).flatMap(_.toRight(WrappedError("Smart constructor error - returned None")))
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, RL, RR](

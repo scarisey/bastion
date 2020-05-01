@@ -25,7 +25,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
-import java.util.logging.Level
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -47,8 +46,7 @@ class DecodeTest extends AnyFlatSpec with Matchers {
   it should "convert a flat structure to another one - same shape" in new Fixture {
     case class RecA(aString: String, anInt: Int, aBoolean: Boolean)
     case class RecB(anInt: Int, aBoolean: Boolean, aString: String)
-    implicit val convA: Encode[RecA] = deriveEncode[RecA]
-    implicit val convB: Decode[RecB] = deriveDecoder[RecB]
+
     RecA("foo", 42, true).convert[RecB] shouldEqual Right(RecB(42, true, "foo"))
   }
 
@@ -71,9 +69,9 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       eitherIOrS: Either[Int, String],
       eitherJustString: String
     )
-    implicit val encA: Encode[RecA]           = deriveEncode[RecA]
+
     implicit val convWrapped: Decode[Wrapped] = Decode.instance(g => g.apply(Wrapped(_)))
-    implicit val convB: Decode[RecB]          = deriveDecoder[RecB]
+
     RecA("toto", 42, true, List("foo", "bar"), Some("content"), Right("baz"), Left("titi")).convert[RecB] shouldEqual Right(
       RecB(42, Wrapped("toto"), List(Wrapped("foo"), Wrapped("bar")), Some(Wrapped("content")), Right("baz"), "titi")
     )
@@ -83,8 +81,7 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     import Configuration.lenient
     case class RecA(aString: String, anInt: Int, aBoolean: Boolean)
     case class RecB(an_int: Int, A_String: String)
-    implicit val convA: Encode[RecA] = deriveEncode[RecA]
-    implicit val convB: Decode[RecB] = deriveDecoder[RecB]
+
     RecA("foo", 42, true).convert[RecB] shouldEqual Right(RecB(42, "foo"))
   }
 
@@ -95,9 +92,6 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     case class SubB1(aString: String)
     case class SubB2(anInt: Int)
     case class RecB(sub1: SubB1, sub2: SubB2)
-
-    implicit val genA: Encode[RecA] = deriveEncode[RecA]
-    implicit val genB: Decode[RecB] = deriveDecoder[RecB]
 
     RecA(SubA1("foo"), SubA2(42)).convert[RecB] shouldEqual Right(RecB(SubB1("foo"), SubB2(42)))
   }
@@ -110,18 +104,13 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     case class RecB0(aBoolean: Boolean) extends RecB
     case class RecB1(aField1: String)   extends RecB
     case class RecB2(aField2: Int)      extends RecB
-    implicit val genA1: Encode[RecA1] = deriveEncode[RecA1]
-    implicit val genA2: Encode[RecA2] = deriveEncode[RecA2]
-    implicit val genA3: Encode[RecA3] = deriveEncode[RecA3]
-    implicit val genB: Decode[RecB]   = deriveDecoder[RecB]
 
     RecA1("foo").convert[RecB] shouldEqual Right(RecB1("foo"))
     RecA2(42).convert[RecB] shouldEqual Right(RecB2(42))
     RecA3(2.0).convert[RecB] shouldEqual Left(IncorrectSubtype)
   }
 
-  //FIXME see https://github.com/propensive/magnolia/issues/216
-  ignore should "convert from a recursive structure to another one" in new Fixture {
+  it should "convert from a recursive structure to another one" in new Fixture {
     sealed trait Specific
     final case class SpecificM(text: String)       extends Specific
     final case class SpecificR(rs: List[Specific]) extends Specific
@@ -129,9 +118,6 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     sealed trait Target
     final case class TargetM(text: String)     extends Target
     final case class TargetR(rs: List[Target]) extends Target
-
-    implicit val encS: Encode[Specific] = deriveEncode[Specific]
-    implicit val decT: Decode[Target]   = deriveDecoder[Target]
 
     SpecificR(List(SpecificM("foo"), SpecificM("bar"))).convert[Target] shouldEqual Right(
       TargetR(List(TargetM("foo"), TargetM("bar")))
@@ -146,7 +132,6 @@ class DecodeTest extends AnyFlatSpec with Matchers {
         Either.cond(aString.length <= anInt, new RecB(anInt, aBoolean, aString), List(s"${aString} > $anInt"))
     }
 
-    implicit val convA: Encode[RecA] = deriveEncode[RecA]
     implicit val convB: Decode[RecB] =
       Decode.instance(g => (g.anInt, g.aBoolean, g.aString).applyE(RecB.apply))
 
@@ -181,22 +166,47 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     )
     implicit val conv: Decode[RecordB] =
       Decode.instance(g => (g, g).apply(RecordB.apply))
-    implicit val genRecordA: Encode[RecordA] = deriveEncode[RecordA]
 
     val recordB     = RecordA(SubA2(true, 2.0), "foo", SubA1("s1", 42)).convert[RecordB]
     val recordBNone = RecordA(SubA2(true, 2.0), "foo", SubA1("astring", 3)).convert[RecordB]
 
     recordB shouldEqual Right(RecordB(SubB1(42, "s1", "foo").get, SubB2(42, 2.0, true)))
-    recordBNone shouldEqual Left(WrappedError("Smart constructor error - returned None"))
+    recordBNone shouldEqual Left(NilSmartConstructorError)
 
+  }
+
+  it should "create decoder for wrapped values" in new Fixture {
+    val exception = new IllegalArgumentException("No !")
+    case class Wrapped(aField: String)
+    object Wrapped {
+      def makeEither(aField: String) =
+        Either.cond(aField.length < 5, new Wrapped(aField), exception)
+      def makeTry(aField: String)    = makeEither(aField).toTry
+      def makeOption(aField: String) = makeEither(aField).toOption
+    }
+
+    val enc: Decode[Wrapped]  = wrap(Wrapped(_))
+    val encE: Decode[Wrapped] = wrapE(Wrapped.makeEither)
+    val encO: Decode[Wrapped] = wrapO(Wrapped.makeOption)
+    val encT: Decode[Wrapped] = wrapT(Wrapped.makeTry)
+
+    private val expectedDecodedValue                  = Right(Wrapped("foo"))
+    private val dynamicRepr: ValueDynamicRepr[String] = ValueDynamicRepr("foo")
+    enc.from(dynamicRepr) shouldEqual expectedDecodedValue
+    encE.from(dynamicRepr) shouldEqual expectedDecodedValue
+    encO.from(dynamicRepr) shouldEqual expectedDecodedValue
+    encT.from(dynamicRepr) shouldEqual expectedDecodedValue
+
+    private val failingDynamicRepr: ValueDynamicRepr[String] = ValueDynamicRepr("failing foo")
+    private val expectedFailedDecodedValue                   = Left(WrappedError(exception))
+    encE.from(failingDynamicRepr) shouldBe expectedFailedDecodedValue
+    encT.from(failingDynamicRepr) shouldBe expectedFailedDecodedValue
+    encO.from(failingDynamicRepr) shouldBe Left(NilSmartConstructorError)
   }
 
   it should "convert to Option in different cases" in new Fixture {
     case class RecA(anInt: Int)
     case class RecB(anInt: Int)
-
-    implicit val encA: Encode[RecA] = deriveEncode[RecA]
-    implicit val encB: Decode[RecB] = deriveDecoder[RecB]
 
     Some(RecA(42)).convert[Option[RecB]] shouldBe Right(Some(RecB(42)))
     RecA(42).convert[Option[RecB]] shouldBe Right(Some(RecB(42)))
@@ -209,9 +219,6 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     case class RecA(anInt: Int)
     case class RecB(anInt: Int)
 
-    implicit val encA: Encode[RecA] = deriveEncode[RecA]
-    implicit val encB: Decode[RecB] = deriveDecoder[RecB]
-
     RecA(42).convert[Either[RecB, String]] shouldBe Right(Left(RecB(42)))
     RecA(42).convert[Either[Boolean, RecB]] shouldBe Right(Right(RecB(42)))
   }
@@ -219,9 +226,6 @@ class DecodeTest extends AnyFlatSpec with Matchers {
   it should "convert to List in different cases" in new Fixture {
     case class RecA(anInt: Int)
     case class RecB(anInt: Int)
-
-    implicit val encA: Encode[RecA] = deriveEncode[RecA]
-    implicit val encB: Decode[RecB] = deriveDecoder[RecB]
 
     RecA(42).convert[List[RecB]] shouldBe Right(List(RecB(42)))
     List(RecA(42), RecA(43)).convert[List[RecB]] shouldBe Right(List(RecB(42), RecB(43)))
@@ -245,7 +249,16 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       aLocalDate: LocalDate,
       aLocalTime: LocalTime,
       aLocalDateTime: LocalDateTime,
-      aFile: io.File
+      aFile: io.File,
+      aSerializedUri: String,
+      aSerializedURL: String,
+      aSerializedDuration: String,
+      aSerializedUUID: String,
+      aSerializedInstant: String,
+      aSerializedLocalDate: String,
+      aSerializedLocalTime: String,
+      aSerializedLocalDateTime: String,
+      aSerializedFile: String
     )
 
     case class Target(
@@ -265,7 +278,16 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       aLocalDate: LocalDate,
       aLocalTime: LocalTime,
       aLocalDateTime: LocalDateTime,
-      aFile: io.File
+      aFile: io.File,
+      aSerializedUri: URI,
+      aSerializedURL: URL,
+      aSerializedDuration: Duration,
+      aSerializedUUID: UUID,
+      aSerializedInstant: Instant,
+      aSerializedLocalDate: LocalDate,
+      aSerializedLocalTime: LocalTime,
+      aSerializedLocalDateTime: LocalDateTime,
+      aSerializedFile: io.File
     )
 
     val uuid          = UUID.randomUUID()
@@ -274,9 +296,6 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     val localTime     = LocalTime.now()
     val localDateTime = LocalDateTime.now()
     val file          = File.createTempFile("foo", ".tmp")
-
-    implicit val encS: Encode[Specific] = deriveEncode[Specific]
-    implicit val decT: Decode[Target]   = deriveDecoder[Target]
 
     Specific(
       42.toByte,
@@ -295,7 +314,16 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       localDate,
       localTime,
       localDateTime,
-      file
+      file,
+      new URI("urn:isbn:096139210x").toString,
+      new URL("https://www.google.com").toString,
+      (42 seconds).toString,
+      uuid.toString,
+      instant.toString,
+      localDate.toString,
+      localTime.toString,
+      localDateTime.toString,
+      file.toString
     ).convert[Target] shouldEqual Right(
       Target(
         42.toByte,
@@ -306,6 +334,15 @@ class DecodeTest extends AnyFlatSpec with Matchers {
         (),
         BigInt(1234567890),
         BigDecimal(123456780.9),
+        new URI("urn:isbn:096139210x"),
+        new URL("https://www.google.com"),
+        42 seconds,
+        uuid,
+        instant,
+        localDate,
+        localTime,
+        localDateTime,
+        file,
         new URI("urn:isbn:096139210x"),
         new URL("https://www.google.com"),
         42 seconds,

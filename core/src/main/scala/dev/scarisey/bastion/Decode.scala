@@ -33,8 +33,6 @@ trait Decode[T] {
 }
 object Decode {
 
-//  def apply[T:Decode]:Decode[T] = implicitly[Decode[T]]
-
   def instance[A](f: DynamicRepr => Result[A]): Decode[A] = (g: DynamicRepr) => f(g)
 
   def wrap[A: Decode, R](f: A => R): Decode[R]                = (g: DynamicRepr) => g.apply(f)
@@ -161,7 +159,7 @@ object Decode {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: URI    => Right(x)
-        case x: String => Try(URI.create(a.asInstanceOf[String])).toEither.left.map(_ => IncorrectPathOrType(d, "URI"))
+        case x: String => Try(URI.create(x)).toEither.left.map(_ => IncorrectPathOrType(d, "URI"))
         case _         => Left(UnexpectedEncodeValue(d, "URI"))
       }
     case _ => Left(IncorrectPath)
@@ -171,7 +169,7 @@ object Decode {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: URL    => Right(x)
-        case x: String => Try(URI.create(a.asInstanceOf[String]).toURL).toEither.left.map(_ => IncorrectPathOrType(d, "URL"))
+        case x: String => Try(URI.create(x).toURL).toEither.left.map(_ => IncorrectPathOrType(d, "URL"))
         case _         => Left(UnexpectedEncodeValue(d, "URL"))
       }
     case _ => Left(IncorrectPath)
