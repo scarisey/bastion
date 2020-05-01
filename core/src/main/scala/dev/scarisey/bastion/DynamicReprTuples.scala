@@ -16,12 +16,12 @@
 
 package dev.scarisey.bastion
 
-import dev.scarisey.bastion.ResultHelper._
+import dev.scarisey.bastion.ResultProducts._
 
 import scala.util.Try
 
-trait ProductHelper {
-  implicit class ProductHelper1(t1: DynamicRepr) {
+trait DynamicReprTuples {
+  implicit class DynamicReprTuples1(t1: DynamicRepr) {
     def applyT[A, RR](f: A => Try[RR])(
       implicit decA: Decode[A]
     ): Result[RR] =
@@ -55,8 +55,9 @@ trait ProductHelper {
   }
 
   // /start/producthelper/ - DO NOT REMOVE
+// $$COVERAGE-OFF$$should find a way to test all of them ...
 
-  implicit class ProductHelper2(tuple: Tuple2[DynamicRepr, DynamicRepr]) {
+  implicit class DynamicReprTuples2(tuple: Tuple2[DynamicRepr, DynamicRepr]) {
     def applyT[A, B, RR](f: (A, B) => Try[RR])(
       implicit decA: Decode[A],
       decB: Decode[B]
@@ -70,9 +71,7 @@ trait ProductHelper {
       decB: Decode[B]
     ): Result[RR] = {
       val (t1, t2) = tuple
-      product2(t1.convert[A], t2.convert[B])
-        .map(f.tupled)
-        .flatMap(_.toRight(NilSmartConstructorError))
+      product2(t1.convert[A], t2.convert[B]).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, RL, RR](f: (A, B) => Either[RL, RR])(
@@ -92,7 +91,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper3(tuple: Tuple3[DynamicRepr, DynamicRepr, DynamicRepr]) {
+  implicit class DynamicReprTuples3(tuple: Tuple3[DynamicRepr, DynamicRepr, DynamicRepr]) {
     def applyT[A, B, C, RR](f: (A, B, C) => Try[RR])(
       implicit decA: Decode[A],
       decB: Decode[B],
@@ -108,9 +107,7 @@ trait ProductHelper {
       decC: Decode[C]
     ): Result[RR] = {
       val (t1, t2, t3) = tuple
-      product3(t1.convert[A], t2.convert[B], t3.convert[C])
-        .map(f.tupled)
-        .flatMap(_.toRight(NilSmartConstructorError))
+      product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     def applyE[A, B, C, RL, RR](f: (A, B, C) => Either[RL, RR])(
@@ -131,8 +128,8 @@ trait ProductHelper {
       product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled)
     }
   }
-  // $COVERAGE-OFF$should find a way to test all of them ...
-  implicit class ProductHelper4(tuple: Tuple4[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
+
+  implicit class DynamicReprTuples4(tuple: Tuple4[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
     def applyT[A, B, C, D, RR](f: (A, B, C, D) => Try[RR])(
       implicit decA: Decode[A],
       decB: Decode[B],
@@ -178,7 +175,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper5(tuple: Tuple5[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
+  implicit class DynamicReprTuples5(tuple: Tuple5[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
     def applyT[A, B, C, D, E, RR](f: (A, B, C, D, E) => Try[RR])(
       implicit decA: Decode[A],
       decB: Decode[B],
@@ -230,7 +227,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper6(tuple: Tuple6[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
+  implicit class DynamicReprTuples6(tuple: Tuple6[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
     def applyT[A, B, C, D, E, F, RR](f: (A, B, C, D, E, F) => Try[RR])(
       implicit decA: Decode[A],
       decB: Decode[B],
@@ -286,7 +283,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper7(
+  implicit class DynamicReprTuples7(
     tuple: Tuple7[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]
   ) {
     def applyT[A, B, C, D, E, F, G, RR](f: (A, B, C, D, E, F, G) => Try[RR])(
@@ -349,7 +346,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper8(
+  implicit class DynamicReprTuples8(
     tuple: Tuple8[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]
   ) {
     def applyT[A, B, C, D, E, F, G, H, RR](f: (A, B, C, D, E, F, G, H) => Try[RR])(
@@ -445,7 +442,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper9(
+  implicit class DynamicReprTuples9(
     tuple: Tuple9[
       DynamicRepr,
       DynamicRepr,
@@ -559,7 +556,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper10(
+  implicit class DynamicReprTuples10(
     tuple: Tuple10[
       DynamicRepr,
       DynamicRepr,
@@ -682,7 +679,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper11(
+  implicit class DynamicReprTuples11(
     tuple: Tuple11[
       DynamicRepr,
       DynamicRepr,
@@ -814,7 +811,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper12(
+  implicit class DynamicReprTuples12(
     tuple: Tuple12[
       DynamicRepr,
       DynamicRepr,
@@ -955,7 +952,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper13(
+  implicit class DynamicReprTuples13(
     tuple: Tuple13[
       DynamicRepr,
       DynamicRepr,
@@ -1105,7 +1102,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper14(
+  implicit class DynamicReprTuples14(
     tuple: Tuple14[
       DynamicRepr,
       DynamicRepr,
@@ -1264,7 +1261,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper15(
+  implicit class DynamicReprTuples15(
     tuple: Tuple15[
       DynamicRepr,
       DynamicRepr,
@@ -1434,7 +1431,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper16(
+  implicit class DynamicReprTuples16(
     tuple: Tuple16[
       DynamicRepr,
       DynamicRepr,
@@ -1617,7 +1614,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper17(
+  implicit class DynamicReprTuples17(
     tuple: Tuple17[
       DynamicRepr,
       DynamicRepr,
@@ -1811,7 +1808,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper18(
+  implicit class DynamicReprTuples18(
     tuple: Tuple18[
       DynamicRepr,
       DynamicRepr,
@@ -2014,7 +2011,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper19(
+  implicit class DynamicReprTuples19(
     tuple: Tuple19[
       DynamicRepr,
       DynamicRepr,
@@ -2226,7 +2223,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper20(
+  implicit class DynamicReprTuples20(
     tuple: Tuple20[
       DynamicRepr,
       DynamicRepr,
@@ -2447,7 +2444,7 @@ trait ProductHelper {
     }
   }
 
-  implicit class ProductHelper21(
+  implicit class DynamicReprTuples21(
     tuple: Tuple21[
       DynamicRepr,
       DynamicRepr,
@@ -2676,8 +2673,8 @@ trait ProductHelper {
       ).map(f.tupled)
     }
   }
-  // $COVERAGE-ON$
-  implicit class ProductHelper22(
+
+  implicit class DynamicReprTuples22(
     tuple: Tuple22[
       DynamicRepr,
       DynamicRepr,
@@ -2915,5 +2912,7 @@ trait ProductHelper {
       ).map(f.tupled)
     }
   }
+
+// $$COVERAGE-ON$$
   //  /end/producthelper/ - DO NOT REMOVE
 }

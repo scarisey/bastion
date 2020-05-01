@@ -1,5 +1,5 @@
-object ResultHelperCodeGen {
-  def generateResultHelpers: List[String] = {
+object ResultProductsCodeGen {
+  def generate: List[String] = {
     val capitals = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     (3 to 22).map { n =>

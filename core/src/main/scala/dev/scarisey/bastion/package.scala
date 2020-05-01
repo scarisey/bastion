@@ -16,7 +16,7 @@
 
 package dev.scarisey
 
-package object bastion extends ProductHelper {
+package object bastion extends DynamicReprTuples {
   type Result[T] = Either[DecodeError, T]
 
   implicit class ConverterSyntax[A](a: A) {

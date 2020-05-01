@@ -18,7 +18,7 @@ package dev.scarisey.bastion
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class ResultHelperTest extends AnyFlatSpec with Matchers {
+class ResultProductsTest extends AnyFlatSpec with Matchers {
   val tuple22 = (
     Right[DecodeError, Int](1),
     Right[DecodeError, Int](2),
@@ -118,7 +118,7 @@ class ResultHelperTest extends AnyFlatSpec with Matchers {
     Result[Int],
     Result[Int]
   ) => Result[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)] =
-    ResultHelper.product22 _
+    ResultProducts.product22 _
 
   it should "combine 22 ok results" in {
     f.tupled(tuple22) shouldEqual Right((1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22))

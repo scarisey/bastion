@@ -21,35 +21,35 @@ ThisBuild / scmInfo := Some(
 
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
 
-lazy val createProductHelper = taskKey[Unit]("Generate code for ProductHelper.scala")
+lazy val createDynamicReprTuples = taskKey[Unit]("Generate code for DynamicReprTuples.scala")
 
-createProductHelper := {
-  val productBuilderFile =
-    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "bastion" / "ProductHelper.scala"
+createDynamicReprTuples := {
+  val dynamicReprTuplesFile =
+    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "bastion" / "DynamicReprTuples.scala"
   val resource = (resourceManaged in Compile).value / "scalaFmt" / "temporary"
   val scalaFmt = baseDirectory.value / ".scalafmt.conf"
 
   CodeGen.replaceFileSection(
-    productBuilderFile,
+    dynamicReprTuplesFile,
     "producthelper",
-    ProductHelperCodeGen.generateProductHelpers,
+    DynamicReprTuplesCodeGen.generate,
     resource,
     scalaFmt
   )
 }
 
-lazy val createResultHelper = taskKey[Unit]("Generate code for ResultHelper.scala")
+lazy val createResultProducts = taskKey[Unit]("Generate code for ResultProducts.scala")
 
-createResultHelper := {
+createResultProducts := {
   val file =
-    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "bastion" / "ResultHelper.scala"
+    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "bastion" / "ResultProducts.scala"
   val resource = (resourceManaged in Compile).value / "scalaFmt" / "temporary"
   val scalaFmt = baseDirectory.value / ".scalafmt.conf"
 
   CodeGen.replaceFileSection(
     file,
     "resulthelper",
-    ResultHelperCodeGen.generateResultHelpers,
+    ResultProductsCodeGen.generate,
     resource,
     scalaFmt
   )

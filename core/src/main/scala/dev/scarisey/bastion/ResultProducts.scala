@@ -16,7 +16,7 @@
 
 package dev.scarisey.bastion
 
-object ResultHelper {
+object ResultProducts {
 
   def product2[A, B](r1: Result[A], r2: Result[B]): Result[(A, B)] = (r1, r2) match {
     case (Right(v1), Right(v2)) => Right(v1, v2)

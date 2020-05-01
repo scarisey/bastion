@@ -21,7 +21,7 @@ import org.scalatest.matchers.should.Matchers
 import scala.util.Success
 import scala.util.Try
 
-class ProductHelperTest extends AnyFlatSpec with Matchers {
+class DynamicReprTuplesTest extends AnyFlatSpec with Matchers {
   def sum22[T](wrap: Int => T)(
     field1: Int,
     field2: Int,
