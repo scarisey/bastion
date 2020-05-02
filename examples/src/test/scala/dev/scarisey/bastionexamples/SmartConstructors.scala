@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package dev.scarisey.bastion
+package dev.scarisey.bastionexamples
 import java.time.LocalDate
 import java.util.UUID
-
-import dev.scarisey.bastion.Configuration.default
-import dev.scarisey.bastion.Encode._
-import dev.scarisey.bastion.Decode._
-import derivation.encode.auto._
-import dev.scarisey.bastion.SmartConstructors.Domain.DomainError.BlankCity
-import dev.scarisey.bastion.SmartConstructors.Domain.DomainError.BlankName
-import dev.scarisey.bastion.SmartConstructors.Domain.DomainError.BlankStreetName
-import dev.scarisey.bastion.SmartConstructors.Domain.DomainError.BlankZipCode
-import dev.scarisey.bastion.SmartConstructors.Domain.DomainError.NegativeStreetNumber
-import dev.scarisey.bastion.SmartConstructors.Contract.Address
-import dev.scarisey.bastion.SmartConstructors.Contract.Identity
+import dev.scarisey.bastion._
+import Configuration.default
+import dev.scarisey.bastion.derivation.encode.auto._
+import dev.scarisey.bastionexamples.SmartConstructors.Domain.DomainError.BlankCity
+import dev.scarisey.bastionexamples.SmartConstructors.Domain.DomainError.BlankName
+import dev.scarisey.bastionexamples.SmartConstructors.Domain.DomainError.BlankStreetName
+import dev.scarisey.bastionexamples.SmartConstructors.Domain.DomainError.BlankZipCode
+import dev.scarisey.bastionexamples.SmartConstructors.Domain.DomainError.NegativeStreetNumber
+import dev.scarisey.bastionexamples.SmartConstructors.Contract.Address
+import dev.scarisey.bastionexamples.SmartConstructors.Contract.Identity
 
 object SmartConstructors extends App {
 

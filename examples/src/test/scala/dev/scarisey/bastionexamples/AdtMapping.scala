@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package dev.scarisey.bastion
-import dev.scarisey.bastion.Configuration.default
-import dev.scarisey.bastion.Encode._
+package dev.scarisey.bastionexamples
+import dev.scarisey.bastion._
+import Configuration.default
 import dev.scarisey.bastion.derivation.encode.auto._
 import dev.scarisey.bastion.derivation.decode.auto._
 

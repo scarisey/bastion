@@ -4,8 +4,8 @@ object DynamicReprTuplesCodeGen {
     val capitals                = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     def decN(gen: Char): String = s"dec$gen: Decode[$gen]"
 
-    val header = """// $$COVERAGE-OFF$$should find a way to test all of them ..."""
-    val footer = """// $$COVERAGE-ON$$"""
+    val header = """// $COVERAGE-OFF$should find a way to test all of them ..."""
+    val footer = """// $COVERAGE-ON$"""
     val lines = (2 to 22).map { n =>
       val tupleTypeArgs = (1 to n).map(_ => "DynamicRepr").mkString(", ")
       val genericArgs   = (1 to n).map(i => capitals(i - 1)).mkString(", ")

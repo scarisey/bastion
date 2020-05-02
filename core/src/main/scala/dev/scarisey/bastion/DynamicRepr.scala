@@ -20,9 +20,11 @@ import scala.language.dynamics
 
 sealed trait DynamicRepr extends Dynamic { self =>
   def selectDynamic(field: String): DynamicRepr
+  def `|||`(other: DynamicRepr): DynamicRepr
 }
 abstract class ProductDynamicRepr[A](val a: A) extends DynamicRepr {
-  override def toString: String = s"ProductDynamicRepr(${a.toString})"
+  override def toString: String                       = s"ProductDynamicRepr(${a.toString})"
+  override def `|||`(other: DynamicRepr): DynamicRepr = this
 }
 object ProductDynamicRepr {
   def unapply[A](arg: ProductDynamicRepr[A]): Option[A] = Some(arg.a)
@@ -30,14 +32,17 @@ object ProductDynamicRepr {
 case class IterableDynamicRepr[A](items: Iterable[DynamicRepr]) extends DynamicRepr {
   override def selectDynamic(field: String): DynamicRepr = NilDynamicRepr
   override def toString: String                          = s"IterableDynamicRepr(${items.toString})"
+  override def `|||`(other: DynamicRepr): DynamicRepr    = this
 }
 case class ValueDynamicRepr[A](a: A) extends DynamicRepr {
   override def selectDynamic(field: String): DynamicRepr = NilDynamicRepr
   override def toString: String                          = s"ValueDynamicRepr(${a.toString})"
+  override def `|||`(other: DynamicRepr): DynamicRepr    = this
 }
 case object NilDynamicRepr extends DynamicRepr {
   override def selectDynamic(field: String): DynamicRepr = this
   override def toString: String                          = "NilDynamicRepr"
+  override def `|||`(other: DynamicRepr): DynamicRepr    = other
 }
 
 case class FieldKeyRepr(s: String) {

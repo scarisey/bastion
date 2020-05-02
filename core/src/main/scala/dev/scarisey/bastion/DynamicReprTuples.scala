@@ -55,7 +55,8 @@ trait DynamicReprTuples {
   }
 
   // /start/producthelper/ - DO NOT REMOVE
-// $$COVERAGE-OFF$$should find a way to test all of them ...
+
+  // $COVERAGE-OFF$should find a way to test all of them ...
 
   implicit class DynamicReprTuples2(tuple: Tuple2[DynamicRepr, DynamicRepr]) {
     def applyT[A, B, RR](f: (A, B) => Try[RR])(
@@ -2913,6 +2914,7 @@ trait DynamicReprTuples {
     }
   }
 
-// $$COVERAGE-ON$$
+  // $COVERAGE-ON$
+
   //  /end/producthelper/ - DO NOT REMOVE
 }
