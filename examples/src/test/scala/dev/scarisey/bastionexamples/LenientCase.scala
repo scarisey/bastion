@@ -16,16 +16,15 @@
 
 package dev.scarisey.bastionexamples
 import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.auto._
+import dev.scarisey.bastion.derivation.encode.configured.auto._
 import dev.scarisey.bastion.derivation.decode.auto._
+import dev.scarisey.bastion.derivation.encode.Configuration.lenient
 
-object MappingNestedTypes extends App {
-  case class SubSource1(aString: String)
-  case class SubSource2(anInt: Int)
-  case class Source(sub1: SubSource1, sub2: SubSource2)
-  case class SubTarget1(aString: String)
-  case class SubTarget2(anInt: Int)
-  case class Target(sub1: SubTarget1, sub2: SubTarget2)
+object LenientCase extends App {
+  case class Source(aString: String, anInt: Int, aBoolean: Boolean)
+  case class Target(an_int: Int, A_String: String)
 
-  println(Source(SubSource1("foo"), SubSource2(42)).convert[Target])
+  println(
+    Source("foo", 42, true).convert[Target]
+  )
 }

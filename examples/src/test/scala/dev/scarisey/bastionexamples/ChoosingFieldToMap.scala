@@ -16,7 +16,6 @@
 
 package dev.scarisey.bastionexamples
 import dev.scarisey.bastion._
-import Configuration.default
 import derivation.encode.auto._
 
 object ChoosingFieldToMap extends App {

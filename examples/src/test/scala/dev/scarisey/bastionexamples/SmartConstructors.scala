@@ -18,7 +18,6 @@ package dev.scarisey.bastionexamples
 import java.time.LocalDate
 import java.util.UUID
 import dev.scarisey.bastion._
-import Configuration.default
 import dev.scarisey.bastion.derivation.encode.auto._
 import dev.scarisey.bastionexamples.SmartConstructors.Domain.DomainError.BlankCity
 import dev.scarisey.bastionexamples.SmartConstructors.Domain.DomainError.BlankName

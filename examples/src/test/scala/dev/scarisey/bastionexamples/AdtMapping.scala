@@ -16,7 +16,6 @@
 
 package dev.scarisey.bastionexamples
 import dev.scarisey.bastion._
-import Configuration.default
 import dev.scarisey.bastion.derivation.encode.auto._
 import dev.scarisey.bastion.derivation.decode.auto._
 

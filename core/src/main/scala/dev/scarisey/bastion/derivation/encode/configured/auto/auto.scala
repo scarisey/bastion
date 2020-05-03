@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package dev.scarisey.bastionexamples
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.auto._
-import dev.scarisey.bastion.derivation.decode.auto._
+package dev.scarisey.bastion.derivation.encode.configured
+import dev.scarisey.bastion.derivation.encode.AutoUnlock
 
-object MappingNestedTypes extends App {
-  case class SubSource1(aString: String)
-  case class SubSource2(anInt: Int)
-  case class Source(sub1: SubSource1, sub2: SubSource2)
-  case class SubTarget1(aString: String)
-  case class SubTarget2(anInt: Int)
-  case class Target(sub1: SubTarget1, sub2: SubTarget2)
-
-  println(Source(SubSource1("foo"), SubSource2(42)).convert[Target])
+package object auto {
+  implicit val autoUnlock: AutoUnlock = new AutoUnlock {}
 }

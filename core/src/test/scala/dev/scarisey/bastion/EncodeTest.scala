@@ -18,9 +18,8 @@ package dev.scarisey.bastion
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import Configuration.lenient
-import Encode._
-import derivation.encode.auto._
+import derivation.encode.Configuration.lenient
+import derivation.encode.configured.auto._
 
 class EncodeTest extends AnyFlatSpec with Matchers {
   trait Fixture {
@@ -81,7 +80,7 @@ class EncodeTest extends AnyFlatSpec with Matchers {
     final case class RecM(text: String)  extends Rec
     final case class RecR(rs: List[Rec]) extends Rec
 
-    val encode: Encode[Rec] = deriveEncode[Rec]
+    val encode: Encode[Rec] = implicitly[Encode[Rec]]
     val record              = RecR(List(RecM("foo"), RecM("bar")))
     val repr                = encode.to(record)
     repr match {

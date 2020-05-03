@@ -18,7 +18,6 @@ package dev.scarisey.bastion
 import dev.scarisey.bastion.derivation.encode.semiauto._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import Configuration.default
 
 class EncodeStrictTest extends AnyFlatSpec with Matchers {
   trait Fixture {

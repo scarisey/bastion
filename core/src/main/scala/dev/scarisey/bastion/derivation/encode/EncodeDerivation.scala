@@ -15,7 +15,6 @@
  */
 
 package dev.scarisey.bastion.derivation.encode
-import dev.scarisey.bastion.Configuration
 import dev.scarisey.bastion.DynamicRepr
 import dev.scarisey.bastion.Encode
 import dev.scarisey.bastion.FieldKeyRepr

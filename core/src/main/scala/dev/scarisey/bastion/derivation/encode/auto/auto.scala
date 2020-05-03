@@ -17,7 +17,8 @@
 package dev.scarisey.bastion.derivation.encode
 
 package object auto {
-  implicit val autoUnlock: AutoUnlock = new AutoUnlock {}
+  implicit val autoUnlock: AutoUnlock       = new AutoUnlock {}
+  implicit val configuration: Configuration = Configuration.default
 }
 
-sealed trait AutoUnlock
+trait AutoUnlock

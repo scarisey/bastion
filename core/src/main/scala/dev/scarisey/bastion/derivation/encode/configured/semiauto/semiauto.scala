@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package dev.scarisey.bastion
+package dev.scarisey.bastion.derivation.encode.configured
 
-case class Configuration(lenientCase: Boolean)
-object Configuration {
-  implicit val default: Configuration = Configuration(false)
-  implicit val lenient: Configuration = Configuration(true)
+import dev.scarisey.bastion._
+import dev.scarisey.bastion.derivation.encode.EncodeDerivation
+import magnolia._
+
+import scala.language.experimental.macros
+
+package object semiauto extends EncodeDerivation {
+  def deriveEncode[T]: Encode[T] = macro Magnolia.gen[T]
 }

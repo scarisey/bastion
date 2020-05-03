@@ -26,6 +26,7 @@ import java.time.LocalTime
 import java.util.UUID
 
 import dev.scarisey.bastion.derivation.encode.AutoUnlock
+import dev.scarisey.bastion.derivation.encode.Configuration
 import dev.scarisey.bastion.derivation.encode.EncodeDerivation
 import magnolia._
 

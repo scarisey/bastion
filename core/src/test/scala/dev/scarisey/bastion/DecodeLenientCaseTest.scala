@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package dev.scarisey.bastionexamples
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.auto._
+package dev.scarisey.bastion
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import dev.scarisey.bastion.derivation.encode.Configuration.lenient
+import dev.scarisey.bastion.derivation.encode.configured.auto._
 import dev.scarisey.bastion.derivation.decode.auto._
 
-object MappingNestedTypes extends App {
-  case class SubSource1(aString: String)
-  case class SubSource2(anInt: Int)
-  case class Source(sub1: SubSource1, sub2: SubSource2)
-  case class SubTarget1(aString: String)
-  case class SubTarget2(anInt: Int)
-  case class Target(sub1: SubTarget1, sub2: SubTarget2)
+class DecodeLenientCaseTest extends AnyFlatSpec with Matchers {
+  behavior of "Encode and Decode with lenient case"
 
-  println(Source(SubSource1("foo"), SubSource2(42)).convert[Target])
+  it should "convert a flat structure to another one - insensitive field case" in {
+    case class RecA(aString: String, anInt: Int, aBoolean: Boolean)
+    case class RecB(an_int: Int, A_String: String)
+
+    RecA("foo", 42, true).convert[RecB] shouldEqual Right(RecB(42, "foo"))
+  }
 }

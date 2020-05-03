@@ -15,10 +15,8 @@
  */
 
 package dev.scarisey.bastion.derivation.decode
-import dev.scarisey.bastion.Decode
-import magnolia.Magnolia
-import language.experimental.macros
 
-package object auto extends DecodeDerivation {
-  implicit def deriveDecoder[T]: Decode[T] = macro Magnolia.gen[T]
+package object auto {
+  implicit val autoUnlockD: AutoUnlockD = new AutoUnlockD {}
 }
+sealed trait AutoUnlockD

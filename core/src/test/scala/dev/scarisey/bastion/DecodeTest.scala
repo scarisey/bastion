@@ -31,15 +31,11 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import Encode._
-import Decode._
 import dev.scarisey.bastion.derivation.encode.auto._
 import dev.scarisey.bastion.derivation.decode.auto._
 
 class DecodeTest extends AnyFlatSpec with Matchers {
-  trait Fixture {
-    implicit val default = Configuration.default
-  }
+  trait Fixture
 
   behavior of "Decode"
 
@@ -75,14 +71,6 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     RecA("toto", 42, true, List("foo", "bar"), Some("content"), Right("baz"), Left("titi")).convert[RecB] shouldEqual Right(
       RecB(42, Wrapped("toto"), List(Wrapped("foo"), Wrapped("bar")), Some(Wrapped("content")), Right("baz"), "titi")
     )
-  }
-
-  it should "convert a flat structure to another one - insensitive field case" in {
-    import Configuration.lenient
-    case class RecA(aString: String, anInt: Int, aBoolean: Boolean)
-    case class RecB(an_int: Int, A_String: String)
-
-    RecA("foo", 42, true).convert[RecB] shouldEqual Right(RecB(42, "foo"))
   }
 
   it should "convert a 2 levels structure to another one - same shape" in new Fixture {
@@ -185,10 +173,10 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       def makeOption(aField: String) = makeEither(aField).toOption
     }
 
-    val enc: Decode[Wrapped]  = wrap(Wrapped(_))
-    val encE: Decode[Wrapped] = wrapE(Wrapped.makeEither)
-    val encO: Decode[Wrapped] = wrapO(Wrapped.makeOption)
-    val encT: Decode[Wrapped] = wrapT(Wrapped.makeTry)
+    val enc: Decode[Wrapped]  = Decode.wrap(Wrapped(_))
+    val encE: Decode[Wrapped] = Decode.wrapE(Wrapped.makeEither)
+    val encO: Decode[Wrapped] = Decode.wrapO(Wrapped.makeOption)
+    val encT: Decode[Wrapped] = Decode.wrapT(Wrapped.makeTry)
 
     private val expectedDecodedValue                  = Right(Wrapped("foo"))
     private val dynamicRepr: ValueDynamicRepr[String] = ValueDynamicRepr("foo")

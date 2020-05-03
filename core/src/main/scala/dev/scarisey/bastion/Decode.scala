@@ -27,11 +27,17 @@ import java.util.UUID
 
 import scala.concurrent.duration.Duration
 import scala.util.Try
+import dev.scarisey.bastion.derivation.decode.AutoUnlockD
+import dev.scarisey.bastion.derivation.decode.DecodeDerivation
+import magnolia._
+
+import scala.language.experimental.macros
+import scala.reflect.macros.whitebox
 
 trait Decode[T] {
   def from(g: DynamicRepr): Result[T]
 }
-object Decode {
+object Decode extends DecodeDerivation {
 
   def instance[A](f: DynamicRepr => Result[A]): Decode[A] = (g: DynamicRepr) => f(g)
 
@@ -276,6 +282,13 @@ object Decode {
           }
       case d => Left(UnexpectedEncodeValue(d, "List"))
     }
+  }
+
+  implicit def deriveDecode[T](implicit u: AutoUnlockD): Decode[T] = macro macroDeriveDecode[T]
+
+  def macroDeriveDecode[T: c.WeakTypeTag](c: whitebox.Context)(u: c.Tree): c.Tree = {
+    val _ = u
+    Magnolia.gen[T](c)
   }
 
 }
