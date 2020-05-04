@@ -16,6 +16,11 @@
 
 package dev.scarisey.bastion.derivation.encode
 
+/**
+ * Configure Encode derivation. When deriving an encoder for a type A, Configuration(lenientCase = true) will enable
+ * lenient case resolution of DynamicRepr field.
+ * @see [[DynamicRepr]], [[Encode]]
+ */
 case class Configuration(lenientCase: Boolean)
 object Configuration {
   implicit val default: Configuration = Configuration(false)

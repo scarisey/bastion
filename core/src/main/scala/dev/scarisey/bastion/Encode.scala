@@ -34,6 +34,9 @@ import language.experimental.macros
 import scala.concurrent.duration.Duration
 import scala.reflect.macros.whitebox
 
+/**
+ * Typeclass representing an Encoder from a type A to [[DynamicRepr]].
+ */
 trait Encode[-A] {
   def to(a: A): DynamicRepr
 }

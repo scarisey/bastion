@@ -20,10 +20,24 @@ package object bastion extends DynamicReprTuples {
   type Result[T] = Either[DecodeError, T]
 
   implicit class ConverterSyntax[A](a: A) {
+
+    /**
+     * Convert a type A to a type B.
+     * An Encode[A] and a Decode[B] must be in implicit scope, as well as a Configuration.
+     * Successful conversion will return Right(B), whether failing to convert will return a Left(DecodeError).
+     * @see [[Configuration]], [[Encode]], [[Decode]], [[DecodeError]]
+     */
     def convert[B](implicit decode: Decode[B], encode: Encode[A]): Result[B] = decode.from(encode.to(a))
   }
 
   implicit class DynamicReprConverter(d: DynamicRepr) {
+
+    /**
+     * Convert a DynamicRepr to a type B.
+     * A Decode[B] must be in implicit scope.
+     * Successful conversion will return Right(B), whether failing to convert will return a Left(DecodeError).
+     * @see [[Decode]], [[DecodeError]], [[DynamicRepr]]
+     */
     def convert[A](implicit decode: Decode[A]): Result[A] = decode.from(d)
   }
 }

@@ -34,17 +34,46 @@ import magnolia._
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
+/**
+ * Typeclass representing a decoder from a DynamicRepr to a type T.
+ * Attempting to decode may fail, resulting in [[DecodeError]].
+ */
 trait Decode[T] {
   def from(g: DynamicRepr): Result[T]
 }
 object Decode extends DecodeDerivation {
 
+  /**
+   * Create your own typeclass instance with this method.
+   */
   def instance[A](f: DynamicRepr => Result[A]): Decode[A] = (g: DynamicRepr) => f(g)
 
-  def wrap[A: Decode, R](f: A => R): Decode[R]                = (g: DynamicRepr) => g.apply(f)
+  /**
+   * For a function f, mapping a type A to R, create an instance of Decode that will map a [[DynamicRepr]] to R.
+   * This method can use your own instance of Decode for type A, enabling decoding of complex types.
+   */
+  def wrap[A: Decode, R](f: A => R): Decode[R] = (g: DynamicRepr) => g.apply(f)
+
+  /**
+   * For a function f, mapping a type A to R, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to R.
+   * This method can use your own instance of Decode for type A, enabling decoding of complex types.
+   * The eventual error L will be wrapped in a [[WrappedError]].
+   */
   def wrapE[A: Decode, L, R](f: A => Either[L, R]): Decode[R] = (g: DynamicRepr) => g.applyE(f)
-  def wrapO[A: Decode, R](f: A => Option[R]): Decode[R]       = (g: DynamicRepr) => g.applyO(f)
-  def wrapT[A: Decode, R](f: A => Try[R]): Decode[R]          = (g: DynamicRepr) => g.applyT(f)
+
+  /**
+   * For a function f, mapping a type A to maybe R, create an instance of Decode that will map a [[DynamicRepr]] to R.
+   * This method can use your own instance of Decode for type A, enabling decoding of complex types.
+   * The absence of value R will be represented by a [[NilSmartConstructorError]].
+   */
+  def wrapO[A: Decode, R](f: A => Option[R]): Decode[R] = (g: DynamicRepr) => g.applyO(f)
+
+  /**
+   * For a function f, mapping a type A to R, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to R.
+   * This method can use your own instance of Decode for type A, enabling decoding of complex types.
+   * The eventual throwable error will be wrapped in a [[WrappedError]].
+   */
+  def wrapT[A: Decode, R](f: A => Try[R]): Decode[R] = (g: DynamicRepr) => g.applyT(f)
 
   /*
    * AnyVal specific instances
@@ -165,7 +194,7 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: URI    => Right(x)
-        case x: String => Try(URI.create(x)).toEither.left.map(_ => IncorrectPathOrType(d, "URI"))
+        case x: String => Try(URI.create(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "URI"))
         case _         => Left(UnexpectedEncodeValue(d, "URI"))
       }
     case _ => Left(IncorrectPath)
@@ -175,7 +204,7 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: URL    => Right(x)
-        case x: String => Try(URI.create(x).toURL).toEither.left.map(_ => IncorrectPathOrType(d, "URL"))
+        case x: String => Try(URI.create(x).toURL).toEither.left.map(_ => UnexpectedEncodeValue(d, "URL"))
         case _         => Left(UnexpectedEncodeValue(d, "URL"))
       }
     case _ => Left(IncorrectPath)

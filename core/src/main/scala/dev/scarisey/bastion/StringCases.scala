@@ -16,6 +16,9 @@
 
 package dev.scarisey.bastion
 
+/**
+ * Internal methods to compute string cases.
+ */
 object StringCases {
 
   private val regexp = "(?:(_*[a-z]|_+)([a-z0-9]*)|(_*[A-Z]|_+)([a-z0-9]+|[A-Z]*))".r
@@ -57,77 +60,82 @@ object StringCases {
     res2.filter(s => s != "")
   }
 
-  /*
+  /**
   Capital_Snake_Case
    */
   def capitalSnakeCase(ss: Array[String]): String = ss.map(capitalise).mkString("_")
 
-  /*
+  /**
   Capital-Hyphen-Case
    */
   def capitalHyphenCase(ss: Array[String]): String = ss.map(capitalise).mkString("-")
 
-  /*
+  /**
   Capital.Dot.Case
    */
   def capitalDotCase(ss: Array[String]): String = ss.map(capitalise).mkString(".")
 
-  /*
+  /**
   Capital Words
    */
   def capitalWords(ss: Array[String]): String = ss.map(capitalise).mkString(" ")
-  /*
+
+  /**
   CamelCase
    */
   def camelCase(ss: Array[String]): String = ss.map(capitalise).mkString
-  /*
+
+  /**
   UPPERCASE
    */
   def upperCase(ss: Array[String]): String = ss.mkString.toUpperCase
 
-  /*
+  /**
   lowercase
    */
   def lowerCase(ss: Array[String]): String = ss.mkString.toLowerCase
-  /*
+
+  /**
   snake_case
    */
   def snakeCase(ss: Array[String]): String = ss.map(_.toLowerCase).mkString("_")
 
-  /*
+  /**
   UPPER_SNAKE_CASE
    */
   def upperSnakeCase(ss: Array[String]): String = ss.map(_.toUpperCase).mkString("_")
 
-  /*
+  /**
   hyphen-case
    */
   def hyphenCase(ss: Array[String]): String = ss.map(_.toLowerCase).mkString("-")
-  /*
+
+  /**
   UPPER-HYPHEN-CASE
    */
   def upperHyphenCase(ss: Array[String]): String = ss.map(_.toUpperCase).mkString("-")
 
-  /*
+  /**
   dot.case
    */
   def dotCase(ss: Array[String]): String = ss.map(_.toLowerCase).mkString(".")
-  /*
+
+  /**
   UPPER.DOT.CASE
    */
   def upperDotCase(ss: Array[String]): String = ss.map(_.toUpperCase).mkString(".")
 
-  /*
+  /**
   some words
    */
   def words(ss: Array[String]): String = ss.map(_.toLowerCase).mkString(" ")
 
-  /*
+  /**
   UPPER WORDS
    */
   def upperWords(ss: Array[String]): String = ss.map(_.toUpperCase).mkString(" ")
 
-  /*
+  /**
   lowerCamelCase
    */
   def lowerCamelCase(ss: Array[String]): String =

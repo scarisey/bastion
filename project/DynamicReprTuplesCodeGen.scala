@@ -15,6 +15,11 @@ object DynamicReprTuplesCodeGen {
 
       s"""
          |implicit class DynamicReprTuples$n(tuple: Tuple$n[$tupleTypeArgs]) {
+         |    /**
+         |     * For a function f, mapping the types $genericArgs to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
+         |     * This method can use your own instances of Decode for types $genericArgs, enabling decoding of complex types.
+         |     * The eventual throwable error will be wrapped in a [[WrappedError]].
+         |     */
          |    def applyT[$genericArgs, RR](f: ($genericArgs) => Try[RR])(
          |      implicit $decoders
          |    ): Result[RR] = {
@@ -22,6 +27,11 @@ object DynamicReprTuplesCodeGen {
          |      product$n($convertN).map(f.tupled).flatMap(_.toEither.left.map(t=>WrappedError(t)))
          |    }
          |
+         |    /**
+         |     * For a function f, mapping the types $genericArgs to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
+         |     * This method can use your own instance of Decode for types $genericArgs, enabling decoding of complex types.
+         |     * The absence of value RR will be represented by a [[NilSmartConstructorError]].
+         |     */
          |    def applyO[$genericArgs, RR](f: ($genericArgs) => Option[RR])(
          |      implicit $decoders
          |    ): Result[RR] = {
@@ -29,6 +39,11 @@ object DynamicReprTuplesCodeGen {
          |      product$n($convertN).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
          |    }
          |
+         |    /**
+         |     * For a function f, mapping the types $genericArgs to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
+         |     * This method can use your own instance of Decode for types $genericArgs, enabling decoding of complex types.
+         |     * The eventual error RL will be wrapped in a [[WrappedError]].
+         |     */
          |    def applyE[$genericArgs, RL, RR](f: ($genericArgs) => Either[RL, RR])(
          |      implicit $decoders
          |    ): Result[RR] = {
@@ -36,6 +51,10 @@ object DynamicReprTuplesCodeGen {
          |      product$n($convertN).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
          |    }
          |
+         |    /**
+         |     * For a function f, mapping types $genericArgs to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
+         |     * This method can use your own instance of Decode for types $genericArgs, enabling decoding of complex types.
+         |     */
          |    def apply[$genericArgs, RR](f: ($genericArgs) => RR)(
          |      implicit $decoders
          |    ): Result[RR] = {
