@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package bastionexamples
-import bastion._
-import derivation.encode.auto._
+package bastion.derivation.encode
 
-object ChoosingFieldToMap extends App {
-  case class Source1(aField1: Int)
-  case class Source2(aField2: Int)
-
-  case class Target(finalValue: Int)
-
-  implicit val decoder: Decode[Target] = Decode.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
-
-  println(Source1(42).convert[Target])
-  println(Source2(33).convert[Target])
+package object auto {
+  implicit val autoUnlock: AutoUnlock       = new AutoUnlock {}
+  implicit val configuration: Configuration = Configuration.default
 }
+
+trait AutoUnlock

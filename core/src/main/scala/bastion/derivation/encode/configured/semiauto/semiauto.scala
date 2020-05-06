@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package bastionexamples
+package bastion.derivation.encode.configured
+
 import bastion._
-import derivation.encode.auto._
+import bastion.derivation.encode.EncodeDerivation
+import magnolia._
 
-object ChoosingFieldToMap extends App {
-  case class Source1(aField1: Int)
-  case class Source2(aField2: Int)
+import scala.language.experimental.macros
 
-  case class Target(finalValue: Int)
-
-  implicit val decoder: Decode[Target] = Decode.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
-
-  println(Source1(42).convert[Target])
-  println(Source2(33).convert[Target])
+package object semiauto extends EncodeDerivation {
+  def deriveEncode[T]: Encode[T] = macro Magnolia.gen[T]
 }

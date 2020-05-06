@@ -42,9 +42,9 @@ So there are three types that you will manipulate through this library :
   
 It should be enough the majority of time to make the imports below and call the convert method that will use instance of Encode and Decode in the implicit scope : 
 ```scala
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.auto._
-import dev.scarisey.bastion.derivation.decode.auto._
+import bastion._
+import bastion.derivation.encode.auto._
+import bastion.derivation.decode.auto._
 //...
 val instanceOfTypeB:TypeB = instanceOfTypeA.convert[TypeB]
 ```
@@ -57,9 +57,9 @@ For more advanced usage, please see below, and the examples [here](https://githu
 
 ### Simple mapping
 ```scala
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.auto._
-import dev.scarisey.bastion.derivation.decode.auto._
+import bastion._
+import bastion.derivation.encode.auto._
+import bastion.derivation.decode.auto._
 
 final case class PersonExternal(
     id: String,
@@ -76,9 +76,9 @@ val person:Person = PersonExternal("anId", "firstName", "lastName", LocalDate.pa
 
 ### Convert to an ADT
 ```scala
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.auto._
-import dev.scarisey.bastion.derivation.decode.auto._
+import bastion._
+import bastion.derivation.encode.auto._
+import bastion.derivation.decode.auto._
 
 case class A1(aField1: String)
 case class A2(aField2: Int)
@@ -96,9 +96,9 @@ A3(2.0).convert[RecB] //Left(IncorrectSubtype)
 
 ### Use your smart constructors
 ```scala
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.auto._
-import dev.scarisey.bastion.derivation.decode.auto._
+import bastion._
+import bastion.derivation.encode.auto._
+import bastion.derivation.decode.auto._
 
 case class A(aString:String,anInt:Int)
 
@@ -117,10 +117,10 @@ See this more complete example : [SmartConstructors](https://github.com/scarisey
 
 ### Lenient case
 ```scala
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.configured.auto._
-import dev.scarisey.bastion.derivation.decode.auto._
-import dev.scarisey.bastion.derivation.encode.Configuration.lenient
+import bastion._
+import bastion.derivation.encode.configured.auto._
+import bastion.derivation.decode.auto._
+import bastion.derivation.encode.Configuration.lenient
 
 case class Source(aString: String, anInt: Int, aBoolean: Boolean)
 case class Target(an_int: Int, A_String: String)
@@ -130,7 +130,7 @@ Source("foo", 42, true).convert[Target] //Target(42,foo)
 
 ### Or combinator on DynamicRepr
 ```scala
-import dev.scarisey.bastion._
+import bastion._
 import derivation.encode.auto._
 
 case class Source1(aField1: Int)

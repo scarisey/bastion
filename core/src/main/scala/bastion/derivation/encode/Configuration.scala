@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package bastionexamples
-import bastion._
-import derivation.encode.auto._
+package bastion.derivation.encode
 
-object ChoosingFieldToMap extends App {
-  case class Source1(aField1: Int)
-  case class Source2(aField2: Int)
-
-  case class Target(finalValue: Int)
-
-  implicit val decoder: Decode[Target] = Decode.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
-
-  println(Source1(42).convert[Target])
-  println(Source2(33).convert[Target])
+/**
+ * Configure Encode derivation. When deriving an encoder for a type A, Configuration(lenientCase = true) will enable
+ * lenient case resolution of DynamicRepr field.
+ * @see [[DynamicRepr]], [[Encode]]
+ */
+case class Configuration(lenientCase: Boolean)
+object Configuration {
+  implicit val default: Configuration = Configuration(false)
+  implicit val lenient: Configuration = Configuration(true)
 }

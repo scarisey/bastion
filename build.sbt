@@ -25,7 +25,7 @@ lazy val createDynamicReprTuples = taskKey[Unit]("Generate code for DynamicReprT
 
 createDynamicReprTuples := {
   val dynamicReprTuplesFile =
-    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "bastion" / "DynamicReprTuples.scala"
+    (sourceDirectory in core).value / "main" / "scala" / "bastion" / "DynamicReprTuples.scala"
   val resource = (resourceManaged in Compile).value / "scalaFmt" / "temporary"
   val scalaFmt = baseDirectory.value / ".scalafmt.conf"
 
@@ -42,7 +42,7 @@ lazy val createResultProducts = taskKey[Unit]("Generate code for ResultProducts.
 
 createResultProducts := {
   val file =
-    (sourceDirectory in core).value / "main" / "scala" / "dev" / "scarisey" / "bastion" / "ResultProducts.scala"
+    (sourceDirectory in core).value / "main" / "scala" / "bastion" / "ResultProducts.scala"
   val resource = (resourceManaged in Compile).value / "scalaFmt" / "temporary"
   val scalaFmt = baseDirectory.value / ".scalafmt.conf"
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package dev.scarisey.bastionexamples
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.configured.auto._
-import dev.scarisey.bastion.derivation.decode.auto._
-import dev.scarisey.bastion.derivation.encode.Configuration.lenient
+package bastionexamples
+import bastion._
+import bastion.derivation.encode.configured.auto._
+import bastion.derivation.decode.auto._
+import bastion.derivation.encode.Configuration.lenient
 
 object LenientCase extends App {
   case class Source(aString: String, anInt: Int, aBoolean: Boolean)

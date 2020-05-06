@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package dev.scarisey.bastionexamples
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.auto._
-import dev.scarisey.bastion.derivation.decode.auto._
+package bastionexamples
+import bastion._
+import bastion.derivation.encode.auto._
+import bastion.derivation.decode.auto._
 
 object MappingNestedTypes extends App {
   case class SubSource1(aString: String)

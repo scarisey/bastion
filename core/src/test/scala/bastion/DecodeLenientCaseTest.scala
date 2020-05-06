@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package bastionexamples
-import bastion._
-import bastion.derivation.encode.auto._
+package bastion
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import bastion.derivation.encode.Configuration.lenient
+import bastion.derivation.encode.configured.auto._
 import bastion.derivation.decode.auto._
 
-object AdtMapping extends App {
-  case class RecA1(aField1: String)
-  case class RecA2(aField2: Int)
-  case class RecA3(aDouble: Double)
-  sealed trait RecB
-  case class RecB0(aBoolean: Boolean) extends RecB
-  case class RecB1(aField1: String)   extends RecB
-  case class RecB2(aField2: Int)      extends RecB
+class DecodeLenientCaseTest extends AnyFlatSpec with Matchers {
+  behavior of "Encode and Decode with lenient case"
 
-  println(RecA1("foo").convert[RecB])
-  println(RecA2(42).convert[RecB])
-  println(RecA3(2.0).convert[RecB]) //will not convert since there is no subtype with aDouble field
+  it should "convert a flat structure to another one - insensitive field case" in {
+    case class RecA(aString: String, anInt: Int, aBoolean: Boolean)
+    case class RecB(an_int: Int, A_String: String)
+
+    RecA("foo", 42, true).convert[RecB] shouldEqual Right(RecB(42, "foo"))
+  }
 }

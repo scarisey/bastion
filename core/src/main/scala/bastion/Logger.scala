@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package bastionexamples
-import bastion._
-import derivation.encode.auto._
+package bastion
 
-object ChoosingFieldToMap extends App {
-  case class Source1(aField1: Int)
-  case class Source2(aField2: Int)
+import java.util.logging.Level
 
-  case class Target(finalValue: Int)
+// $COVERAGE-OFF$Utility class for internal use only
+private[bastion] object Logger {
+  private val rootLogger = java.util.logging.Logger.getLogger("")
+  private val logger     = java.util.logging.Logger.getLogger("bastion")
 
-  implicit val decoder: Decode[Target] = Decode.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
+  def setLevel(level: Level): Unit = {
+    logger.info(s"log level set to $level")
+    rootLogger.setLevel(level)
+    rootLogger.getHandlers.foreach(h => h.setLevel(level))
+  }
 
-  println(Source1(42).convert[Target])
-  println(Source2(33).convert[Target])
+  def debug(message: String): Unit = logger.fine(message)
+  def info(message: String): Unit  = logger.info(message)
 }
+// $COVERAGE-ON$

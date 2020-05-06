@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package dev.scarisey.bastionexamples
+package bastionexamples
 import java.time.LocalDate
-import dev.scarisey.bastion._
-import dev.scarisey.bastion.derivation.encode.auto._
-import dev.scarisey.bastion.derivation.decode.auto._
+import bastion._
+import bastion.derivation.encode.auto._
+import bastion.derivation.decode.auto._
 
 object SimpleMapping extends App {
   final case class PersonExternal(
