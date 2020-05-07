@@ -5,7 +5,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 lazy val supportedScalaVersions = List("2.12.11", "2.13.1")
 
 ThisBuild / organization := "dev.scarisey"
-ThisBuild / homepage := None
+ThisBuild / homepage := Some(url("https://bastion.scarisey.dev"))
 ThisBuild / licenses += "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")
 ThisBuild / developers := List(
   Developer("scarisey", "Sylvain Carisey", "sylvain@carisey.dev", url("https://github.com/scarisey"))
