@@ -1,14 +1,27 @@
 language: scala
-scala:
-  - 2.12.11
-  - 2.13.1
 before_install:
   - git fetch --tags
-
-script:
-  - sbt ++$TRAVIS_SCALA_VERSION headerCheckAll scalafmtCheckAll compile scalafix unusedCompileDependenciesTest test
-
 cache:
   directories:
     - $HOME/.ivy2/cache
     - $HOME/.sbt
+    - $HOME/.coursier
+
+stages:
+  - name: test
+  - name: release
+    if: ((branch = master AND type = push) OR (tag IS present)) AND NOT fork
+
+jobs:
+  include:
+  - stage: test
+    scala:
+     - 2.12.11
+    script: sbt ++$TRAVIS_SCALA_VERSION headerCheckAll scalafmtCheckAll compile scalafix unusedCompileDependenciesTest coverageOn test coverageReport coverageOff
+  - #
+    scala:
+      - 2.13.1
+    script: sbt ++$TRAVIS_SCALA_VERSION compile scalafix unusedCompileDependenciesTest test
+  - stage: release
+    script: sbt ci-release
+
