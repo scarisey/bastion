@@ -1,6 +1,8 @@
 # Bastion
 
 [![Build Status](https://travis-ci.com/scarisey/bastion.svg?token=FoFxcrjoaHEnbx4sScjP&branch=master)](https://travis-ci.com/scarisey/bastion)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=scarisey_bastion&metric=alert_status)](https://sonarcloud.io/dashboard?id=scarisey_bastion)
+[![Latest tag](https://img.shields.io/github/v/tag/scarisey/bastion?sort=semver)](https://github.com/scarisey/bastion/tags)
 
 Bastion is a library to convert types, using when needed custom defined smart constructors. This library should be well suited for Domain Driven Designed applications.
 
@@ -52,6 +54,13 @@ val instanceOfTypeB:TypeB = instanceOfTypeA.convert[TypeB]
 For more advanced usage, please see below, and the examples [here](https://github.com/scarisey/bastion/tree/master/examples/src/test/scala/dev/scarisey/bastionexamples).
 
 ## Installation
+
+![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/dev.scarisey/bastion-core_2.12?color=green&label=latest%202.12&server=https%3A%2F%2Foss.sonatype.org)
+![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/dev.scarisey/bastion-core_2.13?color=green&label=latest%202.13&server=https%3A%2F%2Foss.sonatype.org)
+### Sbt
+```sbt
+libraryDependencies += "dev.scarisey" %% "bastion-core" % "X.Y.Z"
+```
 
 ## Usages
 
@@ -146,7 +155,6 @@ Source2(33).convert[Target] //Target(33)
 
 ## Things to do, and perspectives
 
-  * It should be possible to decode directly from raw data (json, avro ...), providing a nice way to deserialize directly to Domain objects.
   * Some benchmarks need to be done.
   * There are still too much imports to do before being able to convert types.
 
