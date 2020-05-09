@@ -55,8 +55,8 @@ For more advanced usage, please see below, and the examples [here](https://githu
 
 ## Installation
 
-![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/dev.scarisey/bastion-core_2.12?color=green&label=latest%202.12&server=https%3A%2F%2Foss.sonatype.org)
-![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/dev.scarisey/bastion-core_2.13?color=green&label=latest%202.13&server=https%3A%2F%2Foss.sonatype.org)
+![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/dev.scarisey/bastion-core_2.12?color=green&label=latest%202.12&server=https%3A%2F%2Foss.sonatype.org)
+![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/dev.scarisey/bastion-core_2.13?color=green&label=latest%202.13&server=https%3A%2F%2Foss.sonatype.org)
 ### Sbt
 ```sbt
 libraryDependencies += "dev.scarisey" %% "bastion-core" % "X.Y.Z"
