@@ -75,11 +75,27 @@ lazy val core = (project in file("core"))
     (test in Test).value
   })
 
+lazy val ujsonModule = (project in file("ujson"))
+  .settings(moduleName := "bastion-ujson")
+  .settings(buildSettings)
+  .settings(libraryDependencies ++= Seq(
+    ujson,
+    scalaTest % Test
+  ))
+  .dependsOn(core)
+  .settings(tryBuild := {
+    (headerCheckAll in Compile).value
+    scalafmtCheckAll.value
+    (compile in Compile).value
+    unusedCompileDependenciesTest.value
+    (test in Test).value
+  })
+
 lazy val examples = (project in file("examples"))
   .settings(moduleName := "bastion-examples")
   .settings(buildSettings)
   .settings(publish / skip := true)
-  .dependsOn(core)
+  .dependsOn(core, ujsonModule)
 
 lazy val buildSettings = Seq(
   scalacOptions := Seq(
@@ -103,5 +119,5 @@ lazy val buildSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(core,examples)
+  .aggregate(core,examples,ujsonModule)
   .settings(crossScalaVersions := Nil, publish / skip := true)

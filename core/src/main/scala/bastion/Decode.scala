@@ -84,7 +84,7 @@ object Decode extends DecodeDerivation {
         case x: Byte => Right(x)
         case _       => Left(UnexpectedEncodeValue(d, "Byte"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Byte"))
   }
 
   implicit val decodeInt: Decode[Int] = {
@@ -93,7 +93,7 @@ object Decode extends DecodeDerivation {
         case x: Int => Right(x)
         case _      => Left(UnexpectedEncodeValue(d, "Int"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Int"))
   }
 
   implicit val decodeShort: Decode[Short] = {
@@ -102,7 +102,7 @@ object Decode extends DecodeDerivation {
         case x: Short => Right(x)
         case _        => Left(UnexpectedEncodeValue(d, "Short"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Short"))
   }
 
   implicit val decodeLong: Decode[Long] = {
@@ -111,7 +111,7 @@ object Decode extends DecodeDerivation {
         case x: Long => Right(x)
         case _       => Left(UnexpectedEncodeValue(d, "Long"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Long"))
   }
 
   implicit val decodeFloat: Decode[Float] = {
@@ -120,7 +120,7 @@ object Decode extends DecodeDerivation {
         case x: Float => Right(x)
         case _        => Left(UnexpectedEncodeValue(d, "Float"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Float"))
   }
 
   implicit val decodeChar: Decode[Char] = {
@@ -129,7 +129,7 @@ object Decode extends DecodeDerivation {
         case x: Char => Right(x)
         case _       => Left(UnexpectedEncodeValue(d, "Char"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Char"))
   }
 
   implicit val decodeBoolean: Decode[Boolean] = {
@@ -138,7 +138,7 @@ object Decode extends DecodeDerivation {
         case x: Boolean => Right(x)
         case _          => Left(UnexpectedEncodeValue(d, "Boolean"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Boolean"))
   }
 
   implicit val decodeDouble: Decode[Double] = {
@@ -147,7 +147,7 @@ object Decode extends DecodeDerivation {
         case x: Double => Right(x)
         case _         => Left(UnexpectedEncodeValue(d, "Double"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Double"))
   }
 
   implicit val decodeUnit: Decode[Unit] = {
@@ -156,7 +156,7 @@ object Decode extends DecodeDerivation {
         case x: Unit => Right(x)
         case _       => Left(UnexpectedEncodeValue(d, "Unit"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Unit"))
   }
 
   /*
@@ -169,7 +169,7 @@ object Decode extends DecodeDerivation {
         case x: BigInt => Right(x)
         case _         => Left(UnexpectedEncodeValue(d, "BigInt"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "BigInt"))
   }
 
   implicit val decodeBigDecimal: Decode[BigDecimal] = {
@@ -178,7 +178,7 @@ object Decode extends DecodeDerivation {
         case x: BigDecimal => Right(x)
         case _             => Left(UnexpectedEncodeValue(d, "BigDecimal"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "BigDecimal"))
   }
 
   implicit val decodeString: Decode[String] = {
@@ -187,7 +187,7 @@ object Decode extends DecodeDerivation {
         case x: String => Right(x)
         case _         => Left(UnexpectedEncodeValue(d, "String"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "String"))
   }
 
   implicit val decodeUri: Decode[URI] = {
@@ -197,7 +197,7 @@ object Decode extends DecodeDerivation {
         case x: String => Try(URI.create(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "URI"))
         case _         => Left(UnexpectedEncodeValue(d, "URI"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "URI"))
   }
 
   implicit val decodeUrl: Decode[URL] = {
@@ -207,7 +207,7 @@ object Decode extends DecodeDerivation {
         case x: String => Try(URI.create(x).toURL).toEither.left.map(_ => UnexpectedEncodeValue(d, "URL"))
         case _         => Left(UnexpectedEncodeValue(d, "URL"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "URL"))
   }
 
   implicit val decodeDuration: Decode[Duration] = {
@@ -217,7 +217,7 @@ object Decode extends DecodeDerivation {
         case x: String   => Right(Duration(x))
         case _           => Left(UnexpectedEncodeValue(d, "Duration"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Duration"))
   }
 
   implicit val decodeUuid: Decode[UUID] = {
@@ -227,7 +227,7 @@ object Decode extends DecodeDerivation {
         case x: String => Right(UUID.fromString(x))
         case _         => Left(UnexpectedEncodeValue(d, "UUID"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "UUID"))
   }
 
   implicit val decodeInstant: Decode[Instant] = {
@@ -237,7 +237,7 @@ object Decode extends DecodeDerivation {
         case x: String  => Right(Instant.parse(x))
         case _          => Left(UnexpectedEncodeValue(d, "Instant"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "Instant"))
   }
 
   implicit val decodeLocalDate: Decode[LocalDate] = {
@@ -247,7 +247,7 @@ object Decode extends DecodeDerivation {
         case x: String    => Right(LocalDate.parse(x))
         case _            => Left(UnexpectedEncodeValue(d, "LocalDate"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "LocalDate"))
   }
 
   implicit val decodeLocalDateTime: Decode[LocalDateTime] = {
@@ -257,7 +257,7 @@ object Decode extends DecodeDerivation {
         case x: String        => Right(LocalDateTime.parse(x))
         case _                => Left(UnexpectedEncodeValue(d, "LocalDateTime"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "LocalDateTime"))
   }
 
   implicit val decodeLocalTime: Decode[LocalTime] = {
@@ -267,7 +267,7 @@ object Decode extends DecodeDerivation {
         case x: String    => Right(LocalTime.parse(x))
         case _            => Left(UnexpectedEncodeValue(d, "LocalTime"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "LocalTime"))
   }
 
   implicit val decodeFile: Decode[File] = {
@@ -277,7 +277,7 @@ object Decode extends DecodeDerivation {
         case x: String => Right(new File(x))
         case _         => Left(UnexpectedEncodeValue(d, "File"))
       }
-    case _ => Left(IncorrectPath)
+    case d => Left(IncorrectPath(d, "File"))
   }
 
   implicit def decodeOption[A: Decode]: Decode[Option[A]] = new Decode[Option[A]] {
@@ -304,11 +304,7 @@ object Decode extends DecodeDerivation {
     override def from(g: DynamicRepr): Result[List[A]] = g match {
       case ValueDynamicRepr(_) | ProductDynamicRepr(_) => implicitly[Decode[A]].from(g).map(List.apply(_))
       case IterableDynamicRepr(items) =>
-        items
-          .map(implicitly[Decode[A]].from(_))
-          .foldLeft(Right(Seq()).asInstanceOf[Result[List[A]]]) {
-            case (acc, res) => acc.flatMap(xs => res.map(x => xs ++ Seq(x)))
-          }
+        items.traverse(implicitly[Decode[A]].from(_))
       case d => Left(UnexpectedEncodeValue(d, "List"))
     }
   }

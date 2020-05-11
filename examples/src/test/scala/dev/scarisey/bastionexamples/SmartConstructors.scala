@@ -47,7 +47,7 @@ object SmartConstructors extends App {
     final case class Name(value: String)
     object Name {
       def apply(value: String): Either[BlankName.type, Name] =
-        Either.cond(value != null && !value.isBlank, new Name(value), BlankName)
+        Either.cond(value != null && !value.isEmpty, new Name(value), BlankName)
     }
 
     final case class StreetNumber(value: Int)
@@ -58,17 +58,17 @@ object SmartConstructors extends App {
     final case class StreetName(value: String)
     object StreetName {
       def apply(value: String): Either[BlankStreetName.type, StreetName] =
-        Either.cond(value != null && !value.isBlank, new StreetName(value), BlankStreetName)
+        Either.cond(value != null && !value.isEmpty, new StreetName(value), BlankStreetName)
     }
     final case class ZipCode(value: String)
     object ZipCode {
       def apply(value: String): Either[BlankZipCode.type, ZipCode] =
-        Either.cond(value != null && !value.isBlank, new ZipCode(value), BlankZipCode)
+        Either.cond(value != null && !value.isEmpty, new ZipCode(value), BlankZipCode)
     }
     final case class City(value: String)
     object City {
       def apply(value: String): Either[BlankCity.type, City] =
-        Either.cond(value != null && !value.isBlank, new City(value), BlankCity)
+        Either.cond(value != null && !value.isEmpty, new City(value), BlankCity)
     }
     final case class Address(streetNumber: StreetNumber, streetName: StreetName, city: City, zipCode: ZipCode)
     final case class Person(personId: PersonId, firstName: Name, lastName: Name, birthdate: LocalDate, address: Address)

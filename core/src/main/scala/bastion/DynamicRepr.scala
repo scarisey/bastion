@@ -29,6 +29,7 @@ sealed trait DynamicRepr extends Dynamic { self =>
    * Combinator with the semantic we expect for 'or' : (a ||| b) will return a if a is not [[NilDynamicRepr]], else b.
    */
   def `|||`(other: DynamicRepr): DynamicRepr
+
 }
 
 /**
@@ -47,7 +48,7 @@ object ProductDynamicRepr {
  * Data as a collection of DynamicRepr is encoded as IterableDynamicRepr.
  * The data it encodes is the public field items.
  */
-final case class IterableDynamicRepr[A](items: Iterable[DynamicRepr]) extends DynamicRepr {
+final case class IterableDynamicRepr(items: Iterable[DynamicRepr]) extends DynamicRepr {
   override def selectDynamic(field: String): DynamicRepr = NilDynamicRepr
   override def toString: String                          = s"IterableDynamicRepr(${items.toString})"
   override def `|||`(other: DynamicRepr): DynamicRepr    = this

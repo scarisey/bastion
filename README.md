@@ -23,6 +23,7 @@ This project is a way for me to learn typeclass derivation using Magnolia. It's 
     + [Use your smart constructors](#use-your-smart-constructors)
     + [Lenient case](#lenient-case)
     + [Or combinator on DynamicRepr](#or-combinator-on-dynamicrepr)
+    + [JSON deserialization](#json-deserialization)
   * [Things to do, and perspectives](#things-to-do--and-perspectives)
   * [License](#license)
 
@@ -151,6 +152,18 @@ implicit val decoder: Decode[Target] = Decode.instance(g => (g.aField1 ||| g.aFi
 
 Source1(42).convert[Target] //Target(42)
 Source2(33).convert[Target] //Target(33)
+```
+
+### Json deserialization
+```scala
+import bastion._
+import json.decode
+import derivation.decode.auto._
+
+case class Foo(aField1:String,aField2:Double)
+val aJson = """{"aField2":33.0,"aField1":"foo"}"""
+
+decode[Foo](aJson) //Right(Foo(foo,33.0))
 ```
 
 ## Things to do, and perspectives
