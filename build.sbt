@@ -104,7 +104,7 @@ lazy val buildSettings = Seq(
     "-deprecation",
     "-unchecked",
     "-opt:l:inline",
-    "-opt-inline-from:dev.carisey.converter.**",
+    "-opt-inline-from:bastion.**",
     "-Ywarn-unused",
     "-Yrangepos"
   ),

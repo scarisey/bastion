@@ -23,6 +23,8 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.OffsetDateTime
+import java.time.OffsetTime
 import java.util.UUID
 
 import scala.concurrent.duration.Duration
@@ -90,8 +92,10 @@ object Decode extends DecodeDerivation {
   implicit val decodeInt: Decode[Int] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
-        case x: Int => Right(x)
-        case _      => Left(UnexpectedEncodeValue(d, "Int"))
+        case x: Int    => Right(x)
+        case x: Short  => Right(x.toInt)
+        case x: String => Try(x.toInt).toEither.left.map(_ => UnexpectedEncodeValue(d, "Int"))
+        case _         => Left(UnexpectedEncodeValue(d, "Int"))
       }
     case d => Left(IncorrectPath(d, "Int"))
   }
@@ -99,8 +103,9 @@ object Decode extends DecodeDerivation {
   implicit val decodeShort: Decode[Short] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
-        case x: Short => Right(x)
-        case _        => Left(UnexpectedEncodeValue(d, "Short"))
+        case x: Short  => Right(x)
+        case x: String => Try(x.toShort).toEither.left.map(_ => UnexpectedEncodeValue(d, "Short"))
+        case _         => Left(UnexpectedEncodeValue(d, "Short"))
       }
     case d => Left(IncorrectPath(d, "Short"))
   }
@@ -108,8 +113,11 @@ object Decode extends DecodeDerivation {
   implicit val decodeLong: Decode[Long] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
-        case x: Long => Right(x)
-        case _       => Left(UnexpectedEncodeValue(d, "Long"))
+        case x: Long   => Right(x)
+        case x: Int    => Right(x.toLong)
+        case x: Short  => Right(x.toLong)
+        case x: String => Try(x.toLong).toEither.left.map(_ => UnexpectedEncodeValue(d, "Long"))
+        case _         => Left(UnexpectedEncodeValue(d, "Long"))
       }
     case d => Left(IncorrectPath(d, "Long"))
   }
@@ -117,8 +125,12 @@ object Decode extends DecodeDerivation {
   implicit val decodeFloat: Decode[Float] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
-        case x: Float => Right(x)
-        case _        => Left(UnexpectedEncodeValue(d, "Float"))
+        case x: Float  => Right(x)
+        case x: Int    => Right(x.toFloat)
+        case x: Short  => Right(x.toFloat)
+        case x: Long   => Right(x.toFloat)
+        case x: String => Try(x.toFloat).toEither.left.map(_ => UnexpectedEncodeValue(d, "Float"))
+        case _         => Left(UnexpectedEncodeValue(d, "Float"))
       }
     case d => Left(IncorrectPath(d, "Float"))
   }
@@ -136,6 +148,7 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Boolean => Right(x)
+        case x: String  => Try(x.toBoolean).toEither.left.map(_ => UnexpectedEncodeValue(d, "Boolean"))
         case _          => Left(UnexpectedEncodeValue(d, "Boolean"))
       }
     case d => Left(IncorrectPath(d, "Boolean"))
@@ -145,6 +158,11 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Double => Right(x)
+        case x: Int    => Right(x.toDouble)
+        case x: Short  => Right(x.toDouble)
+        case x: Long   => Right(x.toDouble)
+        case x: Float  => Right(x.toDouble)
+        case x: String => Try(x.toDouble).toEither.left.map(_ => UnexpectedEncodeValue(d, "Double"))
         case _         => Left(UnexpectedEncodeValue(d, "Double"))
       }
     case d => Left(IncorrectPath(d, "Double"))
@@ -167,6 +185,10 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: BigInt => Right(x)
+        case x: Int    => Right(BigInt(x))
+        case x: Short  => Right(BigInt(x))
+        case x: Long   => Right(BigInt(x))
+        case x: String => Try(BigInt(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "BigInt"))
         case _         => Left(UnexpectedEncodeValue(d, "BigInt"))
       }
     case d => Left(IncorrectPath(d, "BigInt"))
@@ -176,6 +198,13 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: BigDecimal => Right(x)
+        case x: Int        => Right(BigDecimal(x))
+        case x: Short      => Right(BigDecimal(x))
+        case x: Long       => Right(BigDecimal(x))
+        case x: Float      => Right(BigDecimal(x))
+        case x: Double     => Right(BigDecimal(x))
+        case x: BigInt     => Right(BigDecimal(x))
+        case x: String     => Try(BigDecimal(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "BigDecimal"))
         case _             => Left(UnexpectedEncodeValue(d, "BigDecimal"))
       }
     case d => Left(IncorrectPath(d, "BigDecimal"))
@@ -185,7 +214,11 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: String => Right(x)
-        case _         => Left(UnexpectedEncodeValue(d, "String"))
+        case _: Int | _: Short | _: Long | _: Float | _: Double | _: Char | _: Boolean | _: BigInt | _: BigDecimal =>
+          Right(a.toString)
+        case _: URI | _: URL | _: LocalDate | _: LocalTime | _: LocalDate | _: Instant | _: Duration | _: UUID | _: File =>
+          Right(a.toString)
+        case _ => Left(UnexpectedEncodeValue(d, "String"))
       }
     case d => Left(IncorrectPath(d, "String"))
   }
@@ -214,7 +247,7 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Duration => Right(x)
-        case x: String   => Right(Duration(x))
+        case x: String   => Try(Duration(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "Duration"))
         case _           => Left(UnexpectedEncodeValue(d, "Duration"))
       }
     case d => Left(IncorrectPath(d, "Duration"))
@@ -224,7 +257,7 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: UUID   => Right(x)
-        case x: String => Right(UUID.fromString(x))
+        case x: String => Try(UUID.fromString(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "UUID"))
         case _         => Left(UnexpectedEncodeValue(d, "UUID"))
       }
     case d => Left(IncorrectPath(d, "UUID"))
@@ -234,7 +267,7 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Instant => Right(x)
-        case x: String  => Right(Instant.parse(x))
+        case x: String  => Try(Instant.parse(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "Instant"))
         case _          => Left(UnexpectedEncodeValue(d, "Instant"))
       }
     case d => Left(IncorrectPath(d, "Instant"))
@@ -244,7 +277,7 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: LocalDate => Right(x)
-        case x: String    => Right(LocalDate.parse(x))
+        case x: String    => Try(LocalDate.parse(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "LocalDate"))
         case _            => Left(UnexpectedEncodeValue(d, "LocalDate"))
       }
     case d => Left(IncorrectPath(d, "LocalDate"))
@@ -254,7 +287,7 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: LocalDateTime => Right(x)
-        case x: String        => Right(LocalDateTime.parse(x))
+        case x: String        => Try(LocalDateTime.parse(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "LocalDateTime"))
         case _                => Left(UnexpectedEncodeValue(d, "LocalDateTime"))
       }
     case d => Left(IncorrectPath(d, "LocalDateTime"))
@@ -264,18 +297,38 @@ object Decode extends DecodeDerivation {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: LocalTime => Right(x)
-        case x: String    => Right(LocalTime.parse(x))
+        case x: String    => Try(LocalTime.parse(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "LocalTime"))
         case _            => Left(UnexpectedEncodeValue(d, "LocalTime"))
       }
     case d => Left(IncorrectPath(d, "LocalTime"))
   }
 
+  implicit val decodeOffsetDateTime: Decode[OffsetDateTime] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: OffsetDateTime => Right(x)
+        case x: String         => Try(OffsetDateTime.parse(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "OffsetDateTime"))
+        case _                 => Left(UnexpectedEncodeValue(d, "OffsetDateTime"))
+      }
+    case d => Left(IncorrectPath(d, "OffsetDateTime"))
+  }
+
+  implicit val decodeOffsetTime: Decode[OffsetTime] = {
+    case d @ ValueDynamicRepr(a) =>
+      a match {
+        case x: OffsetTime => Right(x)
+        case x: String     => Try(OffsetTime.parse(x)).toEither.left.map(_ => UnexpectedEncodeValue(d, "OffsetTime"))
+        case _             => Left(UnexpectedEncodeValue(d, "OffsetTime"))
+      }
+    case d => Left(IncorrectPath(d, "OffsetTime"))
+  }
+
   implicit val decodeFile: Decode[File] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
-        case x: File   => Right(x)
-        case x: String => Right(new File(x))
-        case _         => Left(UnexpectedEncodeValue(d, "File"))
+        case x: File                => Right(x)
+        case x: String if x != null => Right(new File(x))
+        case _                      => Left(UnexpectedEncodeValue(d, "File"))
       }
     case d => Left(IncorrectPath(d, "File"))
   }

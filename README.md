@@ -6,7 +6,7 @@
 
 Bastion is a library to convert types, using when needed custom defined smart constructors. This library should be well suited for Domain Driven Designed applications.
 
-Based on [Magnolia](https://github.com/propensive/magnolia) for typeclass derivation.
+Based on [Magnolia](https://github.com/propensive/magnolia) for typeclass derivation, and [uJson](https://www.lihaoyi.com/post/uJsonfastflexibleandintuitiveJSONforScala.html) for JSON deserialization.
 
 ## Disclaimer
 
@@ -17,14 +17,16 @@ This project is a way for me to learn typeclass derivation using Magnolia. It's 
 
   * [Concepts](#concepts)
   * [Installation](#installation)
+    + [Sbt](#sbt)
   * [Usages](#usages)
     + [Simple mapping](#simple-mapping)
     + [Convert to an ADT](#convert-to-an-adt)
     + [Use your smart constructors](#use-your-smart-constructors)
     + [Lenient case](#lenient-case)
     + [Or combinator on DynamicRepr](#or-combinator-on-dynamicrepr)
-    + [JSON deserialization](#json-deserialization)
+    + [Json deserialization](#json-deserialization)
   * [Things to do, and perspectives](#things-to-do--and-perspectives)
+  * [Markdown tools](#markdown-tools)
   * [License](#license)
 
 ## Concepts
@@ -55,9 +57,12 @@ val instanceOfTypeB:TypeB = instanceOfTypeA.convert[TypeB]
 For more advanced usage, please see below, and the examples [here](https://github.com/scarisey/bastion/tree/master/examples/src/test/scala/dev/scarisey/bastionexamples).
 
 ## Installation
+|                                                                              Releases                                                                             |                                                                         Snapshots                                                                        |
+|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| ![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/dev.scarisey/bastion-core_2.12?color=green&label=2.12&server=https%3A%2F%2Foss.sonatype.org) | ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/dev.scarisey/bastion-core_2.12?label=2.12&server=https%3A%2F%2Foss.sonatype.org) |
+| ![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/dev.scarisey/bastion-core_2.13?color=green&label=2.13&server=https%3A%2F%2Foss.sonatype.org) | ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/dev.scarisey/bastion-core_2.13?label=2.13&server=https%3A%2F%2Foss.sonatype.org) |
 
-![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/dev.scarisey/bastion-core_2.12?color=green&label=latest%202.12&server=https%3A%2F%2Foss.sonatype.org)
-![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/dev.scarisey/bastion-core_2.13?color=green&label=latest%202.13&server=https%3A%2F%2Foss.sonatype.org)
+
 ### Sbt
 ```sbt
 libraryDependencies += "dev.scarisey" %% "bastion-core" % "X.Y.Z"
@@ -170,6 +175,13 @@ decode[Foo](aJson) //Right(Foo(foo,33.0))
 
   * Some benchmarks need to be done.
   * There are still too much imports to do before being able to convert types.
+  * I would love to verify at compile time the shape of a DynamicRepr, but I still don't know how to do unless using Shapeless (and replace DynmicRepr by HList). I also guess the [issue](https://github.com/propensive/magnolia/issues/238) about inlining combine and dispatch could adress this problem.
+
+## Markdown tools
+
+  * [![Shields.io](https://img.shields.io/badge/badges-shields.io-blue)](https://shields.io/)
+  * <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+  * https://www.tablesgenerator.com/
 
 ## License
 bastion is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0) (the "License"); you may not use this software except in compliance with the License.
