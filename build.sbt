@@ -97,6 +97,14 @@ lazy val examples = (project in file("examples"))
   .settings(publish / skip := true)
   .dependsOn(core, ujsonModule)
 
+lazy val benchmark = (project in file("benchmark"))
+  .settings(moduleName := "bastion-benchmark")
+  .settings(buildSettings)
+  .settings(libraryDependencies ++= circe :+ circeMagnolia)
+  .settings(publish / skip := true)
+  .dependsOn(core, ujsonModule)
+  .enablePlugins(JmhPlugin)
+
 lazy val buildSettings = Seq(
   scalacOptions := Seq(
     "-feature",

@@ -28,9 +28,11 @@ trait EncodeDerivation {
 
   def combine[T](ctx: ReadOnlyCaseClass[Encode, T])(implicit configuration: Configuration): Encode[T] = new Encode[T] {
     Logger.debug(s"combine to ${ctx.typeName.full}")
-    val fieldsKeyRepr: Map[FieldKeyRepr, ReadOnlyParam[Encode, T]] = {
+    val fieldsKeyRepr: Map[FieldKeyRepr, ReadOnlyParam[Encode, T]] = if (configuration.lenientCase) {
       Logger.debug(s"Computing fieldsRepr for ${ctx.typeName.full}")
       ctx.parameters.map(p => (FieldKeyRepr(p.label), p)).toMap
+    } else {
+      Map.empty
     }
     override def to(a: T): DynamicRepr = new ProductDynamicRepr[T](a) { self =>
       override def selectDynamic(field: String): DynamicRepr = {
