@@ -15,7 +15,7 @@
  */
 
 package bastion
-import bastion.derivation.encode.semiauto._
+import bastion.derivation.dynamicrepr.semiauto._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -26,10 +26,10 @@ class EncodeStrictTest extends AnyFlatSpec with Matchers {
     case class RecordA(sub_2: SubA2, string_description: String, sub_1: SubA1)
     case class RecordB(stringDescription: String, subA1: Option[SubA1], subA2s: List[SubA2], recA: Either[String, RecordA])
 
-    implicit val encodeSubA1: Encode[SubA1] = deriveEncode[SubA1]
-    implicit val encodeSubA2: Encode[SubA2] = deriveEncode[SubA2]
-    implicit val encodeA: Encode[RecordA]   = deriveEncode[RecordA]
-    implicit val encodeB: Encode[RecordB]   = deriveEncode[RecordB]
+    implicit val encodeSubA1: DynamicReprEncode[SubA1] = deriveEncode[SubA1]
+    implicit val encodeSubA2: DynamicReprEncode[SubA2] = deriveEncode[SubA2]
+    implicit val encodeA: DynamicReprEncode[RecordA]   = deriveEncode[RecordA]
+    implicit val encodeB: DynamicReprEncode[RecordB]   = deriveEncode[RecordB]
   }
 
   it should "be case sensitive" in new Fixture {

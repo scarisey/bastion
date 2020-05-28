@@ -18,8 +18,8 @@ package bastion
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import derivation.encode.Configuration.lenient
-import derivation.encode.configured.auto._
+import derivation.dynamicrepr.Configuration.lenient
+import derivation.dynamicrepr.configured.auto._
 
 class EncodeTest extends AnyFlatSpec with Matchers {
   trait Fixture {
@@ -33,8 +33,8 @@ class EncodeTest extends AnyFlatSpec with Matchers {
       recA: Either[String, RecordA]
     )
 
-    implicit val encodeA = implicitly[Encode[RecordA]] //FIXME implicitly will fail with type ascription, returning null
-    implicit val encodeB = implicitly[Encode[RecordB]]
+    implicit val encodeA = implicitly[DynamicReprEncode[RecordA]] //FIXME implicitly will fail with type ascription, returning null
+    implicit val encodeB = implicitly[DynamicReprEncode[RecordB]]
   }
 
   behavior of "Encode"
@@ -63,7 +63,7 @@ class EncodeTest extends AnyFlatSpec with Matchers {
       final case class RecC3(anInt: Int)      extends RecC
     }
 
-    val encode  = implicitly[Encode[RecC]]
+    val encode  = implicitly[DynamicReprEncode[RecC]]
     val recordC = RecC.RecC2("a string")
     val repr    = encode.to(recordC)
     repr match {
@@ -80,9 +80,9 @@ class EncodeTest extends AnyFlatSpec with Matchers {
     final case class RecM(text: String)  extends Rec
     final case class RecR(rs: List[Rec]) extends Rec
 
-    val encode: Encode[Rec] = implicitly[Encode[Rec]]
-    val record              = RecR(List(RecM("foo"), RecM("bar")))
-    val repr                = encode.to(record)
+    val encode: DynamicReprEncode[Rec] = implicitly[DynamicReprEncode[Rec]]
+    val record                         = RecR(List(RecM("foo"), RecM("bar")))
+    val repr                           = encode.to(record)
     repr match {
       case ProductDynamicRepr(a) => a shouldBe record
       case _                     => fail()

@@ -27,7 +27,7 @@ import java.time.OffsetTime
 import java.util.UUID
 
 import bastion.derivation.decode.auto._
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import scala.language.postfixOps

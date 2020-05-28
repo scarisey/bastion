@@ -42,13 +42,13 @@ So yes, this library will warn you of **mismatch on field names only at runtime*
 So there are three types that you will manipulate through this library : 
 
   * ***DynamicRepr***, which represents the encoding of the type you want to convert from
-  * ***Encode***, which is the contract for instances of encoders from a specific type to DynamicRepr 
+  * ***DynamicReprEncode***, which is the contract for instances of encoders from a specific type to DynamicRepr 
   * ***Decode***, which is the contract for instances of decoders from any DynamicRepr to a specific type
   
 It should be enough the majority of time to make the imports below and call the convert method that will use instance of Encode and Decode in the implicit scope : 
 ```scala
 import bastion._
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import bastion.derivation.decode.auto._
 //...
 val instanceOfTypeB:TypeB = instanceOfTypeA.convert[TypeB]
@@ -73,7 +73,7 @@ libraryDependencies += "dev.scarisey" %% "bastion-core" % "X.Y.Z"
 ### Simple mapping
 ```scala
 import bastion._
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import bastion.derivation.decode.auto._
 
 final case class PersonExternal(
@@ -92,7 +92,7 @@ val person:Person = PersonExternal("anId", "firstName", "lastName", LocalDate.pa
 ### Convert to an ADT
 ```scala
 import bastion._
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import bastion.derivation.decode.auto._
 
 case class A1(aField1: String)
@@ -112,7 +112,7 @@ A3(2.0).convert[RecB] //Left(IncorrectSubtype)
 ### Use your smart constructors
 ```scala
 import bastion._
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import bastion.derivation.decode.auto._
 
 case class A(aString:String,anInt:Int)
@@ -133,9 +133,9 @@ See this more complete example : [SmartConstructors](https://github.com/scarisey
 ### Lenient case
 ```scala
 import bastion._
-import bastion.derivation.encode.configured.auto._
+import bastion.derivation.dynamicrepr.configured.auto._
 import bastion.derivation.decode.auto._
-import bastion.derivation.encode.Configuration.lenient
+import bastion.derivation.dynamicrepr.Configuration.lenient
 
 case class Source(aString: String, anInt: Int, aBoolean: Boolean)
 case class Target(an_int: Int, A_String: String)
@@ -146,7 +146,7 @@ Source("foo", 42, true).convert[Target] //Target(42,foo)
 ### Or combinator on DynamicRepr
 ```scala
 import bastion._
-import derivation.encode.auto._
+import derivation.dynamicrepr.auto._
 
 case class Source1(aField1: Int)
 case class Source2(aField2: Int)

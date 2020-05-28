@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package bastion.derivation.encode
+package bastion.derivation.dynamicrepr.configured
 
-/**
- * Configure Encode derivation. When deriving an encoder for a type A, Configuration(lenientCase = true) will enable
- * lenient case resolution of DynamicRepr field.
- * @see [[DynamicRepr]], [[Encode]]
- */
-case class Configuration(lenientCase: Boolean)
-object Configuration {
-  implicit val default: Configuration = Configuration(false)
-  implicit val lenient: Configuration = Configuration(true)
+import bastion._
+import bastion.derivation.dynamicrepr.EncodeDerivation
+import magnolia._
+
+import scala.language.experimental.macros
+
+package object semiauto extends EncodeDerivation {
+  def deriveEncode[T]: DynamicReprEncode[T] = macro Magnolia.gen[T]
 }

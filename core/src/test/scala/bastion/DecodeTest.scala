@@ -31,7 +31,7 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import bastion.derivation.decode.auto._
 
 class DecodeTest extends AnyFlatSpec with Matchers {

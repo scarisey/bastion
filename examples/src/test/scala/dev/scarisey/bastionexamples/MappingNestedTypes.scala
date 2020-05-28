@@ -16,7 +16,7 @@
 
 package bastionexamples
 import bastion._
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import bastion.derivation.decode.auto._
 
 object MappingNestedTypes extends App {

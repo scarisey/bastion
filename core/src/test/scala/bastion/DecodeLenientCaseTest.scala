@@ -17,8 +17,8 @@
 package bastion
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import bastion.derivation.encode.Configuration.lenient
-import bastion.derivation.encode.configured.auto._
+import bastion.derivation.dynamicrepr.Configuration.lenient
+import bastion.derivation.dynamicrepr.configured.auto._
 import bastion.derivation.decode.auto._
 
 class DecodeLenientCaseTest extends AnyFlatSpec with Matchers {

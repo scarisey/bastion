@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package bastion.derivation.encode.configured
-import bastion.derivation.encode.AutoUnlock
+package bastion.derivation.dynamicrepr
 
 package object auto {
-  implicit val autoUnlock: AutoUnlock = new AutoUnlock {}
+  implicit val autoUnlock: AutoUnlock       = new AutoUnlock {}
+  implicit val configuration: Configuration = Configuration.default
 }
+
+trait AutoUnlock

@@ -18,7 +18,7 @@ package bastionexamples
 import java.time.LocalDate
 import java.util.UUID
 import bastion._
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import bastionexamples.SmartConstructors.Domain.DomainError.BlankCity
 import bastionexamples.SmartConstructors.Domain.DomainError.BlankName
 import bastionexamples.SmartConstructors.Domain.DomainError.BlankStreetName

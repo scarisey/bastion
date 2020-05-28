@@ -1,7 +1,7 @@
 package dev.scarisey.bastionbenchmark
 import java.util.concurrent.TimeUnit
 
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
 import dev.scarisey.bastionbenchmark.fixture.{BastionConversion, ManualConversion}
 import org.openjdk.jmh.annotations._

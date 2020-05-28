@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package bastion.derivation.encode
+package bastion.derivation.dynamicrepr
 
 import bastion._
 import magnolia._
@@ -23,5 +23,5 @@ import scala.language.experimental.macros
 
 package object semiauto extends EncodeDerivation {
   implicit val configuration: Configuration = Configuration.default
-  def deriveEncode[T]: Encode[T] = macro Magnolia.gen[T]
+  def deriveEncode[T]: DynamicReprEncode[T] = macro Magnolia.gen[T]
 }

@@ -16,9 +16,9 @@
 
 package bastionexamples
 import bastion._
-import bastion.derivation.encode.configured.auto._
+import bastion.derivation.dynamicrepr.configured.auto._
 import bastion.derivation.decode.auto._
-import bastion.derivation.encode.Configuration.lenient
+import bastion.derivation.dynamicrepr.Configuration.lenient
 
 object LenientCase extends App {
   case class Source(aString: String, anInt: Int, aBoolean: Boolean)

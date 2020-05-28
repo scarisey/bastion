@@ -16,7 +16,7 @@
 
 package bastionexamples
 import bastion._
-import derivation.encode.auto._
+import derivation.dynamicrepr.auto._
 
 object ChoosingFieldToMap extends App {
   case class Source1(aField1: Int)

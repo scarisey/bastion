@@ -17,7 +17,7 @@
 package bastionexamples
 import java.time.LocalDate
 import bastion._
-import bastion.derivation.encode.auto._
+import bastion.derivation.dynamicrepr.auto._
 import bastion.derivation.decode.auto._
 
 object SimpleMapping extends App {
