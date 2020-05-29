@@ -75,4 +75,5 @@ object uJsonDynamicRepr {
   }
 
   def parse(t: Readable): DynamicRepr = ujson.transform(t, JsonVisitor)
+
 }

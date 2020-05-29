@@ -6,7 +6,7 @@
 
 Bastion is a library to convert types, using when needed custom defined smart constructors. This library should be well suited for Domain Driven Designed applications.
 
-Based on [Magnolia](https://github.com/propensive/magnolia) for typeclass derivation, and [uJson](https://www.lihaoyi.com/post/uJsonfastflexibleandintuitiveJSONforScala.html) for JSON deserialization.
+Based on [Magnolia](https://github.com/propensive/magnolia) for typeclass derivation, and [uJson](https://www.lihaoyi.com/post/uJsonfastflexibleandintuitiveJSONforScala.html) for JSON serialization/deserialization.
 
 ## Disclaimer
 
@@ -24,6 +24,7 @@ This project is a way for me to learn typeclass derivation using Magnolia. It's 
     + [Use your smart constructors](#use-your-smart-constructors)
     + [Lenient case](#lenient-case)
     + [Or combinator on DynamicRepr](#or-combinator-on-dynamicrepr)
+    + [Json serialization](#json-serialization)
     + [Json deserialization](#json-deserialization)
   * [Things to do, and perspectives](#things-to-do--and-perspectives)
   * [Markdown tools](#markdown-tools)
@@ -157,6 +158,18 @@ implicit val decoder: Decode[Target] = Decode.instance(g => (g.aField1 ||| g.aFi
 
 Source1(42).convert[Target] //Target(42)
 Source2(33).convert[Target] //Target(33)
+```
+
+### Json serialization
+```scala
+import bastion._,json._,derivation.json._
+
+case class FooString(foo: String)
+case class Foo(bar: Double, baz: FooString, items: List[String])
+
+val foo = Foo(42.0, FooString("aFoo"), List("baz", "bar"))
+encodeString[Foo](foo)// {"bar":42,"baz":{"foo":"aFoo"},"items":["baz","bar"]}
+encodeAST[Foo](foo) //the uJson Value tree
 ```
 
 ### Json deserialization

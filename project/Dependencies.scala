@@ -9,7 +9,7 @@ object Dependencies {
   lazy val mercator = "com.propensive" %% "mercator" % "0.2.1"
 
   /* ujson */
-  lazy val ujson = "com.lihaoyi" %% "ujson" % "1.1.0"
+  lazy val ujson = "com.lihaoyi" %% "upickle" % "1.1.0"
 
   /* circe, for benchmarks */
   lazy val circe = Seq(

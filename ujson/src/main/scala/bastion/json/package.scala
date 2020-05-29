@@ -18,7 +18,11 @@ package bastion
 
 import bastion.uJsonDynamicRepr.parse
 import ujson.Readable
+import ujson.Value
+import upickle.default._
 
 package object json {
   def decode[T: Decode](t: Readable): Result[T] = parse(t).convert[T]
+  def encodeAST[T: Writer](t: T): Value         = upickle.default.writeJs(t)
+  def encodeString[T: Writer](t: T): String     = upickle.default.write(t)
 }

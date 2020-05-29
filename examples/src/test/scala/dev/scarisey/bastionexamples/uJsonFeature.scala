@@ -16,7 +16,8 @@
 
 package dev.scarisey.bastionexamples
 import bastion._
-import json.decode
+import json._
+import derivation.json._
 import derivation.decode.auto._
 
 object uJsonFeature extends App {
@@ -36,4 +37,9 @@ object uJsonFeature extends App {
 
   val foo = decode[RootFoo](aJson)
   println(foo) //Right(RootFoo(NestedFoo(806.0,FooString(foo again, but not the same),List(first, second, third))))
+
+  val serializedFoo = foo.map(encodeString[RootFoo](_))
+  println(
+    serializedFoo
+  ) //Right({"foo":{"bar":806,"baz":{"foo":"foo again, but not the same"},"items":["first","second","third"]}})
 }
