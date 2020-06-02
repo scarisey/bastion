@@ -17,6 +17,6 @@
 package bastion.derivation.decode
 
 package object auto {
-  implicit val autoUnlockD: AutoUnlockD = new AutoUnlockD {}
+  implicit val autoUnlockDecode: AutoUnlockDecode = new AutoUnlockDecode {}
 }
-sealed trait AutoUnlockD
+sealed trait AutoUnlockDecode

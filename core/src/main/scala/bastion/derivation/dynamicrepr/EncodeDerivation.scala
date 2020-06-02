@@ -18,7 +18,6 @@ package bastion.derivation.dynamicrepr
 import bastion.DynamicRepr
 import bastion.DynamicReprEncode
 import bastion.FieldKeyRepr
-import bastion.Logger
 import bastion.NilDynamicRepr
 import bastion.ProductDynamicRepr
 import magnolia._
@@ -28,9 +27,7 @@ trait EncodeDerivation {
 
   def combine[T](ctx: ReadOnlyCaseClass[DynamicReprEncode, T])(implicit configuration: Configuration): DynamicReprEncode[T] =
     new DynamicReprEncode[T] {
-      Logger.debug(s"combine to ${ctx.typeName.full}")
       val fieldsKeyRepr: Map[FieldKeyRepr, ReadOnlyParam[DynamicReprEncode, T]] = if (configuration.lenientCase) {
-        Logger.debug(s"Computing fieldsRepr for ${ctx.typeName.full}")
         ctx.parameters.map(p => (FieldKeyRepr(p.label), p)).toMap
       } else {
         Map.empty
@@ -51,7 +48,6 @@ trait EncodeDerivation {
 
   def dispatch[T](ctx: SealedTrait[DynamicReprEncode, T]): DynamicReprEncode[T] =
     new DynamicReprEncode[T] {
-      Logger.debug(s"dispatch to ${ctx.typeName.full}")
       override def to(a: T): DynamicRepr =
         ctx.dispatch(a)(sub => sub.typeclass.to(sub.cast(a)))
 

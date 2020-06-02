@@ -29,7 +29,7 @@ import java.util.UUID
 
 import scala.concurrent.duration.Duration
 import scala.util.Try
-import bastion.derivation.decode.AutoUnlockD
+import bastion.derivation.decode.AutoUnlockDecode
 import bastion.derivation.decode.DecodeDerivation
 import magnolia._
 
@@ -40,47 +40,47 @@ import scala.reflect.macros.whitebox
  * Typeclass representing a decoder from a DynamicRepr to a type T.
  * Attempting to decode may fail, resulting in [[DecodeError]].
  */
-trait Decode[T] {
+trait Decoder[T] {
   def from(g: DynamicRepr): Result[T]
 }
-object Decode extends DecodeDerivation {
+object Decoder extends DecodeDerivation {
 
   /**
    * Create your own typeclass instance with this method.
    */
-  def instance[A](f: DynamicRepr => Result[A]): Decode[A] = (g: DynamicRepr) => f(g)
+  def instance[A](f: DynamicRepr => Result[A]): Decoder[A] = (g: DynamicRepr) => f(g)
 
   /**
    * For a function f, mapping a type A to R, create an instance of Decode that will map a [[DynamicRepr]] to R.
    * This method can use your own instance of Decode for type A, enabling decoding of complex types.
    */
-  def wrap[A: Decode, R](f: A => R): Decode[R] = (g: DynamicRepr) => g.apply(f)
+  def wrap[A: Decoder, R](f: A => R): Decoder[R] = (g: DynamicRepr) => g.apply(f)
 
   /**
    * For a function f, mapping a type A to R, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to R.
    * This method can use your own instance of Decode for type A, enabling decoding of complex types.
    * The eventual error L will be wrapped in a [[WrappedError]].
    */
-  def wrapE[A: Decode, L, R](f: A => Either[L, R]): Decode[R] = (g: DynamicRepr) => g.applyE(f)
+  def wrapE[A: Decoder, L, R](f: A => Either[L, R]): Decoder[R] = (g: DynamicRepr) => g.applyE(f)
 
   /**
    * For a function f, mapping a type A to maybe R, create an instance of Decode that will map a [[DynamicRepr]] to R.
    * This method can use your own instance of Decode for type A, enabling decoding of complex types.
    * The absence of value R will be represented by a [[NilSmartConstructorError]].
    */
-  def wrapO[A: Decode, R](f: A => Option[R]): Decode[R] = (g: DynamicRepr) => g.applyO(f)
+  def wrapO[A: Decoder, R](f: A => Option[R]): Decoder[R] = (g: DynamicRepr) => g.applyO(f)
 
   /**
    * For a function f, mapping a type A to R, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to R.
    * This method can use your own instance of Decode for type A, enabling decoding of complex types.
    * The eventual throwable error will be wrapped in a [[WrappedError]].
    */
-  def wrapT[A: Decode, R](f: A => Try[R]): Decode[R] = (g: DynamicRepr) => g.applyT(f)
+  def wrapT[A: Decoder, R](f: A => Try[R]): Decoder[R] = (g: DynamicRepr) => g.applyT(f)
 
   /*
    * AnyVal specific instances
    */
-  implicit val decodeByte: Decode[Byte] = {
+  implicit val decodeByte: Decoder[Byte] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Byte => Right(x)
@@ -89,7 +89,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Byte"))
   }
 
-  implicit val decodeInt: Decode[Int] = {
+  implicit val decodeInt: Decoder[Int] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Int    => Right(x)
@@ -100,7 +100,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Int"))
   }
 
-  implicit val decodeShort: Decode[Short] = {
+  implicit val decodeShort: Decoder[Short] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Short  => Right(x)
@@ -110,7 +110,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Short"))
   }
 
-  implicit val decodeLong: Decode[Long] = {
+  implicit val decodeLong: Decoder[Long] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Long   => Right(x)
@@ -122,7 +122,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Long"))
   }
 
-  implicit val decodeFloat: Decode[Float] = {
+  implicit val decodeFloat: Decoder[Float] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Float  => Right(x)
@@ -135,7 +135,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Float"))
   }
 
-  implicit val decodeChar: Decode[Char] = {
+  implicit val decodeChar: Decoder[Char] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Char => Right(x)
@@ -144,7 +144,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Char"))
   }
 
-  implicit val decodeBoolean: Decode[Boolean] = {
+  implicit val decodeBoolean: Decoder[Boolean] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Boolean => Right(x)
@@ -154,7 +154,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Boolean"))
   }
 
-  implicit val decodeDouble: Decode[Double] = {
+  implicit val decodeDouble: Decoder[Double] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Double => Right(x)
@@ -168,7 +168,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Double"))
   }
 
-  implicit val decodeUnit: Decode[Unit] = {
+  implicit val decodeUnit: Decoder[Unit] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Unit => Right(x)
@@ -181,7 +181,7 @@ object Decode extends DecodeDerivation {
    * Other useful specific instances
    */
 
-  implicit val decodeBigInt: Decode[BigInt] = {
+  implicit val decodeBigInt: Decoder[BigInt] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: BigInt => Right(x)
@@ -194,7 +194,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "BigInt"))
   }
 
-  implicit val decodeBigDecimal: Decode[BigDecimal] = {
+  implicit val decodeBigDecimal: Decoder[BigDecimal] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: BigDecimal => Right(x)
@@ -210,7 +210,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "BigDecimal"))
   }
 
-  implicit val decodeString: Decode[String] = {
+  implicit val decodeString: Decoder[String] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: String => Right(x)
@@ -223,7 +223,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "String"))
   }
 
-  implicit val decodeUri: Decode[URI] = {
+  implicit val decodeUri: Decoder[URI] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: URI    => Right(x)
@@ -233,7 +233,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "URI"))
   }
 
-  implicit val decodeUrl: Decode[URL] = {
+  implicit val decodeUrl: Decoder[URL] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: URL    => Right(x)
@@ -243,7 +243,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "URL"))
   }
 
-  implicit val decodeDuration: Decode[Duration] = {
+  implicit val decodeDuration: Decoder[Duration] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Duration => Right(x)
@@ -253,7 +253,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Duration"))
   }
 
-  implicit val decodeUuid: Decode[UUID] = {
+  implicit val decodeUuid: Decoder[UUID] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: UUID   => Right(x)
@@ -263,7 +263,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "UUID"))
   }
 
-  implicit val decodeInstant: Decode[Instant] = {
+  implicit val decodeInstant: Decoder[Instant] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: Instant => Right(x)
@@ -273,7 +273,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "Instant"))
   }
 
-  implicit val decodeLocalDate: Decode[LocalDate] = {
+  implicit val decodeLocalDate: Decoder[LocalDate] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: LocalDate => Right(x)
@@ -283,7 +283,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "LocalDate"))
   }
 
-  implicit val decodeLocalDateTime: Decode[LocalDateTime] = {
+  implicit val decodeLocalDateTime: Decoder[LocalDateTime] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: LocalDateTime => Right(x)
@@ -293,7 +293,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "LocalDateTime"))
   }
 
-  implicit val decodeLocalTime: Decode[LocalTime] = {
+  implicit val decodeLocalTime: Decoder[LocalTime] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: LocalTime => Right(x)
@@ -303,7 +303,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "LocalTime"))
   }
 
-  implicit val decodeOffsetDateTime: Decode[OffsetDateTime] = {
+  implicit val decodeOffsetDateTime: Decoder[OffsetDateTime] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: OffsetDateTime => Right(x)
@@ -313,7 +313,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "OffsetDateTime"))
   }
 
-  implicit val decodeOffsetTime: Decode[OffsetTime] = {
+  implicit val decodeOffsetTime: Decoder[OffsetTime] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: OffsetTime => Right(x)
@@ -323,7 +323,7 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "OffsetTime"))
   }
 
-  implicit val decodeFile: Decode[File] = {
+  implicit val decodeFile: Decoder[File] = {
     case d @ ValueDynamicRepr(a) =>
       a match {
         case x: File                => Right(x)
@@ -333,36 +333,36 @@ object Decode extends DecodeDerivation {
     case d => Left(IncorrectPath(d, "File"))
   }
 
-  implicit def decodeOption[A: Decode]: Decode[Option[A]] = new Decode[Option[A]] {
+  implicit def decodeOption[A: Decoder]: Decoder[Option[A]] = new Decoder[Option[A]] {
     override def from(g: DynamicRepr): Result[Option[A]] = g match {
-      case ProductDynamicRepr(_)  => implicitly[Decode[A]].from(g).map(Some(_))
-      case IterableDynamicRepr(_) => implicitly[Decode[A]].from(g).map(Some(_))
-      case ValueDynamicRepr(_)    => implicitly[Decode[A]].from(g).map(Some(_))
+      case ProductDynamicRepr(_)  => implicitly[Decoder[A]].from(g).map(Some(_))
+      case IterableDynamicRepr(_) => implicitly[Decoder[A]].from(g).map(Some(_))
+      case ValueDynamicRepr(_)    => implicitly[Decoder[A]].from(g).map(Some(_))
       case NilDynamicRepr         => Right(None)
     }
   }
 
-  implicit def decodeEither[L: Decode, R: Decode]: Decode[Either[L, R]] = new Decode[Either[L, R]] {
+  implicit def decodeEither[L: Decoder, R: Decoder]: Decoder[Either[L, R]] = new Decoder[Either[L, R]] {
     override def from(g: DynamicRepr): Result[Either[L, R]] = g match {
       case ValueDynamicRepr(_) | ProductDynamicRepr(_) =>
-        implicitly[Decode[L]].from(g).map(Left(_)) match {
-          case Left(_)      => implicitly[Decode[R]].from(g).map(Right(_))
+        implicitly[Decoder[L]].from(g).map(Left(_)) match {
+          case Left(_)      => implicitly[Decoder[R]].from(g).map(Right(_))
           case r @ Right(_) => r
         }
       case d => Left(UnexpectedEncodeValue(d, "Either"))
     }
   }
 
-  implicit def decodeList[A: Decode]: Decode[List[A]] = new Decode[List[A]] {
+  implicit def decodeList[A: Decoder]: Decoder[List[A]] = new Decoder[List[A]] {
     override def from(g: DynamicRepr): Result[List[A]] = g match {
-      case ValueDynamicRepr(_) | ProductDynamicRepr(_) => implicitly[Decode[A]].from(g).map(List.apply(_))
+      case ValueDynamicRepr(_) | ProductDynamicRepr(_) => implicitly[Decoder[A]].from(g).map(List.apply(_))
       case IterableDynamicRepr(items) =>
-        items.traverse(implicitly[Decode[A]].from(_))
+        items.traverse(implicitly[Decoder[A]].from(_))
       case d => Left(UnexpectedEncodeValue(d, "List"))
     }
   }
 
-  implicit def deriveDecode[T](implicit u: AutoUnlockD): Decode[T] = macro macroDeriveDecode[T]
+  implicit def deriveDecode[T](implicit u: AutoUnlockDecode): Decoder[T] = macro macroDeriveDecode[T]
 
   def macroDeriveDecode[T: c.WeakTypeTag](c: whitebox.Context)(u: c.Tree): c.Tree = {
     val _ = u

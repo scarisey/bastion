@@ -15,25 +15,22 @@
  */
 
 package bastion.derivation.decode
-import bastion.Decode
+import bastion.Decoder
 import bastion.DynamicRepr
 import bastion.IncorrectSubtype
-import bastion.Logger
 import bastion.Result
 import magnolia.CaseClass
 import magnolia.SealedTrait
 
 trait DecodeDerivation {
-  type Typeclass[T] = Decode[T]
+  type Typeclass[T] = Decoder[T]
 
-  def combine[T](ctx: CaseClass[Decode, T]): Decode[T] = new Decode[T] {
-    Logger.debug(s"decode combine to ${ctx.typeName.full}")
+  def combine[T](ctx: CaseClass[Decoder, T]): Decoder[T] = new Decoder[T] {
     override def from(g: DynamicRepr): Result[T] =
       ctx.constructMonadic(param => param.typeclass.from(g.selectDynamic(param.label)))
   }
 
-  def dispatch[T](ctx: SealedTrait[Decode, T]): Decode[T] = new Decode[T] {
-    Logger.debug(s"decode dispatch to ${ctx.typeName.full}")
+  def dispatch[T](ctx: SealedTrait[Decoder, T]): Decoder[T] = new Decoder[T] {
     override def from(g: DynamicRepr): Result[T] =
       ctx.subtypes
         .foldLeft(Option.empty[Result[T]]) { (res, sub) =>

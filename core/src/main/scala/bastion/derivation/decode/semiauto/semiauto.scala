@@ -15,11 +15,11 @@
  */
 
 package bastion.derivation.decode
-import bastion.Decode
+import bastion.Decoder
 import magnolia.Magnolia
 
 import scala.language.experimental.macros
 
 package object semiauto extends DecodeDerivation {
-  def deriveDecode[T]: Decode[T] = macro Magnolia.gen[T]
+  def deriveDecode[T]: Decoder[T] = macro Magnolia.gen[T]
 }

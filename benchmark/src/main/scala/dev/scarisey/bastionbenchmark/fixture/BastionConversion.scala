@@ -9,8 +9,8 @@ object BastionConversion extends Conversion[DecodeError]{
   import derivation.decode.auto._
   import json._
 
-  implicit val decodeName: Decode[Name] = Decode.wrapE(Name.apply)
-  implicit val decodeBirthdate:Decode[Birthdate] = Decode.wrapE(Birthdate.apply)
+  implicit val decodeName: Decoder[Name] = Decoder.wrapE(Name.apply)
+  implicit val decodeBirthdate: Decoder[Birthdate] = Decoder.wrapE(Birthdate.apply)
 
   override def convert(source:ExternalPerson):Either[DecodeError,Person] = source.convert[Person]
 

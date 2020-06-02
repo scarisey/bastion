@@ -155,4 +155,27 @@ class EncodeTest extends AnyFlatSpec with Matchers {
     reprL.recA shouldBe ValueDynamicRepr("not a recA")
   }
 
+  it should "encode Map[K,V] to ProductDynamicRepr" in {
+    val subA1: Map[String, String]             = Map("subString1"  -> "foo", "subInt1"     -> "42")
+    val subA2: Map[String, String]             = Map("subBoolean2" -> "true", "subDouble2" -> "3.0")
+    val mapA: Map[String, Map[String, String]] = Map("sub2"        -> subA2, "sub1"        -> subA1)
+
+    implicit val encodeMap = implicitly[DynamicReprEncode[Map[String, Map[String, String]]]]
+
+    val repr = encodeMap.to(mapA)
+
+    repr match {
+      case ProductDynamicRepr(a) => a shouldBe mapA
+      case _                     => fail()
+    }
+    repr.sub1 match {
+      case ProductDynamicRepr(a) => a shouldBe subA1
+      case _                     => fail()
+    }
+    repr.sub1.subString1 match {
+      case ValueDynamicRepr(a) => a shouldBe "foo"
+      case _                   => fail()
+    }
+  }
+
 }

@@ -44,7 +44,7 @@ So there are three types that you will manipulate through this library :
 
   * ***DynamicRepr***, which represents the encoding of the type you want to convert from
   * ***DynamicReprEncode***, which is the contract for instances of encoders from a specific type to DynamicRepr 
-  * ***Decode***, which is the contract for instances of decoders from any DynamicRepr to a specific type
+  * ***Decoder***, which is the contract for instances of decoders from any DynamicRepr to a specific type
   
 It should be enough the majority of time to make the imports below and call the convert method that will use instance of Encode and Decode in the implicit scope : 
 ```scala
@@ -124,7 +124,7 @@ object Wrapped{
 }
 case class B(aString:Wrapped,anInt:Int)
 
-implicit val decodeWrapped:Decode[Wrapped] = Decode.wrapE(Wrapped.apply)
+implicit val decodeWrapped:Decoder[Wrapped] = Decoder.wrapE(Wrapped.apply)
 
 A("foo",42).convert[B] //Right(B(Wrapped("foo"),42))
 A("fo",42).convert[B] //Left(WrappedError("length > 2"))
@@ -154,7 +154,7 @@ case class Source2(aField2: Int)
 
 case class Target(finalValue: Int)
 
-implicit val decoder: Decode[Target] = Decode.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
+implicit val decoder: Decoder[Target] = Decoder.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
 
 Source1(42).convert[Target] //Target(42)
 Source2(33).convert[Target] //Target(33)

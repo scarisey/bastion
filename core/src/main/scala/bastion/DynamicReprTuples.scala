@@ -24,12 +24,12 @@ trait DynamicReprTuples {
   implicit class DynamicReprTuples1(t1: DynamicRepr) {
 
     /**
-     * For a function f, mapping a type A to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for type A, enabling decoding of complex types.
+     * For a function f, mapping a type A to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, RR](f: A => Try[RR])(
-      implicit decA: Decode[A]
+      implicit decA: Decoder[A]
     ): Result[RR] =
       for {
         tr1 <- t1.convert[A]
@@ -37,12 +37,12 @@ trait DynamicReprTuples {
       } yield r
 
     /**
-     * For a function f, mapping a type A to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for type A, enabling decoding of complex types.
+     * For a function f, mapping a type A to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, RR](f: A => Option[RR])(
-      implicit decA: Decode[A]
+      implicit decA: Decoder[A]
     ): Result[RR] =
       for {
         tr1 <- t1.convert[A]
@@ -50,12 +50,12 @@ trait DynamicReprTuples {
       } yield r
 
     /**
-     * For a function f, mapping a type A to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for type A, enabling decoding of complex types.
+     * For a function f, mapping a type A to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, RL, RR](f: A => Either[RL, RR])(
-      implicit decA: Decode[A]
+      implicit decA: Decoder[A]
     ): Result[RR] =
       (for {
         tr1 <- t1.convert[A]
@@ -63,11 +63,11 @@ trait DynamicReprTuples {
       } yield r).left.map(WrappedError(_))
 
     /**
-     * For a function f, mapping a type A to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for type A, enabling decoding of complex types.
+     * For a function f, mapping a type A to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
      */
     def apply[A, RR](f: A => RR)(
-      implicit decA: Decode[A]
+      implicit decA: Decoder[A]
     ): Result[RR] =
       for {
         tr1 <- t1.convert[A]
@@ -80,51 +80,51 @@ trait DynamicReprTuples {
   implicit class DynamicReprTuples2(tuple: Tuple2[DynamicRepr, DynamicRepr]) {
 
     /**
-     * For a function f, mapping the types A, B to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, enabling decoding of complex types.
+     * For a function f, mapping the types A, B to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, RR](f: (A, B) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B]
+      implicit decA: Decoder[A],
+      decB: Decoder[B]
     ): Result[RR] = {
       val (t1, t2) = tuple
       product2(t1.convert[A], t2.convert[B]).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
     /**
-     * For a function f, mapping the types A, B to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, enabling decoding of complex types.
+     * For a function f, mapping the types A, B to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, RR](f: (A, B) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B]
+      implicit decA: Decoder[A],
+      decB: Decoder[B]
     ): Result[RR] = {
       val (t1, t2) = tuple
       product2(t1.convert[A], t2.convert[B]).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     /**
-     * For a function f, mapping the types A, B to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, enabling decoding of complex types.
+     * For a function f, mapping the types A, B to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, RL, RR](f: (A, B) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B]
+      implicit decA: Decoder[A],
+      decB: Decoder[B]
     ): Result[RR] = {
       val (t1, t2) = tuple
       product2(t1.convert[A], t2.convert[B]).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
     /**
-     * For a function f, mapping types A, B to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, enabling decoding of complex types.
+     * For a function f, mapping types A, B to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, enabling decoding of complex types.
      */
     def apply[A, B, RR](f: (A, B) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B]
+      implicit decA: Decoder[A],
+      decB: Decoder[B]
     ): Result[RR] = {
       val (t1, t2) = tuple
       product2(t1.convert[A], t2.convert[B]).map(f.tupled)
@@ -134,55 +134,55 @@ trait DynamicReprTuples {
   implicit class DynamicReprTuples3(tuple: Tuple3[DynamicRepr, DynamicRepr, DynamicRepr]) {
 
     /**
-     * For a function f, mapping the types A, B, C to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, RR](f: (A, B, C) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C]
     ): Result[RR] = {
       val (t1, t2, t3) = tuple
       product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
     /**
-     * For a function f, mapping the types A, B, C to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, RR](f: (A, B, C) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C]
     ): Result[RR] = {
       val (t1, t2, t3) = tuple
       product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     /**
-     * For a function f, mapping the types A, B, C to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, RL, RR](f: (A, B, C) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C]
     ): Result[RR] = {
       val (t1, t2, t3) = tuple
       product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
     /**
-     * For a function f, mapping types A, B, C to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, enabling decoding of complex types.
      */
     def apply[A, B, C, RR](f: (A, B, C) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C]
     ): Result[RR] = {
       val (t1, t2, t3) = tuple
       product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled)
@@ -192,15 +192,15 @@ trait DynamicReprTuples {
   implicit class DynamicReprTuples4(tuple: Tuple4[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
 
     /**
-     * For a function f, mapping the types A, B, C, D to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, RR](f: (A, B, C, D) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D]
     ): Result[RR] = {
       val (t1, t2, t3, t4) = tuple
       product4(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D])
@@ -209,15 +209,15 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, RR](f: (A, B, C, D) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D]
     ): Result[RR] = {
       val (t1, t2, t3, t4) = tuple
       product4(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D])
@@ -226,29 +226,29 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, RL, RR](f: (A, B, C, D) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D]
     ): Result[RR] = {
       val (t1, t2, t3, t4) = tuple
       product4(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D]).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
     /**
-     * For a function f, mapping types A, B, C, D to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, enabling decoding of complex types.
      */
     def apply[A, B, C, D, RR](f: (A, B, C, D) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D]
     ): Result[RR] = {
       val (t1, t2, t3, t4) = tuple
       product4(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D]).map(f.tupled)
@@ -258,16 +258,16 @@ trait DynamicReprTuples {
   implicit class DynamicReprTuples5(tuple: Tuple5[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, RR](f: (A, B, C, D, E) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5) = tuple
       product5(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E])
@@ -276,16 +276,16 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, RR](f: (A, B, C, D, E) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5) = tuple
       product5(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E])
@@ -294,16 +294,16 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, RL, RR](f: (A, B, C, D, E) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5) = tuple
       product5(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E])
@@ -312,15 +312,15 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, RR](f: (A, B, C, D, E) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5) = tuple
       product5(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E]).map(f.tupled)
@@ -330,17 +330,17 @@ trait DynamicReprTuples {
   implicit class DynamicReprTuples6(tuple: Tuple6[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, RR](f: (A, B, C, D, E, F) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6) = tuple
       product6(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F])
@@ -349,17 +349,17 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, RR](f: (A, B, C, D, E, F) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6) = tuple
       product6(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F])
@@ -368,17 +368,17 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, RL, RR](f: (A, B, C, D, E, F) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6) = tuple
       product6(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F])
@@ -387,16 +387,16 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, RR](f: (A, B, C, D, E, F) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6) = tuple
       product6(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F]).map(f.tupled)
@@ -408,18 +408,18 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, RR](f: (A, B, C, D, E, F, G) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7) = tuple
       product7(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F], t7.convert[G])
@@ -428,18 +428,18 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, RR](f: (A, B, C, D, E, F, G) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7) = tuple
       product7(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F], t7.convert[G])
@@ -448,18 +448,18 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, RL, RR](f: (A, B, C, D, E, F, G) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7) = tuple
       product7(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F], t7.convert[G])
@@ -468,17 +468,17 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, RR](f: (A, B, C, D, E, F, G) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7) = tuple
       product7(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F], t7.convert[G])
@@ -491,19 +491,19 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, RR](f: (A, B, C, D, E, F, G, H) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8) = tuple
       product8(
@@ -519,19 +519,19 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, RR](f: (A, B, C, D, E, F, G, H) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8) = tuple
       product8(
@@ -547,19 +547,19 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, RL, RR](f: (A, B, C, D, E, F, G, H) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8) = tuple
       product8(
@@ -575,18 +575,18 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, RR](f: (A, B, C, D, E, F, G, H) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8) = tuple
       product8(
@@ -617,20 +617,20 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, RR](f: (A, B, C, D, E, F, G, H, I) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9) = tuple
       product9(
@@ -647,20 +647,20 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, RR](f: (A, B, C, D, E, F, G, H, I) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9) = tuple
       product9(
@@ -677,20 +677,20 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, RL, RR](f: (A, B, C, D, E, F, G, H, I) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9) = tuple
       product9(
@@ -707,19 +707,19 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, RR](f: (A, B, C, D, E, F, G, H, I) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9) = tuple
       product9(
@@ -752,21 +752,21 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, RR](f: (A, B, C, D, E, F, G, H, I, J) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) = tuple
       product10(
@@ -784,21 +784,21 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, RR](f: (A, B, C, D, E, F, G, H, I, J) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) = tuple
       product10(
@@ -816,21 +816,21 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, RL, RR](f: (A, B, C, D, E, F, G, H, I, J) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) = tuple
       product10(
@@ -848,20 +848,20 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, RR](f: (A, B, C, D, E, F, G, H, I, J) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) = tuple
       product10(
@@ -896,22 +896,22 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, RR](f: (A, B, C, D, E, F, G, H, I, J, K) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) = tuple
       product11(
@@ -930,22 +930,22 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, RR](f: (A, B, C, D, E, F, G, H, I, J, K) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) = tuple
       product11(
@@ -964,22 +964,22 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, RL, RR](f: (A, B, C, D, E, F, G, H, I, J, K) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) = tuple
       product11(
@@ -998,21 +998,21 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, RR](f: (A, B, C, D, E, F, G, H, I, J, K) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) = tuple
       product11(
@@ -1049,23 +1049,23 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) = tuple
       product12(
@@ -1085,23 +1085,23 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) = tuple
       product12(
@@ -1121,23 +1121,23 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, RL, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) = tuple
       product12(
@@ -1157,22 +1157,22 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) = tuple
       product12(
@@ -1211,24 +1211,24 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) = tuple
       product13(
@@ -1249,24 +1249,24 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) = tuple
       product13(
@@ -1287,24 +1287,24 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, RL, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) = tuple
       product13(
@@ -1325,23 +1325,23 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) = tuple
       product13(
@@ -1382,25 +1382,25 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, N, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) = tuple
       product14(
@@ -1422,25 +1422,25 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, N, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) = tuple
       product14(
@@ -1462,25 +1462,25 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, RL, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N) => Either[RL, RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) = tuple
       product14(
@@ -1502,24 +1502,24 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) = tuple
       product14(
@@ -1562,26 +1562,26 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => Try[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) = tuple
       product15(
@@ -1604,26 +1604,26 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => Option[RR])(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) = tuple
       product15(
@@ -1646,28 +1646,28 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, RL, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => Either[RL, RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) = tuple
       product15(
@@ -1690,25 +1690,25 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) = tuple
       product15(
@@ -1753,29 +1753,29 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Try[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) = tuple
       product16(
@@ -1799,29 +1799,29 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Option[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) = tuple
       product16(
@@ -1845,29 +1845,29 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, RL, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => Either[RL, RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) = tuple
       product16(
@@ -1891,26 +1891,26 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, RR](f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P) => RR)(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) = tuple
       product16(
@@ -1957,30 +1957,30 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => Try[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) = tuple
       product17(
@@ -2005,30 +2005,30 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => Option[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) = tuple
       product17(
@@ -2053,30 +2053,30 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, RL, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => Either[RL, RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) = tuple
       product17(
@@ -2101,29 +2101,29 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) => RR
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) = tuple
       product17(
@@ -2172,31 +2172,31 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => Try[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) = tuple
       product18(
@@ -2222,31 +2222,31 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => Option[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) = tuple
       product18(
@@ -2272,31 +2272,31 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, RL, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => Either[RL, RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) = tuple
       product18(
@@ -2322,30 +2322,30 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R) => RR
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) = tuple
       product18(
@@ -2396,32 +2396,32 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => Try[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) = tuple
       product19(
@@ -2448,32 +2448,32 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => Option[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) = tuple
       product19(
@@ -2500,32 +2500,32 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, RL, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => Either[RL, RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) = tuple
       product19(
@@ -2552,31 +2552,31 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S) => RR
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) = tuple
       product19(
@@ -2629,33 +2629,33 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => Try[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) = tuple
       product20(
@@ -2683,33 +2683,33 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => Option[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) = tuple
       product20(
@@ -2737,33 +2737,33 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, RL, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => Either[RL, RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) = tuple
       product20(
@@ -2791,32 +2791,32 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T) => RR
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) = tuple
       product20(
@@ -2871,34 +2871,34 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => Try[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T],
-      decU: Decode[U]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T],
+      decU: Decoder[U]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21) = tuple
       product21(
@@ -2927,34 +2927,34 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => Option[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T],
-      decU: Decode[U]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T],
+      decU: Decoder[U]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21) = tuple
       product21(
@@ -2983,34 +2983,34 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, RL, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => Either[RL, RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T],
-      decU: Decode[U]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T],
+      decU: Decoder[U]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21) = tuple
       product21(
@@ -3039,33 +3039,33 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U) => RR
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T],
-      decU: Decode[U]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T],
+      decU: Decoder[U]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21) = tuple
       product21(
@@ -3122,35 +3122,35 @@ trait DynamicReprTuples {
   ) {
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instances of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, enabling decoding of complex types.
      * The eventual throwable error will be wrapped in a [[WrappedError]].
      */
     def applyT[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => Try[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T],
-      decU: Decode[U],
-      decV: Decode[V]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T],
+      decU: Decoder[U],
+      decV: Decoder[V]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) = tuple
       product22(
@@ -3180,35 +3180,35 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, enabling decoding of complex types.
      * The absence of value RR will be represented by a [[NilSmartConstructorError]].
      */
     def applyO[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => Option[RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T],
-      decU: Decode[U],
-      decV: Decode[V]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T],
+      decU: Decoder[U],
+      decV: Decoder[V]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) = tuple
       product22(
@@ -3238,35 +3238,35 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, enabling decoding of complex types.
+     * For a function f, mapping the types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, enabling decoding of complex types.
      * The eventual error RL will be wrapped in a [[WrappedError]].
      */
     def applyE[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, RL, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => Either[RL, RR]
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T],
-      decU: Decode[U],
-      decV: Decode[V]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T],
+      decU: Decoder[U],
+      decV: Decoder[V]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) = tuple
       product22(
@@ -3296,34 +3296,34 @@ trait DynamicReprTuples {
     }
 
     /**
-     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decode for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, enabling decoding of complex types.
+     * For a function f, mapping types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for types A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, enabling decoding of complex types.
      */
     def apply[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, RR](
       f: (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V) => RR
     )(
-      implicit decA: Decode[A],
-      decB: Decode[B],
-      decC: Decode[C],
-      decD: Decode[D],
-      decE: Decode[E],
-      decF: Decode[F],
-      decG: Decode[G],
-      decH: Decode[H],
-      decI: Decode[I],
-      decJ: Decode[J],
-      decK: Decode[K],
-      decL: Decode[L],
-      decM: Decode[M],
-      decN: Decode[N],
-      decO: Decode[O],
-      decP: Decode[P],
-      decQ: Decode[Q],
-      decR: Decode[R],
-      decS: Decode[S],
-      decT: Decode[T],
-      decU: Decode[U],
-      decV: Decode[V]
+      implicit decA: Decoder[A],
+      decB: Decoder[B],
+      decC: Decoder[C],
+      decD: Decoder[D],
+      decE: Decoder[E],
+      decF: Decoder[F],
+      decG: Decoder[G],
+      decH: Decoder[H],
+      decI: Decoder[I],
+      decJ: Decoder[J],
+      decK: Decoder[K],
+      decL: Decoder[L],
+      decM: Decoder[M],
+      decN: Decoder[N],
+      decO: Decoder[O],
+      decP: Decoder[P],
+      decQ: Decoder[Q],
+      decR: Decoder[R],
+      decS: Decoder[S],
+      decT: Decoder[T],
+      decU: Decoder[U],
+      decV: Decoder[V]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) = tuple
       product22(

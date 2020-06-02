@@ -62,6 +62,6 @@ final case class WrappedError[T](t: T) extends DecodeError
 final case class CumulatedErrors(errors: List[DecodeError]) extends DecodeError
 
 /**
- * This error is used in [[DynamicReprTuples]] when encapsulating a smart constructor with 'applyO' into a [[Decode]].
+ * This error is used in [[DynamicReprTuples]] when encapsulating a smart constructor with 'applyO' into a [[Decoder]].
  */
-final case object NilSmartConstructorError extends DecodeError
+case object NilSmartConstructorError extends DecodeError

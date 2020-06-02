@@ -78,7 +78,6 @@ case object NilDynamicRepr extends DynamicRepr {
  */
 case class FieldKeyRepr(s: String) {
   val repr: List[String] = {
-    Logger.debug(s"FieldRepr for ${s}")
     val tokens = StringCases.tokenize(s)
     StringCases.transformations.map(f => f(tokens)) :+ s
   }

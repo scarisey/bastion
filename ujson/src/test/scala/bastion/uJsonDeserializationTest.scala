@@ -120,7 +120,7 @@ class uJsonDeserializationTest extends AnyFlatSpec with Matchers {
   it should "decode to a case class" in new MixedJsonFixture {
     import derivation.decode.auto._
 
-    implicit val d: Decode[List[Foo]] = Decode.instance {
+    implicit val d: Decoder[List[Foo]] = Decoder.instance {
       case IterableDynamicRepr(items) => items.zipWithIndex.traverse { case (d, i) => d.selectDynamic(s"foo$i").convert[Foo] }
     }
 

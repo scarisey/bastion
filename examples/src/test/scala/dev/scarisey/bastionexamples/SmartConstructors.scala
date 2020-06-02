@@ -80,15 +80,15 @@ object SmartConstructors extends App {
     final case class Person(identity: Identity, address: Address)
   }
 
-  implicit val decodePersonId: Decode[Domain.PersonId]         = Decode.wrap(Domain.PersonId.from)
-  implicit val decodeName: Decode[Domain.Name]                 = Decode.wrapE(Domain.Name.apply)
-  implicit val decodeStreetNumber: Decode[Domain.StreetNumber] = Decode.wrapE(Domain.StreetNumber.apply)
-  implicit val decodeStreetName: Decode[Domain.StreetName]     = Decode.wrapE(Domain.StreetName.apply)
-  implicit val decodeZipCode: Decode[Domain.ZipCode]           = Decode.wrapE(Domain.ZipCode.apply)
-  implicit val decodeCity: Decode[Domain.City]                 = Decode.wrapE(Domain.City.apply)
-  implicit val decodeAddress: Decode[Domain.Address] =
-    Decode.instance(g => (g.streetNumber, g.streetName, g.city, g.zipCode).apply(Domain.Address.apply))
-  implicit val decodePerson: Decode[Domain.Person] = Decode.instance(g =>
+  implicit val decodePersonId: Decoder[Domain.PersonId]         = Decoder.wrap(Domain.PersonId.from)
+  implicit val decodeName: Decoder[Domain.Name]                 = Decoder.wrapE(Domain.Name.apply)
+  implicit val decodeStreetNumber: Decoder[Domain.StreetNumber] = Decoder.wrapE(Domain.StreetNumber.apply)
+  implicit val decodeStreetName: Decoder[Domain.StreetName]     = Decoder.wrapE(Domain.StreetName.apply)
+  implicit val decodeZipCode: Decoder[Domain.ZipCode]           = Decoder.wrapE(Domain.ZipCode.apply)
+  implicit val decodeCity: Decoder[Domain.City]                 = Decoder.wrapE(Domain.City.apply)
+  implicit val decodeAddress: Decoder[Domain.Address] =
+    Decoder.instance(g => (g.streetNumber, g.streetName, g.city, g.zipCode).apply(Domain.Address.apply))
+  implicit val decodePerson: Decoder[Domain.Person] = Decoder.instance(g =>
     (g.identity.personId, g.identity.firstName, g.identity.lastName, g.identity.birthdate, g.address).apply(Domain.Person.apply)
   )
 

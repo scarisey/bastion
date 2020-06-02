@@ -2,7 +2,7 @@ object DynamicReprTuplesCodeGen {
 
   def generate: List[String] = {
     val capitals                = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    def decN(gen: Char): String = s"dec$gen: Decode[$gen]"
+    def decN(gen: Char): String = s"dec$gen: Decoder[$gen]"
 
     val header = """// $COVERAGE-OFF$should find a way to test all of them ..."""
     val footer = """// $COVERAGE-ON$"""
@@ -16,8 +16,8 @@ object DynamicReprTuplesCodeGen {
       s"""
          |implicit class DynamicReprTuples$n(tuple: Tuple$n[$tupleTypeArgs]) {
          |    /**
-         |     * For a function f, mapping the types $genericArgs to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-         |     * This method can use your own instances of Decode for types $genericArgs, enabling decoding of complex types.
+         |     * For a function f, mapping the types $genericArgs to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+         |     * This method can use your own instances of Decoder for types $genericArgs, enabling decoding of complex types.
          |     * The eventual throwable error will be wrapped in a [[WrappedError]].
          |     */
          |    def applyT[$genericArgs, RR](f: ($genericArgs) => Try[RR])(
@@ -28,8 +28,8 @@ object DynamicReprTuplesCodeGen {
          |    }
          |
          |    /**
-         |     * For a function f, mapping the types $genericArgs to maybe RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-         |     * This method can use your own instance of Decode for types $genericArgs, enabling decoding of complex types.
+         |     * For a function f, mapping the types $genericArgs to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+         |     * This method can use your own instance of Decoder for types $genericArgs, enabling decoding of complex types.
          |     * The absence of value RR will be represented by a [[NilSmartConstructorError]].
          |     */
          |    def applyO[$genericArgs, RR](f: ($genericArgs) => Option[RR])(
@@ -40,8 +40,8 @@ object DynamicReprTuplesCodeGen {
          |    }
          |
          |    /**
-         |     * For a function f, mapping the types $genericArgs to RR, and that can fail, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-         |     * This method can use your own instance of Decode for types $genericArgs, enabling decoding of complex types.
+         |     * For a function f, mapping the types $genericArgs to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+         |     * This method can use your own instance of Decoder for types $genericArgs, enabling decoding of complex types.
          |     * The eventual error RL will be wrapped in a [[WrappedError]].
          |     */
          |    def applyE[$genericArgs, RL, RR](f: ($genericArgs) => Either[RL, RR])(
@@ -52,8 +52,8 @@ object DynamicReprTuplesCodeGen {
          |    }
          |
          |    /**
-         |     * For a function f, mapping types $genericArgs to RR, create an instance of Decode that will map a [[DynamicRepr]] to RR.
-         |     * This method can use your own instance of Decode for types $genericArgs, enabling decoding of complex types.
+         |     * For a function f, mapping types $genericArgs to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+         |     * This method can use your own instance of Decoder for types $genericArgs, enabling decoding of complex types.
          |     */
          |    def apply[$genericArgs, RR](f: ($genericArgs) => RR)(
          |      implicit $decoders

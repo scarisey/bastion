@@ -25,13 +25,14 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 
+import bastion.DynamicReprEncode.macroDeriveEncode
 import bastion.derivation.dynamicrepr.AutoUnlock
 import bastion.derivation.dynamicrepr.Configuration
 import bastion.derivation.dynamicrepr.EncodeDerivation
 import magnolia._
 
-import language.experimental.macros
 import scala.concurrent.duration.Duration
+import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
 /**
@@ -40,7 +41,7 @@ import scala.reflect.macros.whitebox
 trait DynamicReprEncode[-A] {
   def to(a: A): DynamicRepr
 }
-object DynamicReprEncode extends EncodeDerivation {
+object DynamicReprEncode extends EncodeDerivation with LowPriorityImplicits {
   /*
   Any val implicits
    */
@@ -80,15 +81,26 @@ object DynamicReprEncode extends EncodeDerivation {
     case Right(value) => implicitly[DynamicReprEncode[R]].to(value)
   }
 
-  implicit def encodeIterable[A: DynamicReprEncode]: DynamicReprEncode[Iterable[A]] =
-    (a: Iterable[A]) => IterableDynamicRepr(a.map(implicitly[DynamicReprEncode[A]].to(_)))
-
-  implicit def deriveEncode[T](implicit u: AutoUnlock, configuration: Configuration): DynamicReprEncode[T] =
-    macro macroDeriveEncode[T]
+  implicit def encodeMap[V: DynamicReprEncode]: DynamicReprEncode[Map[String, V]] =
+    (a: Map[String, V]) =>
+      new ProductDynamicRepr[Map[String, V]](a) {
+        override def selectDynamic(field: String): DynamicRepr =
+          a.get(field).map(implicitly[DynamicReprEncode[V]].to(_)).getOrElse(NilDynamicRepr)
+      }
 
   def macroDeriveEncode[T: c.WeakTypeTag](c: whitebox.Context)(u: c.Tree, configuration: c.Tree): c.Tree = {
     val _ = (u, configuration)
     Magnolia.gen[T](c)
   }
 
+}
+
+trait LowPriorityImplicits extends LowPriorityImplicits2 {
+  implicit def encodeIterable[A: DynamicReprEncode]: DynamicReprEncode[Iterable[A]] =
+    (a: Iterable[A]) => IterableDynamicRepr(a.map(implicitly[DynamicReprEncode[A]].to(_)))
+}
+
+trait LowPriorityImplicits2 {
+  implicit def deriveEncode[T](implicit u: AutoUnlock, configuration: Configuration): DynamicReprEncode[T] =
+    macro macroDeriveEncode[T]
 }

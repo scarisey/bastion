@@ -66,7 +66,7 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       eitherJustString: String
     )
 
-    implicit val convWrapped: Decode[Wrapped] = Decode.instance(g => g.apply(Wrapped(_)))
+    implicit val convWrapped: Decoder[Wrapped] = Decoder.instance(g => g.apply(Wrapped(_)))
 
     RecA("toto", 42, true, List("foo", "bar"), Some("content"), Right("baz"), Left("titi")).convert[RecB] shouldEqual Right(
       RecB(42, Wrapped("toto"), List(Wrapped("foo"), Wrapped("bar")), Some(Wrapped("content")), Right("baz"), "titi")
@@ -120,8 +120,8 @@ class DecodeTest extends AnyFlatSpec with Matchers {
         Either.cond(aString.length <= anInt, new RecB(anInt, aBoolean, aString), List(s"${aString} > $anInt"))
     }
 
-    implicit val convB: Decode[RecB] =
-      Decode.instance(g => (g.anInt, g.aBoolean, g.aString).applyE(RecB.apply))
+    implicit val convB: Decoder[RecB] =
+      Decoder.instance(g => (g.anInt, g.aBoolean, g.aString).applyE(RecB.apply))
 
     RecA("foo", 42, true).convert[RecB] shouldEqual RecB(42, true, "foo")
     RecA("fooo", 3, true).convert[RecB] shouldEqual Left(WrappedError(List("fooo > 3")))
@@ -144,16 +144,16 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     }
 
     //explicit instances
-    implicit val conv2: Decode[SubB2] = Decode.instance(g =>
+    implicit val conv2: Decoder[SubB2] = Decoder.instance(g =>
       (g.sub_1.sub_int_1, g.sub_2.sub_double_2, g.sub_2.sub_boolean_2)
         .apply(SubB2.apply)
     )
-    implicit val conv1: Decode[SubB1] = Decode.instance(g =>
+    implicit val conv1: Decoder[SubB1] = Decoder.instance(g =>
       (g.sub_1.sub_int_1, g.sub_1.sub_string_1, g.string_description)
         .applyO(SubB1.apply)
     )
-    implicit val conv: Decode[RecordB] =
-      Decode.instance(g => (g, g).apply(RecordB.apply))
+    implicit val conv: Decoder[RecordB] =
+      Decoder.instance(g => (g, g).apply(RecordB.apply))
 
     val recordB     = RecordA(SubA2(true, 2.0), "foo", SubA1("s1", 42)).convert[RecordB]
     val recordBNone = RecordA(SubA2(true, 2.0), "foo", SubA1("astring", 3)).convert[RecordB]
@@ -173,10 +173,10 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       def makeOption(aField: String) = makeEither(aField).toOption
     }
 
-    val enc: Decode[Wrapped]  = Decode.wrap(Wrapped(_))
-    val encE: Decode[Wrapped] = Decode.wrapE(Wrapped.makeEither)
-    val encO: Decode[Wrapped] = Decode.wrapO(Wrapped.makeOption)
-    val encT: Decode[Wrapped] = Decode.wrapT(Wrapped.makeTry)
+    val enc: Decoder[Wrapped]  = Decoder.wrap(Wrapped(_))
+    val encE: Decoder[Wrapped] = Decoder.wrapE(Wrapped.makeEither)
+    val encO: Decoder[Wrapped] = Decoder.wrapO(Wrapped.makeOption)
+    val encT: Decoder[Wrapped] = Decoder.wrapT(Wrapped.makeTry)
 
     private val expectedDecodedValue                  = Right(Wrapped("foo"))
     private val dynamicRepr: ValueDynamicRepr[String] = ValueDynamicRepr("foo")
@@ -217,6 +217,13 @@ class DecodeTest extends AnyFlatSpec with Matchers {
 
     RecA(42).convert[List[RecB]] shouldBe Right(List(RecB(42)))
     List(RecA(42), RecA(43)).convert[List[RecB]] shouldBe Right(List(RecB(42), RecB(43)))
+  }
+
+  it should "convert a Map[K,V] to a case class" in {
+    val aMap = Map("field1" -> "42", "field2" -> "description")
+    case class RecordA(field1: Int, field2: String)
+
+    aMap.convert[RecordA] shouldBe Right(RecordA(42, "description"))
   }
 
   it should "convert those specific instances - same shape and types, just verifying decode(encode(t)) = t" in new Fixture {

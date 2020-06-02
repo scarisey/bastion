@@ -24,7 +24,7 @@ object ChoosingFieldToMap extends App {
 
   case class Target(finalValue: Int)
 
-  implicit val decoder: Decode[Target] = Decode.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
+  implicit val decoder: Decoder[Target] = Decoder.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
 
   println(Source1(42).convert[Target])
   println(Source2(33).convert[Target])
