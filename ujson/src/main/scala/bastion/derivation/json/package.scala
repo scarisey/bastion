@@ -16,12 +16,27 @@
 
 package bastion.derivation
 
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.OffsetDateTime
+import java.time.OffsetTime
+
 import magnolia._
 import upickle.core.Visitor
 
 import scala.language.experimental.macros
 
 package object json extends upickle.AttributeTagged with upickle.implicits.Writers {
+
+  implicit val writerLocalDate: upickle.default.Writer[LocalDate]           = upickle.default.StringWriter.comap(_.toString)
+  implicit val writerLocalDateTime: upickle.default.Writer[LocalDateTime]   = upickle.default.StringWriter.comap(_.toString)
+  implicit val writerLocalTime: upickle.default.Writer[LocalTime]           = upickle.default.StringWriter.comap(_.toString)
+  implicit val writerOffsetTime: upickle.default.Writer[OffsetTime]         = upickle.default.StringWriter.comap(_.toString)
+  implicit val writerOffsetDateTime: upickle.default.Writer[OffsetDateTime] = upickle.default.StringWriter.comap(_.toString)
+  implicit val writerInstant: upickle.default.Writer[Instant]               = upickle.default.StringWriter.comap(_.toString)
+
   type Typeclass[T] = upickle.default.Writer[T]
 
   def combine[T](ctx: ReadOnlyCaseClass[Typeclass, T]): Typeclass[T] = new Typeclass[T] {
@@ -42,5 +57,5 @@ package object json extends upickle.AttributeTagged with upickle.implicits.Write
     }
   }
 
-  implicit def gen[T]: Typeclass[T] = macro Magnolia.gen[T]
+  implicit def deriveWriter[T]: Typeclass[T] = macro Magnolia.gen[T]
 }

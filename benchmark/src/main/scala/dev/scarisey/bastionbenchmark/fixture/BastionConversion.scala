@@ -5,8 +5,8 @@ import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
 
 object BastionConversion extends Conversion[DecodeError]{
   import bastion._
-  import derivation.dynamicrepr.auto._
   import derivation.decode.auto._
+  import derivation.dynamicrepr.auto._
   import json._
 
   implicit val decodeName: Decoder[Name] = Decoder.wrapE(Name.apply)
@@ -19,4 +19,6 @@ object BastionConversion extends Conversion[DecodeError]{
   def encode(person: ExternalPerson)(implicit encode: DynamicReprEncode[ExternalPerson]):DynamicRepr = encode.to(person)
 
   def decodeFromJson(json:String):Either[DecodeError,Person] = decode[Person](json)
+
+  def encode(person: Person)(implicit writer:upickle.default.Writer[Person]) = encodeString[Person](person)
 }

@@ -1,12 +1,14 @@
 package dev.scarisey.bastionbenchmark.fixture
 import dev.scarisey.bastionbenchmark.fixture.Domain.Person
 import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
+import io.circe.Encoder
 
 
 object CirceConversion {
   import io.circe.generic.auto._
   import io.circe.optics.JsonPath._
   import io.circe.parser._
+  import io.circe.syntax._
   val getName      = root.name.string
   val getBirthdate = root.birthdate.string
 
@@ -23,6 +25,8 @@ object CirceConversion {
       external <- decode[ExternalPerson](json).left.map(WrapOtherError(_))
       person   <- ManualConversion.convert(external)
     } yield person
+
+  def encode(person: Person)(implicit encode:Encoder[Person]):String = person.asJson.toString()
 }
 
 object CirceMagnoliaConversion {
