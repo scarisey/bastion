@@ -24,6 +24,8 @@ This project is a way for me to learn typeclass derivation using Magnolia. It's 
     + [Use your smart constructors](#use-your-smart-constructors)
     + [Lenient case](#lenient-case)
     + [Or combinator on DynamicRepr](#or-combinator-on-dynamicrepr)
+    + [Conversions from string](#conversions-from-string)
+    + [Conversions between numeric types](#conversions-between-numeric-types)
     + [Json serialization](#json-serialization)
     + [Json deserialization](#json-deserialization)
   * [Things to do, and perspectives](#things-to-do--and-perspectives)
@@ -105,9 +107,9 @@ case class B0(aBoolean: Boolean) extends B
 case class B1(aField1: String)   extends B
 case class B2(aField2: Int)      extends B
 
-A1("foo").convert[RecB] // Right(B1("foo"))
-A2(42).convert[RecB] // Right(B2(42))
-A3(2.0).convert[RecB] //Left(IncorrectSubtype)
+A1("foo").convert[B] // Right(B1("foo"))
+A2(42).convert[B] // Right(B2(42))
+A3(2.0).convert[B] //Left(IncorrectSubtype)
 ```
 
 ### Use your smart constructors
@@ -159,6 +161,38 @@ implicit val decoder: Decoder[Target] = Decoder.instance(g => (g.aField1 ||| g.a
 Source1(42).convert[Target] //Target(42)
 Source2(33).convert[Target] //Target(33)
 ```
+
+### Conversions from string
+```scala
+import java.time.LocalDateTime
+import bastion._
+import derivation.dynamicrepr.auto._
+import derivation.decode.auto._
+
+case class A(aLocalDateTime: String, aDouble: String, anInteger: String)
+case class B(aLocalDateTime: LocalDateTime, aDouble: Double, anInteger: Int)
+
+A("2020-06-04T13:45:00.000", "3.14", "42").convert[B] //Right(B(2020-06-04T13:45,3.14,42))
+```
+You can check [Decoder](https://github.com/scarisey/bastion/blob/master/core/src/main/scala/bastion/Decoder.scala) for an exhaustive view.
+
+### Conversions between numeric types
+
+The basic idea is that conversions are allowed from narrower numeric types to wider numeric types. 
+For example, you can convert from an Int to a Long, Double, BigInt or BigDecimal, but you can't convert from a Long to an Int (you should implement your 
+own decoder, where you will decide how to handle limits).
+
+```scala
+import bastion._
+import derivation.dynamicrepr.auto._
+import derivation.decode.auto._
+
+case class SomeLong(aField:Long)
+case class SomeFloat(aField:Float)
+
+SomeLong(Long.MaxValue).convert[SomeFloat] //Right(SomeFloat(9.223372E18))
+```
+You can check [Decoder](https://github.com/scarisey/bastion/blob/master/core/src/main/scala/bastion/Decoder.scala) for an exhaustive view.
 
 ### Json serialization
 ```scala

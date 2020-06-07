@@ -14,8 +14,8 @@ ThisBuild / startYear := Some(2020)
 ThisBuild / dynverSeparator := "-"
 ThisBuild / scmInfo := Some(
   ScmInfo(
-    url("https://github.com/scarisey/bastion" + name.value),
-    "scm:git:git@github.com/scarisey/bastion" + name.value + ".git"
+    url("https://github.com/scarisey/bastion"),
+    "scm:git:git@github.com/scarisey/bastion.git"
   )
 )
 
@@ -56,10 +56,18 @@ createResultProducts := {
 }
 
 lazy val tryBuild = taskKey[Unit]("Build like it should on CI")
+lazy val tryBuildImpl = Def.task {
+  (headerCheckAll in Compile).value
+  scalafmtCheckAll.value
+  (compile in Compile).value
+  unusedCompileDependenciesTest.value
+  (test in Test).value
+}
 
 lazy val core = (project in file("core"))
   .settings(moduleName := "bastion-core")
   .settings(buildSettings)
+  .settings(tryBuild := tryBuildImpl.value)
   .settings(
     libraryDependencies ++= Seq(
       magnolia,
@@ -67,33 +75,23 @@ lazy val core = (project in file("core"))
       scalaTest % Test
     )
   )
-  .settings(tryBuild := {
-    (headerCheckAll in Compile).value
-    scalafmtCheckAll.value
-    (compile in Compile).value
-    unusedCompileDependenciesTest.value
-    (test in Test).value
-  })
 
 lazy val ujsonModule = (project in file("ujson"))
   .settings(moduleName := "bastion-ujson")
   .settings(buildSettings)
-  .settings(libraryDependencies ++= Seq(
-    ujson,
-    scalaTest % Test
-  ))
+  .settings(tryBuild := tryBuildImpl.value)
+  .settings(
+    libraryDependencies ++= Seq(
+      ujson,
+      scalaTest % Test
+    )
+  )
   .dependsOn(core)
-  .settings(tryBuild := {
-    (headerCheckAll in Compile).value
-    scalafmtCheckAll.value
-    (compile in Compile).value
-    unusedCompileDependenciesTest.value
-    (test in Test).value
-  })
 
 lazy val examples = (project in file("examples"))
   .settings(moduleName := "bastion-examples")
   .settings(buildSettings)
+  .settings(tryBuild := tryBuildImpl.value)
   .settings(publish / skip := true)
   .dependsOn(core, ujsonModule)
 
@@ -127,5 +125,5 @@ lazy val buildSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(core,examples,ujsonModule)
+  .aggregate(core, examples, ujsonModule)
   .settings(crossScalaVersions := Nil, publish / skip := true)
