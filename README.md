@@ -23,9 +23,9 @@ This project is a way for me to learn typeclass derivation using Magnolia. It's 
     + [Convert to an ADT](#convert-to-an-adt)
     + [Use your smart constructors](#use-your-smart-constructors)
     + [Lenient case](#lenient-case)
-    + [Or combinator on DynamicRepr](#or-combinator-on-dynamicrepr)
     + [Conversions from string](#conversions-from-string)
     + [Conversions between numeric types](#conversions-between-numeric-types)
+    + [Your own converter for non matching types](#your-own-converter-for-non-matching-types)
     + [Json serialization](#json-serialization)
     + [Json deserialization](#json-deserialization)
   * [Things to do, and perspectives](#things-to-do--and-perspectives)
@@ -146,22 +146,6 @@ case class Target(an_int: Int, A_String: String)
 Source("foo", 42, true).convert[Target] //Target(42,foo)
 ```
 
-### Or combinator on DynamicRepr
-```scala
-import bastion._
-import derivation.dynamicrepr.auto._
-
-case class Source1(aField1: Int)
-case class Source2(aField2: Int)
-
-case class Target(finalValue: Int)
-
-implicit val decoder: Decoder[Target] = Decoder.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
-
-Source1(42).convert[Target] //Target(42)
-Source2(33).convert[Target] //Target(33)
-```
-
 ### Conversions from string
 ```scala
 import java.time.LocalDateTime
@@ -193,6 +177,35 @@ case class SomeFloat(aField:Float)
 SomeLong(Long.MaxValue).convert[SomeFloat] //Right(SomeFloat(9.223372E18))
 ```
 You can check [Decoder](https://github.com/scarisey/bastion/blob/master/core/src/main/scala/bastion/Decoder.scala) for an exhaustive view.
+
+### Your own converter for non matching types
+
+```scala
+import bastion._
+import derivation.dynamicrepr.auto._
+
+case class SubSource1(aString: String)
+case class SubSource2(anInt: Int)
+case class Source(sub1: SubSource1, sub2: SubSource2)
+case class Target(field1: Int, field2: String)
+
+implicit val decoderTarget: Decoder[Target] = 
+  Decoder.instance(g => (g.sub2.anInt, g.sub1.aString).apply(Target.apply))
+
+Source(SubSource1("foo"), SubSource2(42)).convert[Target] //Right(Target(42,foo))
+```
+
+
+```scala
+//...
+
+implicit val decoderTarget: Decoder[Target] = 
+  Decoder.instance(g => (g.sub32.anInt, g.sub1.aString).apply(Target.apply))
+
+Source(SubSource1("foo"), SubSource2(42)).convert[Target]
+    //Left(IncorrectPath: applying root.sub32.anInt on ProductDynamicRepr(Source(SubSource1(foo),SubSource2(42))) produces NilDynamicRepr
+    // actualDynamicRepr: NilDynamicRepr))
+```
 
 ### Json serialization
 ```scala

@@ -25,11 +25,9 @@ import scala.language.dynamics
 sealed trait DynamicRepr extends Dynamic { self =>
   def selectDynamic(field: String): DynamicRepr
 
-  /**
-   * Combinator with the semantic we expect for 'or' : (a ||| b) will return a if a is not [[NilDynamicRepr]], else b.
-   */
-  def `|||`(other: DynamicRepr): DynamicRepr
-
+}
+object DynamicRepr {
+  val nil: DynamicRepr = NilDynamicRepr
 }
 
 /**
@@ -37,8 +35,12 @@ sealed trait DynamicRepr extends Dynamic { self =>
  * The data it encodes is the public field a.
  */
 abstract class ProductDynamicRepr[A](val a: A) extends DynamicRepr {
-  override def toString: String                       = s"ProductDynamicRepr(${a.toString})"
-  override def `|||`(other: DynamicRepr): DynamicRepr = this
+  override def toString: String = s"ProductDynamicRepr(${a.toString})"
+
+  override def equals(obj: Any): Boolean = obj match {
+    case ProductDynamicRepr(otherA) => a.equals(otherA)
+    case _                          => false
+  }
 }
 object ProductDynamicRepr {
   def unapply[A](arg: ProductDynamicRepr[A]): Option[A] = Some(arg.a)
@@ -51,7 +53,6 @@ object ProductDynamicRepr {
 final case class IterableDynamicRepr(items: Iterable[DynamicRepr]) extends DynamicRepr {
   override def selectDynamic(field: String): DynamicRepr = NilDynamicRepr
   override def toString: String                          = s"IterableDynamicRepr(${items.toString})"
-  override def `|||`(other: DynamicRepr): DynamicRepr    = this
 }
 
 /**
@@ -61,7 +62,6 @@ final case class IterableDynamicRepr(items: Iterable[DynamicRepr]) extends Dynam
 final case class ValueDynamicRepr[A](a: A) extends DynamicRepr {
   override def selectDynamic(field: String): DynamicRepr = NilDynamicRepr
   override def toString: String                          = s"ValueDynamicRepr(${a.toString})"
-  override def `|||`(other: DynamicRepr): DynamicRepr    = this
 }
 
 /**
@@ -70,7 +70,6 @@ final case class ValueDynamicRepr[A](a: A) extends DynamicRepr {
 case object NilDynamicRepr extends DynamicRepr {
   override def selectDynamic(field: String): DynamicRepr = this
   override def toString: String                          = "NilDynamicRepr"
-  override def `|||`(other: DynamicRepr): DynamicRepr    = other
 }
 
 /**

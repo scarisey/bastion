@@ -19,20 +19,18 @@ ThisBuild / scmInfo := Some(
   )
 )
 
-// See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
+lazy val createDecodingStateTuples = taskKey[Unit]("Generate code for DecodingStateTuples.scala")
 
-lazy val createDynamicReprTuples = taskKey[Unit]("Generate code for DynamicReprTuples.scala")
-
-createDynamicReprTuples := {
-  val dynamicReprTuplesFile =
-    (sourceDirectory in core).value / "main" / "scala" / "bastion" / "DynamicReprTuples.scala"
+createDecodingStateTuples := {
+  val decodingStateTuplesFile =
+    (sourceDirectory in core).value / "main" / "scala" / "bastion" / "DecodingStateTuples.scala"
   val resource = (resourceManaged in Compile).value / "scalaFmt" / "temporary"
   val scalaFmt = baseDirectory.value / ".scalafmt.conf"
 
   CodeGen.replaceFileSection(
-    dynamicReprTuplesFile,
+    decodingStateTuplesFile,
     "producthelper",
-    DynamicReprTuplesCodeGen.generate,
+    DecodingStateTuplesCodeGen.generate,
     resource,
     scalaFmt
   )

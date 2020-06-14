@@ -66,7 +66,7 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       eitherJustString: String
     )
 
-    implicit val convWrapped: Decoder[Wrapped] = Decoder.instance(g => g.apply(Wrapped(_)))
+    implicit val convWrapped: Decoder[Wrapped] = Decoder.wrap(Wrapped.apply)
 
     RecA("toto", 42, true, List("foo", "bar"), Some("content"), Right("baz"), Left("titi")).convert[RecB] shouldEqual Right(
       RecB(42, Wrapped("toto"), List(Wrapped("foo"), Wrapped("bar")), Some(Wrapped("content")), Right("baz"), "titi")
@@ -173,23 +173,23 @@ class DecodeTest extends AnyFlatSpec with Matchers {
       def makeOption(aField: String) = makeEither(aField).toOption
     }
 
-    val enc: Decoder[Wrapped]  = Decoder.wrap(Wrapped(_))
-    val encE: Decoder[Wrapped] = Decoder.wrapE(Wrapped.makeEither)
-    val encO: Decoder[Wrapped] = Decoder.wrapO(Wrapped.makeOption)
-    val encT: Decoder[Wrapped] = Decoder.wrapT(Wrapped.makeTry)
+    val dec: Decoder[Wrapped]  = Decoder.wrap(Wrapped(_))
+    val decE: Decoder[Wrapped] = Decoder.wrapE(Wrapped.makeEither)
+    val decO: Decoder[Wrapped] = Decoder.wrapO(Wrapped.makeOption)
+    val decT: Decoder[Wrapped] = Decoder.wrapT(Wrapped.makeTry)
 
     private val expectedDecodedValue                  = Right(Wrapped("foo"))
     private val dynamicRepr: ValueDynamicRepr[String] = ValueDynamicRepr("foo")
-    enc.from(dynamicRepr) shouldEqual expectedDecodedValue
-    encE.from(dynamicRepr) shouldEqual expectedDecodedValue
-    encO.from(dynamicRepr) shouldEqual expectedDecodedValue
-    encT.from(dynamicRepr) shouldEqual expectedDecodedValue
+    dec.from(DecodingState.init(dynamicRepr)) shouldEqual expectedDecodedValue
+    decE.from(DecodingState.init(dynamicRepr)) shouldEqual expectedDecodedValue
+    decO.from(DecodingState.init(dynamicRepr)) shouldEqual expectedDecodedValue
+    decT.from(DecodingState.init(dynamicRepr)) shouldEqual expectedDecodedValue
 
     private val failingDynamicRepr: ValueDynamicRepr[String] = ValueDynamicRepr("failing foo")
     private val expectedFailedDecodedValue                   = Left(WrappedError(exception))
-    encE.from(failingDynamicRepr) shouldBe expectedFailedDecodedValue
-    encT.from(failingDynamicRepr) shouldBe expectedFailedDecodedValue
-    encO.from(failingDynamicRepr) shouldBe Left(NilSmartConstructorError)
+    decE.from(DecodingState.init(failingDynamicRepr)) shouldBe expectedFailedDecodedValue
+    decT.from(DecodingState.init(failingDynamicRepr)) shouldBe expectedFailedDecodedValue
+    decO.from(DecodingState.init(failingDynamicRepr)) shouldBe Left(NilSmartConstructorError)
   }
 
   it should "convert to Option in different cases" in new Fixture {

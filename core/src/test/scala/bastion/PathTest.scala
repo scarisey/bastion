@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package bastionexamples
-import bastion._
-import derivation.dynamicrepr.auto._
+package bastion
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-object ChoosingFieldToMap extends App {
-  case class Source1(aField1: Int)
-  case class Source2(aField2: Int)
+import scala.language.experimental.macros
 
-  case class Target(finalValue: Int)
+class PathTest extends AnyFlatSpec with Matchers {
 
-  implicit val decoder: Decoder[Target] = Decoder.instance(g => (g.aField1 ||| g.aField2).apply(Target.apply))
+  it should "aggregate path selection" in {
 
-  println(Source1(42).convert[Target])
-  println(Source2(33).convert[Target])
+    Path.root.field1.field2.item(42).field3.path shouldEqual List("root", "field1", "field2", "[42]", "field3")
+  }
+
 }

@@ -40,15 +40,8 @@ case object IncorrectSubtype extends DecodeError
 /**
  * This error may occur when attempting to select an incorrect field on a DynamicRepr.
  */
-final case class IncorrectPath(d: DynamicRepr, decodeType: String) extends DecodeError {
-  override def toString: String = s"UnexpectedEncodeValue(actualType:${d},expected:${decodeType})"
-}
-
-/**
- * This error may occur when attempting to decode a field on DynamicRepr with incorrect type.
- */
-final case class UnexpectedEncodeValue(d: DynamicRepr, decodeType: String) extends DecodeError {
-  override def toString: String = s"UnexpectedEncodeValue(actualType:${d},expected:${decodeType})"
+final case class IncorrectPath(d: DynamicRepr, message: String) extends DecodeError {
+  override def toString: String = s"IncorrectPath: ${message} \n actualDynamicRepr: ${d})"
 }
 
 /**

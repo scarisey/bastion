@@ -1,4 +1,4 @@
-object DynamicReprTuplesCodeGen {
+object DecodingStateTuplesCodeGen {
 
   def generate: List[String] = {
     val capitals                = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -7,14 +7,14 @@ object DynamicReprTuplesCodeGen {
     val header = """// $COVERAGE-OFF$should find a way to test all of them ..."""
     val footer = """// $COVERAGE-ON$"""
     val lines = (2 to 22).map { n =>
-      val tupleTypeArgs = (1 to n).map(_ => "DynamicRepr").mkString(", ")
+      val tupleTypeArgs = (1 to n).map(_ => "DecodingState").mkString(", ")
       val genericArgs   = (1 to n).map(i => capitals(i - 1)).mkString(", ")
       val decoders      = (1 to n).map(i => decN(capitals(i - 1))).mkString(", ")
       val arguments     = (1 to n).map(i => s"t$i").mkString(",")
-      val convertN      = (1 to n).map(i => s"t$i.convert[${capitals(i - 1)}]").mkString(",")
+      val convertN      = (1 to n).map(i => s"t$i.runDecoder[${capitals(i - 1)}]").mkString(",")
 
       s"""
-         |implicit class DynamicReprTuples$n(tuple: Tuple$n[$tupleTypeArgs]) {
+         |implicit class DecodingStateTuples$n(tuple: Tuple$n[$tupleTypeArgs]) {
          |    /**
          |     * For a function f, mapping the types $genericArgs to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
          |     * This method can use your own instances of Decoder for types $genericArgs, enabling decoding of complex types.

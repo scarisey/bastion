@@ -20,64 +20,12 @@ import bastion.ResultProducts._
 
 import scala.util.Try
 
-trait DynamicReprTuples {
-  implicit class DynamicReprTuples1(t1: DynamicRepr) {
-
-    /**
-     * For a function f, mapping a type A to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
-     * The eventual throwable error will be wrapped in a [[WrappedError]].
-     */
-    def applyT[A, RR](f: A => Try[RR])(
-      implicit decA: Decoder[A]
-    ): Result[RR] =
-      for {
-        tr1 <- t1.convert[A]
-        r   <- f(tr1).toEither.left.map(t => WrappedError(t))
-      } yield r
-
-    /**
-     * For a function f, mapping a type A to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
-     * The absence of value RR will be represented by a [[NilSmartConstructorError]].
-     */
-    def applyO[A, RR](f: A => Option[RR])(
-      implicit decA: Decoder[A]
-    ): Result[RR] =
-      for {
-        tr1 <- t1.convert[A]
-        r   <- f(tr1).toRight(NilSmartConstructorError)
-      } yield r
-
-    /**
-     * For a function f, mapping a type A to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
-     * The eventual error RL will be wrapped in a [[WrappedError]].
-     */
-    def applyE[A, RL, RR](f: A => Either[RL, RR])(
-      implicit decA: Decoder[A]
-    ): Result[RR] =
-      (for {
-        tr1 <- t1.convert[A]
-        r   <- f(tr1)
-      } yield r).left.map(WrappedError(_))
-
-    /**
-     * For a function f, mapping a type A to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
-     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
-     */
-    def apply[A, RR](f: A => RR)(
-      implicit decA: Decoder[A]
-    ): Result[RR] =
-      for {
-        tr1 <- t1.convert[A]
-      } yield f(tr1)
-  }
+trait DecodingStateTuples {
 
   // /start/producthelper/ - DO NOT REMOVE
 // $COVERAGE-OFF$should find a way to test all of them ...
 
-  implicit class DynamicReprTuples2(tuple: Tuple2[DynamicRepr, DynamicRepr]) {
+  implicit class DecodingStateTuples2(tuple: Tuple2[DecodingState, DecodingState]) {
 
     /**
      * For a function f, mapping the types A, B to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
@@ -89,7 +37,7 @@ trait DynamicReprTuples {
       decB: Decoder[B]
     ): Result[RR] = {
       val (t1, t2) = tuple
-      product2(t1.convert[A], t2.convert[B]).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
+      product2(t1.runDecoder[A], t2.runDecoder[B]).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
     /**
@@ -102,7 +50,7 @@ trait DynamicReprTuples {
       decB: Decoder[B]
     ): Result[RR] = {
       val (t1, t2) = tuple
-      product2(t1.convert[A], t2.convert[B]).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
+      product2(t1.runDecoder[A], t2.runDecoder[B]).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     /**
@@ -115,7 +63,7 @@ trait DynamicReprTuples {
       decB: Decoder[B]
     ): Result[RR] = {
       val (t1, t2) = tuple
-      product2(t1.convert[A], t2.convert[B]).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
+      product2(t1.runDecoder[A], t2.runDecoder[B]).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
     /**
@@ -127,11 +75,11 @@ trait DynamicReprTuples {
       decB: Decoder[B]
     ): Result[RR] = {
       val (t1, t2) = tuple
-      product2(t1.convert[A], t2.convert[B]).map(f.tupled)
+      product2(t1.runDecoder[A], t2.runDecoder[B]).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples3(tuple: Tuple3[DynamicRepr, DynamicRepr, DynamicRepr]) {
+  implicit class DecodingStateTuples3(tuple: Tuple3[DecodingState, DecodingState, DecodingState]) {
 
     /**
      * For a function f, mapping the types A, B, C to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
@@ -144,7 +92,9 @@ trait DynamicReprTuples {
       decC: Decoder[C]
     ): Result[RR] = {
       val (t1, t2, t3) = tuple
-      product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
+      product3(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C])
+        .map(f.tupled)
+        .flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
     /**
@@ -158,7 +108,7 @@ trait DynamicReprTuples {
       decC: Decoder[C]
     ): Result[RR] = {
       val (t1, t2, t3) = tuple
-      product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
+      product3(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C]).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     /**
@@ -172,7 +122,7 @@ trait DynamicReprTuples {
       decC: Decoder[C]
     ): Result[RR] = {
       val (t1, t2, t3) = tuple
-      product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
+      product3(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C]).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
     /**
@@ -185,11 +135,11 @@ trait DynamicReprTuples {
       decC: Decoder[C]
     ): Result[RR] = {
       val (t1, t2, t3) = tuple
-      product3(t1.convert[A], t2.convert[B], t3.convert[C]).map(f.tupled)
+      product3(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C]).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples4(tuple: Tuple4[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
+  implicit class DecodingStateTuples4(tuple: Tuple4[DecodingState, DecodingState, DecodingState, DecodingState]) {
 
     /**
      * For a function f, mapping the types A, B, C, D to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
@@ -203,7 +153,7 @@ trait DynamicReprTuples {
       decD: Decoder[D]
     ): Result[RR] = {
       val (t1, t2, t3, t4) = tuple
-      product4(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D])
+      product4(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D])
         .map(f.tupled)
         .flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
@@ -220,7 +170,7 @@ trait DynamicReprTuples {
       decD: Decoder[D]
     ): Result[RR] = {
       val (t1, t2, t3, t4) = tuple
-      product4(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D])
+      product4(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D])
         .map(f.tupled)
         .flatMap(_.toRight(NilSmartConstructorError))
     }
@@ -237,7 +187,9 @@ trait DynamicReprTuples {
       decD: Decoder[D]
     ): Result[RR] = {
       val (t1, t2, t3, t4) = tuple
-      product4(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D]).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
+      product4(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D])
+        .map(f.tupled)
+        .flatMap(_.left.map(WrappedError(_)))
     }
 
     /**
@@ -251,11 +203,11 @@ trait DynamicReprTuples {
       decD: Decoder[D]
     ): Result[RR] = {
       val (t1, t2, t3, t4) = tuple
-      product4(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D]).map(f.tupled)
+      product4(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D]).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples5(tuple: Tuple5[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
+  implicit class DecodingStateTuples5(tuple: Tuple5[DecodingState, DecodingState, DecodingState, DecodingState, DecodingState]) {
 
     /**
      * For a function f, mapping the types A, B, C, D, E to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
@@ -270,7 +222,7 @@ trait DynamicReprTuples {
       decE: Decoder[E]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5) = tuple
-      product5(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E])
+      product5(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D], t5.runDecoder[E])
         .map(f.tupled)
         .flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
@@ -288,7 +240,7 @@ trait DynamicReprTuples {
       decE: Decoder[E]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5) = tuple
-      product5(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E])
+      product5(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D], t5.runDecoder[E])
         .map(f.tupled)
         .flatMap(_.toRight(NilSmartConstructorError))
     }
@@ -306,7 +258,7 @@ trait DynamicReprTuples {
       decE: Decoder[E]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5) = tuple
-      product5(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E])
+      product5(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D], t5.runDecoder[E])
         .map(f.tupled)
         .flatMap(_.left.map(WrappedError(_)))
     }
@@ -323,11 +275,13 @@ trait DynamicReprTuples {
       decE: Decoder[E]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5) = tuple
-      product5(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E]).map(f.tupled)
+      product5(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D], t5.runDecoder[E]).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples6(tuple: Tuple6[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]) {
+  implicit class DecodingStateTuples6(
+    tuple: Tuple6[DecodingState, DecodingState, DecodingState, DecodingState, DecodingState, DecodingState]
+  ) {
 
     /**
      * For a function f, mapping the types A, B, C, D, E, F to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
@@ -343,7 +297,7 @@ trait DynamicReprTuples {
       decF: Decoder[F]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6) = tuple
-      product6(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F])
+      product6(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D], t5.runDecoder[E], t6.runDecoder[F])
         .map(f.tupled)
         .flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
@@ -362,7 +316,7 @@ trait DynamicReprTuples {
       decF: Decoder[F]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6) = tuple
-      product6(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F])
+      product6(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D], t5.runDecoder[E], t6.runDecoder[F])
         .map(f.tupled)
         .flatMap(_.toRight(NilSmartConstructorError))
     }
@@ -381,7 +335,7 @@ trait DynamicReprTuples {
       decF: Decoder[F]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6) = tuple
-      product6(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F])
+      product6(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D], t5.runDecoder[E], t6.runDecoder[F])
         .map(f.tupled)
         .flatMap(_.left.map(WrappedError(_)))
     }
@@ -399,12 +353,13 @@ trait DynamicReprTuples {
       decF: Decoder[F]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6) = tuple
-      product6(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F]).map(f.tupled)
+      product6(t1.runDecoder[A], t2.runDecoder[B], t3.runDecoder[C], t4.runDecoder[D], t5.runDecoder[E], t6.runDecoder[F])
+        .map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples7(
-    tuple: Tuple7[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]
+  implicit class DecodingStateTuples7(
+    tuple: Tuple7[DecodingState, DecodingState, DecodingState, DecodingState, DecodingState, DecodingState, DecodingState]
   ) {
 
     /**
@@ -422,9 +377,15 @@ trait DynamicReprTuples {
       decG: Decoder[G]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7) = tuple
-      product7(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F], t7.convert[G])
-        .map(f.tupled)
-        .flatMap(_.toEither.left.map(t => WrappedError(t)))
+      product7(
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G]
+      ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
     /**
@@ -442,9 +403,15 @@ trait DynamicReprTuples {
       decG: Decoder[G]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7) = tuple
-      product7(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F], t7.convert[G])
-        .map(f.tupled)
-        .flatMap(_.toRight(NilSmartConstructorError))
+      product7(
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G]
+      ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
     /**
@@ -462,9 +429,15 @@ trait DynamicReprTuples {
       decG: Decoder[G]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7) = tuple
-      product7(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F], t7.convert[G])
-        .map(f.tupled)
-        .flatMap(_.left.map(WrappedError(_)))
+      product7(
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G]
+      ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
     /**
@@ -481,13 +454,29 @@ trait DynamicReprTuples {
       decG: Decoder[G]
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7) = tuple
-      product7(t1.convert[A], t2.convert[B], t3.convert[C], t4.convert[D], t5.convert[E], t6.convert[F], t7.convert[G])
-        .map(f.tupled)
+      product7(
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G]
+      ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples8(
-    tuple: Tuple8[DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr, DynamicRepr]
+  implicit class DecodingStateTuples8(
+    tuple: Tuple8[
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
+    ]
   ) {
 
     /**
@@ -507,14 +496,14 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8) = tuple
       product8(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -535,14 +524,14 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8) = tuple
       product8(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -563,14 +552,14 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8) = tuple
       product8(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -590,29 +579,29 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8) = tuple
       product8(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples9(
+  implicit class DecodingStateTuples9(
     tuple: Tuple9[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -634,15 +623,15 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9) = tuple
       product9(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -664,15 +653,15 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9) = tuple
       product9(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -694,15 +683,15 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9) = tuple
       product9(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -723,31 +712,31 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9) = tuple
       product9(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples10(
+  implicit class DecodingStateTuples10(
     tuple: Tuple10[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -770,16 +759,16 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) = tuple
       product10(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -802,16 +791,16 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) = tuple
       product10(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -834,16 +823,16 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) = tuple
       product10(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -865,33 +854,33 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) = tuple
       product10(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples11(
+  implicit class DecodingStateTuples11(
     tuple: Tuple11[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -915,17 +904,17 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) = tuple
       product11(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -949,17 +938,17 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) = tuple
       product11(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -983,17 +972,17 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) = tuple
       product11(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -1016,35 +1005,35 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11) = tuple
       product11(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples12(
+  implicit class DecodingStateTuples12(
     tuple: Tuple12[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -1069,18 +1058,18 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) = tuple
       product12(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -1105,18 +1094,18 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) = tuple
       product12(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -1141,18 +1130,18 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) = tuple
       product12(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -1176,37 +1165,37 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12) = tuple
       product12(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples13(
+  implicit class DecodingStateTuples13(
     tuple: Tuple13[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -1232,19 +1221,19 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) = tuple
       product13(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -1270,19 +1259,19 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) = tuple
       product13(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -1308,19 +1297,19 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) = tuple
       product13(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -1345,39 +1334,39 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13) = tuple
       product13(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples14(
+  implicit class DecodingStateTuples14(
     tuple: Tuple14[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -1404,20 +1393,20 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) = tuple
       product14(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -1444,20 +1433,20 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) = tuple
       product14(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -1484,20 +1473,20 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) = tuple
       product14(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -1523,41 +1512,41 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14) = tuple
       product14(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples15(
+  implicit class DecodingStateTuples15(
     tuple: Tuple15[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -1585,21 +1574,21 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) = tuple
       product15(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -1627,21 +1616,21 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) = tuple
       product15(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -1671,21 +1660,21 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) = tuple
       product15(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -1712,43 +1701,43 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) = tuple
       product15(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples16(
+  implicit class DecodingStateTuples16(
     tuple: Tuple16[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -1779,22 +1768,22 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) = tuple
       product16(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -1825,22 +1814,22 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) = tuple
       product16(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -1871,22 +1860,22 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) = tuple
       product16(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -1914,45 +1903,45 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16) = tuple
       product16(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples17(
+  implicit class DecodingStateTuples17(
     tuple: Tuple17[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -1984,23 +1973,23 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) = tuple
       product17(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -2032,23 +2021,23 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) = tuple
       product17(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -2080,23 +2069,23 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) = tuple
       product17(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -2127,47 +2116,47 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17) = tuple
       product17(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples18(
+  implicit class DecodingStateTuples18(
     tuple: Tuple18[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -2200,24 +2189,24 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) = tuple
       product18(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -2250,24 +2239,24 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) = tuple
       product18(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -2300,24 +2289,24 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) = tuple
       product18(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -2349,49 +2338,49 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18) = tuple
       product18(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples19(
+  implicit class DecodingStateTuples19(
     tuple: Tuple19[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -2425,25 +2414,25 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) = tuple
       product19(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -2477,25 +2466,25 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) = tuple
       product19(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -2529,25 +2518,25 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) = tuple
       product19(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -2580,51 +2569,51 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19) = tuple
       product19(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples20(
+  implicit class DecodingStateTuples20(
     tuple: Tuple20[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -2659,26 +2648,26 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) = tuple
       product20(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -2713,26 +2702,26 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) = tuple
       product20(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -2767,26 +2756,26 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) = tuple
       product20(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -2820,53 +2809,53 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20) = tuple
       product20(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples21(
+  implicit class DecodingStateTuples21(
     tuple: Tuple21[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -2902,27 +2891,27 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21) = tuple
       product21(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T],
-        t21.convert[U]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T],
+        t21.runDecoder[U]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -2958,27 +2947,27 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21) = tuple
       product21(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T],
-        t21.convert[U]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T],
+        t21.runDecoder[U]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -3014,27 +3003,27 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21) = tuple
       product21(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T],
-        t21.convert[U]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T],
+        t21.runDecoder[U]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -3069,55 +3058,55 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21) = tuple
       product21(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T],
-        t21.convert[U]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T],
+        t21.runDecoder[U]
       ).map(f.tupled)
     }
   }
 
-  implicit class DynamicReprTuples22(
+  implicit class DecodingStateTuples22(
     tuple: Tuple22[
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr,
-      DynamicRepr
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState,
+      DecodingState
     ]
   ) {
 
@@ -3154,28 +3143,28 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) = tuple
       product22(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T],
-        t21.convert[U],
-        t22.convert[V]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T],
+        t21.runDecoder[U],
+        t22.runDecoder[V]
       ).map(f.tupled).flatMap(_.toEither.left.map(t => WrappedError(t)))
     }
 
@@ -3212,28 +3201,28 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) = tuple
       product22(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T],
-        t21.convert[U],
-        t22.convert[V]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T],
+        t21.runDecoder[U],
+        t22.runDecoder[V]
       ).map(f.tupled).flatMap(_.toRight(NilSmartConstructorError))
     }
 
@@ -3270,28 +3259,28 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) = tuple
       product22(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T],
-        t21.convert[U],
-        t22.convert[V]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T],
+        t21.runDecoder[U],
+        t22.runDecoder[V]
       ).map(f.tupled).flatMap(_.left.map(WrappedError(_)))
     }
 
@@ -3327,28 +3316,28 @@ trait DynamicReprTuples {
     ): Result[RR] = {
       val (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22) = tuple
       product22(
-        t1.convert[A],
-        t2.convert[B],
-        t3.convert[C],
-        t4.convert[D],
-        t5.convert[E],
-        t6.convert[F],
-        t7.convert[G],
-        t8.convert[H],
-        t9.convert[I],
-        t10.convert[J],
-        t11.convert[K],
-        t12.convert[L],
-        t13.convert[M],
-        t14.convert[N],
-        t15.convert[O],
-        t16.convert[P],
-        t17.convert[Q],
-        t18.convert[R],
-        t19.convert[S],
-        t20.convert[T],
-        t21.convert[U],
-        t22.convert[V]
+        t1.runDecoder[A],
+        t2.runDecoder[B],
+        t3.runDecoder[C],
+        t4.runDecoder[D],
+        t5.runDecoder[E],
+        t6.runDecoder[F],
+        t7.runDecoder[G],
+        t8.runDecoder[H],
+        t9.runDecoder[I],
+        t10.runDecoder[J],
+        t11.runDecoder[K],
+        t12.runDecoder[L],
+        t13.runDecoder[M],
+        t14.runDecoder[N],
+        t15.runDecoder[O],
+        t16.runDecoder[P],
+        t17.runDecoder[Q],
+        t18.runDecoder[R],
+        t19.runDecoder[S],
+        t20.runDecoder[T],
+        t21.runDecoder[U],
+        t22.runDecoder[V]
       ).map(f.tupled)
     }
   }

@@ -16,7 +16,7 @@
 
 package bastion.derivation.decode
 import bastion.Decoder
-import bastion.DynamicRepr
+import bastion.DecodingState
 import bastion.IncorrectSubtype
 import bastion.Result
 import magnolia.CaseClass
@@ -26,18 +26,18 @@ trait DecodeDerivation {
   type Typeclass[T] = Decoder[T]
 
   def combine[T](ctx: CaseClass[Decoder, T]): Decoder[T] = new Decoder[T] {
-    override def from(g: DynamicRepr): Result[T] =
-      ctx.constructMonadic(param => param.typeclass.from(g.selectDynamic(param.label)))
+    override def from(state: DecodingState): Result[T] =
+      ctx.constructMonadic(param => param.typeclass.from(state.selectDynamic(param.label)))
   }
 
   def dispatch[T](ctx: SealedTrait[Decoder, T]): Decoder[T] = new Decoder[T] {
-    override def from(g: DynamicRepr): Result[T] =
+    override def from(state: DecodingState): Result[T] =
       ctx.subtypes
         .foldLeft(Option.empty[Result[T]]) { (res, sub) =>
           res match {
             case s @ Some(_) => s
             case None =>
-              sub.typeclass.from(g) match {
+              sub.typeclass.from(state) match {
                 case r @ Right(_) => Some(r)
                 case _            => None
               }

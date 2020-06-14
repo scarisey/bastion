@@ -15,13 +15,14 @@
  */
 
 package bastion
+
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.util.Success
 import scala.util.Try
 
-class DynamicReprTuplesTest extends AnyFlatSpec with Matchers {
+class DecodingStateTuplesTest extends AnyFlatSpec with Matchers {
   def sum22[T](wrap: Int => T)(
     field1: Int,
     field2: Int,
@@ -71,28 +72,28 @@ class DynamicReprTuplesTest extends AnyFlatSpec with Matchers {
         field22
     )
   val tuple22 = (
-    ValueDynamicRepr(1),
-    ValueDynamicRepr(2),
-    ValueDynamicRepr(3),
-    ValueDynamicRepr(4),
-    ValueDynamicRepr(5),
-    ValueDynamicRepr(6),
-    ValueDynamicRepr(7),
-    ValueDynamicRepr(8),
-    ValueDynamicRepr(9),
-    ValueDynamicRepr(10),
-    ValueDynamicRepr(11),
-    ValueDynamicRepr(12),
-    ValueDynamicRepr(13),
-    ValueDynamicRepr(14),
-    ValueDynamicRepr(15),
-    ValueDynamicRepr(16),
-    ValueDynamicRepr(17),
-    ValueDynamicRepr(18),
-    ValueDynamicRepr(19),
-    ValueDynamicRepr(20),
-    ValueDynamicRepr(21),
-    ValueDynamicRepr(22)
+    DecodingState.init(ValueDynamicRepr(1)),
+    DecodingState.init(ValueDynamicRepr(2)),
+    DecodingState.init(ValueDynamicRepr(3)),
+    DecodingState.init(ValueDynamicRepr(4)),
+    DecodingState.init(ValueDynamicRepr(5)),
+    DecodingState.init(ValueDynamicRepr(6)),
+    DecodingState.init(ValueDynamicRepr(7)),
+    DecodingState.init(ValueDynamicRepr(8)),
+    DecodingState.init(ValueDynamicRepr(9)),
+    DecodingState.init(ValueDynamicRepr(10)),
+    DecodingState.init(ValueDynamicRepr(11)),
+    DecodingState.init(ValueDynamicRepr(12)),
+    DecodingState.init(ValueDynamicRepr(13)),
+    DecodingState.init(ValueDynamicRepr(14)),
+    DecodingState.init(ValueDynamicRepr(15)),
+    DecodingState.init(ValueDynamicRepr(16)),
+    DecodingState.init(ValueDynamicRepr(17)),
+    DecodingState.init(ValueDynamicRepr(18)),
+    DecodingState.init(ValueDynamicRepr(19)),
+    DecodingState.init(ValueDynamicRepr(20)),
+    DecodingState.init(ValueDynamicRepr(21)),
+    DecodingState.init(ValueDynamicRepr(22))
   )
 
   it should "apply 22 DynamicRepr arguments to a total function" in {
@@ -115,20 +116,4 @@ class DynamicReprTuplesTest extends AnyFlatSpec with Matchers {
     tuple22.applyT(f) shouldEqual Right(253)
   }
 
-  it should "apply one DynamicRepr arguments to a total function" in {
-    ValueDynamicRepr(42).apply[Int, Int](_ + 2) shouldEqual Right(44)
-  }
-
-  it should "apply one DynamicRepr arguments to a function returning Option" in {
-    ValueDynamicRepr(42).applyO[Int, Int](x => Some(x + 2)) shouldEqual Right(44)
-  }
-
-  it should "apply one DynamicRepr arguments to a function returning Either" in {
-    ValueDynamicRepr(42).applyE[Int, String, Int](x => Right(x + 2)) shouldEqual Right(44)
-    ValueDynamicRepr(42).applyE[Int, String, Int](x => Left("an error")) shouldEqual Left(WrappedError("an error"))
-  }
-
-  it should "apply one DynamicRepr arguments to a function returning Try" in {
-    ValueDynamicRepr(42).applyT[Int, Int](x => Success(x + 2)) shouldEqual Right(44)
-  }
 }
