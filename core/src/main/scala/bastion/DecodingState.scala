@@ -19,22 +19,64 @@ package bastion
 import scala.util.Try
 import scala.language.dynamics
 
+/**
+ * Used in the decoder typeclass, it helps to propagate state through decoding, enabling helpful error reports, and simplifying instantiation of a decoder.
+ * You will find many usage examples in the [[Decoder]] object.
+ * <p><pre><code>
+ * val decodeInt: Decoder[Int] = instance { state =>
+ *     state.collect {
+ *        case ValueDynamicRepr(a) =>
+ *          a match {
+ *            case x: Int    => state.succeed(x)
+ *            case x: Short  => state.attempt(x.toInt)
+ *            case x: String => state.attempt(x.toInt)
+ *            case _         => state.fail
+ *          }
+ *     }
+ * }
+ * </code></pre></p>
+ */
 final case class DecodingState(aggregatedPath: Path, initialDynamicRepr: DynamicRepr, actualDynamicRepr: DynamicRepr)
     extends Dynamic {
   override def toString: String = s"applying ${aggregatedPath.show} on ${initialDynamicRepr} produces $actualDynamicRepr"
 
-  def succeed[T](t: T): Result[T]    = Right(t)
-  def fail[T]: Result[T]             = Left(IncorrectPath(actualDynamicRepr, this.toString))
+  /**
+   * Will terminate decoding with the value t.
+   */
+  def succeed[T](t: T): Result[T] = Right(t)
+
+  /**
+   * Will terminate decoding, raising an error with the current path, type and DynamicRepr being decoded.
+   */
+  def fail[T]: Result[T] = Left(IncorrectPath(this))
+
+  /**
+   * Will terminate decoding, with an error if =>T throw an exception (like with fail[T]), or a successful value otherwise.
+   */
   def attempt[T](t: => T): Result[T] = Try(t).fold(_ => this.fail[T], this.succeed)
+
+  /**
+   * Browse the attribute "field" of the current DynamicRepr being decoded. Can be chained to browse nested ProductDynamicRepr.
+   */
   def selectField(field: String): DecodingState = this.copy(
     aggregatedPath = aggregatedPath.selectDynamic(field),
     actualDynamicRepr = actualDynamicRepr.selectDynamic(field)
   )
+
+  /**
+   * Nice scala shortcut to selectField, enabling dynamic invocation.
+   */
   def selectDynamic(field: String): DecodingState = selectField(field)
-  def foreach[A](f: DecodingState => Result[A]): Iterable[Result[A]] =
+
+  /**
+   * Useful when you guess that the current DynamicRepr is an Iterable. It will loop on each item of an IterableDynamicRepr,
+   * accessible through a new decoding state for each item, and will return the monadic Result list of decoded items.
+   * It is intended to be used like a traverse function for an Iterable, combining all Results.
+   */
+  def foreach[A](f: DecodingState => Result[A]): Result[Iterable[A]] =
     actualDynamicRepr match {
       case IterableDynamicRepr(items) =>
-        items.zipWithIndex.map({
+        items.zipWithIndex.traverse {
           case (g, i) =>
             f(
               this.copy(
@@ -42,13 +84,19 @@ final case class DecodingState(aggregatedPath: Path, initialDynamicRepr: Dynamic
                 actualDynamicRepr = g
               )
             )
-        })
-      case _ => Iterable(f(this))
+        }
+      case _ => f(this).map(Iterable(_))
     }
 
+  /**
+   * Will invoke an instance of a Decoder[D] on the current DynamicRepr being decoded, as long as this instance is in the implicit scope.
+   */
   def runDecoder[D: Decoder]: Result[D] =
     implicitly[Decoder[D]].from(this)
 
+  /**
+   * Will apply the partial function f on the current DynamicRepr being decoded.
+   */
   def collect[T](f: PartialFunction[DynamicRepr, Result[T]]): Result[T] =
     f.applyOrElse(this.actualDynamicRepr, { _: DynamicRepr => this.fail[T] })
 

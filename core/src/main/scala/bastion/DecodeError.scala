@@ -33,15 +33,25 @@ sealed trait DecodeError {
 }
 
 /**
- * Thi error may occur when decoding a DynamicRepr to an ADT, and no subtype suits.
+ * This error may occur when decoding a DynamicRepr to an ADT, and no subtype suits.
  */
-case object IncorrectSubtype extends DecodeError
+case class IncorrectSubtype(typeTag: String, d: DynamicRepr) extends DecodeError {
+  override def toString: String = s"No matching subtypes of ${typeTag} for ${d.toString}"
+}
+
+/**
+ * This error may occur when you transform an existing decoder with collect method and the function you have given does not handle all cases.
+ *
+ */
+case class PartialFunctionCollectError(typeTag: String) extends DecodeError {
+  override def toString: String = s"Match error : transforming Decoder[$typeTag] with collect failed"
+}
 
 /**
  * This error may occur when attempting to select an incorrect field on a DynamicRepr.
  */
-final case class IncorrectPath(d: DynamicRepr, message: String) extends DecodeError {
-  override def toString: String = s"IncorrectPath: ${message} \n actualDynamicRepr: ${d})"
+final case class IncorrectPath(decodingState: DecodingState) extends DecodeError {
+  override def toString: String = s"IncorrectPath: ${decodingState.toString}"
 }
 
 /**

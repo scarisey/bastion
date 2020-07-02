@@ -15,21 +15,44 @@
  */
 
 package bastion
+import bastion.json._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import ujson._
-import bastion.json._
-import bastion.derivation.json._
 
 class uJsonSerializationTest extends AnyFlatSpec with Matchers {
   behavior of "uJson module when serializing"
-
   it should "serialize a case class" in {
-    val foo = Foo(42.0, FooString("aFoo"), List("baz", "bar"))
-    encodeAST[Foo](foo) shouldEqual Obj(("bar", Num(42.0)), ("baz", Obj(("foo", "aFoo"))), ("items", Arr(Str("baz"), Str("bar"))))
+    case class FooString(foo: String)
+    case class Foo(bar: Double, baz: FooString, items: List[String])
+
+    val foo    = Foo(42.0, FooString("aFoo"), List.apply("baz", "bar"))
+    val astFoo = foo.asJsonAst
+    astFoo shouldEqual Obj(("bar", Num(42.0)), ("baz", Obj(("foo", "aFoo"))), ("items", Arr(Str("baz"), Str("bar"))))
     val expectedJsonString = """{"bar":42,"baz":{"foo":"aFoo"},"items":["baz","bar"]}"""
-    encodeString[Foo](foo) shouldEqual expectedJsonString
+    foo.asJson shouldEqual expectedJsonString
+  }
+
+  it should "serialize a specific case of a sealed trait" in {
+    sealed trait Bar
+    case class BarA(fieldA: String) extends Bar
+    case class BarB(fieldB: Int)    extends Bar
+    case class FooBar(fieldBar: Bar)
+
+    BarA("bar").asJson shouldEqual """{"fieldA":"bar"}"""
+    BarB(42).asJson shouldEqual """{"fieldB":42}"""
+    FooBar(BarB(36)).asJson shouldEqual """{"fieldBar":{"fieldB":36}}"""
+  }
+
+  it should "serialize enum's like ADT" in {
+    sealed trait Baz
+    case object Enum1 extends Baz
+    case object Enum2 extends Baz
+    case object Enum3 extends Baz
+    case class FooBaz(fieldBaz: Baz)
+
+    FooBaz(Enum1).asJson shouldEqual """{"fieldBaz":"Enum1"}"""
+    FooBaz(Enum2).asJson shouldEqual """{"fieldBaz":"Enum2"}"""
+    FooBaz(Enum3).asJson shouldEqual """{"fieldBaz":"Enum3"}"""
   }
 }
-case class FooString(foo: String)
-case class Foo(bar: Double, baz: FooString, items: List[String])

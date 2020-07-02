@@ -26,6 +26,12 @@ object MappingNestedTypes extends App {
   case class SubTarget1(aString: String)
   case class SubTarget2(anInt: Int)
   case class Target(sub1: SubTarget1, sub2: SubTarget2)
+  case class Target2(field1: Int, field2: String)
 
   println(Source(SubSource1("foo"), SubSource2(42)).convert[Target])
+
+  implicit val decoderTarget: Decoder[Target2] =
+    Decoder.instance(g => (g.sub32.anInt, g.sub1.aString).apply(Target2.apply))
+
+  println(Source(SubSource1("foo"), SubSource2(42)).convert[Target2])
 }

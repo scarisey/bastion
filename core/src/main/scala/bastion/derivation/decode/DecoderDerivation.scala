@@ -22,7 +22,7 @@ import bastion.Result
 import magnolia.CaseClass
 import magnolia.SealedTrait
 
-trait DecodeDerivation {
+trait DecoderDerivation {
   type Typeclass[T] = Decoder[T]
 
   def combine[T](ctx: CaseClass[Decoder, T]): Decoder[T] = new Decoder[T] {
@@ -44,7 +44,7 @@ trait DecodeDerivation {
           }
         } match {
         case Some(value) => value
-        case None        => Left(IncorrectSubtype)
+        case None        => Left(IncorrectSubtype(ctx.typeName.short, state.actualDynamicRepr))
       }
 
   }

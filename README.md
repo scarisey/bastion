@@ -6,7 +6,7 @@
 
 Bastion is a library to convert types, using when needed custom defined smart constructors. This library should be well suited for Domain Driven Designed applications.
 
-Based on [Magnolia](https://github.com/propensive/magnolia) for typeclass derivation, and [uJson](https://www.lihaoyi.com/post/uJsonfastflexibleandintuitiveJSONforScala.html) for JSON serialization/deserialization.
+Based on [Magnolia](https://github.com/propensive/magnolia) for typeclass derivation, and parts of [uPickle](https://github.com/lihaoyi/upickle) for JSON serialization/deserialization in bastion-ujson module.
 
 ## Disclaimer
 
@@ -39,14 +39,14 @@ Converting from a data type A to another data type B could have been represented
 Derive this typeclass on two type parameters at the same time seems not trivial with Shapeless, and I just don't find how with Magnolia.
 As I was trying to implement it, the obvious way for me was to encode the data type A in a simplistic representation, for which the contract is known
 by any decoder. Since the majority of the translating labor is to convert fields from a product type A to fields of the same name of a type B, 
-I just use the dynamics feature of Scala to achieve this translating.
-So yes, this library will warn you of **mismatch on field names only at runtime**.
+I just use the dynamics feature of Scala to achieve this translation.
 
-So there are three types that you will manipulate through this library : 
+So there are four types that you will manipulate through this library : 
 
   * ***DynamicRepr***, which represents the encoding of the type you want to convert from
   * ***DynamicReprEncode***, which is the contract for instances of encoders from a specific type to DynamicRepr 
   * ***Decoder***, which is the contract for instances of decoders from any DynamicRepr to a specific type
+  * ***DecodingState***, that you may need if you implement your own decoder, which represents the current state of a decoder.
   
 It should be enough the majority of time to make the imports below and call the convert method that will use instance of Encode and Decode in the implicit scope : 
 ```scala
@@ -68,7 +68,10 @@ For more advanced usage, please see below, and the examples [here](https://githu
 
 ### Sbt
 ```sbt
-libraryDependencies += "dev.scarisey" %% "bastion-core" % "X.Y.Z"
+libraryDependencies ++= Seq(
+  "dev.scarisey" %% "bastion-core" % "X.Y.Z",
+  "dev.scarisey" %% "bastion-ujson" % "X.Y.Z"
+)
 ```
 
 ## Usages
@@ -89,7 +92,8 @@ final case class PersonExternal(
   )
 final case class Person(id: String, firstName: String, lastName: String, birthdate: LocalDate)
 
-val person:Person = PersonExternal("anId", "firstName", "lastName", LocalDate.parse("1985-01-12"), 44.846565, -0.567351).convert[Person]
+val person = PersonExternal("anId", "firstName", "lastName", LocalDate.parse("1985-01-12"), 44.846565, -0.567351).convert[Person]
+//Right(Person(anId,firstName,lastName,1985-01-12))
 ```
 
 ### Convert to an ADT
@@ -109,7 +113,7 @@ case class B2(aField2: Int)      extends B
 
 A1("foo").convert[B] // Right(B1("foo"))
 A2(42).convert[B] // Right(B2(42))
-A3(2.0).convert[B] //Left(IncorrectSubtype)
+A3(2.0).convert[B] //Left(No matching subtypes of B for ProductDynamicRepr(A3(2.0)))
 ```
 
 ### Use your smart constructors
@@ -183,6 +187,7 @@ You can check [Decoder](https://github.com/scarisey/bastion/blob/master/core/src
 ```scala
 import bastion._
 import derivation.dynamicrepr.auto._
+import bastion.derivation.decode.auto._
 
 case class SubSource1(aString: String)
 case class SubSource2(anInt: Int)
@@ -203,8 +208,7 @@ implicit val decoderTarget: Decoder[Target] =
   Decoder.instance(g => (g.sub32.anInt, g.sub1.aString).apply(Target.apply))
 
 Source(SubSource1("foo"), SubSource2(42)).convert[Target]
-    //Left(IncorrectPath: applying root.sub32.anInt on ProductDynamicRepr(Source(SubSource1(foo),SubSource2(42))) produces NilDynamicRepr
-    // actualDynamicRepr: NilDynamicRepr))
+    //Left(IncorrectPath: applying root.sub32.anInt on ProductDynamicRepr(Source(SubSource1(foo),SubSource2(42))) produces NilDynamicRepr)
 ```
 
 ### Json serialization
@@ -215,8 +219,8 @@ case class FooString(foo: String)
 case class Foo(bar: Double, baz: FooString, items: List[String])
 
 val foo = Foo(42.0, FooString("aFoo"), List("baz", "bar"))
-encodeString[Foo](foo)// {"bar":42,"baz":{"foo":"aFoo"},"items":["baz","bar"]}
-encodeAST[Foo](foo) //the uJson Value tree
+foo.asJson// {"bar":42,"baz":{"foo":"aFoo"},"items":["baz","bar"]}
+foo.asJsonAst //the uJson Value tree
 ```
 
 ### Json deserialization
@@ -228,12 +232,11 @@ import derivation.decode.auto._
 case class Foo(aField1:String,aField2:Double)
 val aJson = """{"aField2":33.0,"aField1":"foo"}"""
 
-decode[Foo](aJson) //Right(Foo(foo,33.0))
+decodeJson[Foo](aJson) //Right(Foo(foo,33.0))
 ```
 
 ## Things to do, and perspectives
 
-  * Some benchmarks need to be done.
   * There are still too much imports to do before being able to convert types.
   * I would love to verify at compile time the shape of a DynamicRepr, but I still don't know how to do unless using Shapeless (and replace DynmicRepr by HList). I also guess the [issue](https://github.com/propensive/magnolia/issues/238) about inlining combine and dispatch could adress this problem.
 

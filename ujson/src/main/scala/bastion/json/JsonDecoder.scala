@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package bastion
-
+package bastion.json
+import bastion.DynamicRepr
+import bastion.IterableDynamicRepr
+import bastion.NilDynamicRepr
+import bastion.ProductDynamicRepr
+import bastion.ValueDynamicRepr
 import ujson.JsVisitor
 import ujson.Readable
 import upickle.core.ArrVisitor
@@ -26,7 +30,7 @@ import upickle.core.Visitor
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-object uJsonDynamicRepr {
+object JsonDecoder {
   object JsonVisitor extends JsVisitor[DynamicRepr, DynamicRepr] {
     override def visitArray(length: Int, index: Int): ArrVisitor[DynamicRepr, DynamicRepr] = new JsonArrayVisitor
 

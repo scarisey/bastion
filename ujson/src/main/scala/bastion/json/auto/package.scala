@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package bastion
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
+package bastion.json
 
-class PathTest extends AnyFlatSpec with Matchers {
-
-  it should "aggregate path selection" in {
-
-    Path.root.field1.field2.item(42).field3.path shouldEqual List("root", "field1", "field2", "[42]", "field3")
-  }
-
+package object auto {
+  sealed trait JsonEncoderAutoDerivation
+  implicit val auto = new JsonEncoderAutoDerivation {}
 }

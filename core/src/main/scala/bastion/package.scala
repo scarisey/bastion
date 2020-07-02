@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import scala.language.dynamics
-
 package object bastion extends DecodingStateTuples {
   type Result[T] = Either[DecodeError, T]
 

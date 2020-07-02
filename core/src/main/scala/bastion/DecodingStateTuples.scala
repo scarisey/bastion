@@ -22,6 +22,48 @@ import scala.util.Try
 
 trait DecodingStateTuples {
 
+  implicit class DecodingStateOps(state: DecodingState) {
+
+    /**
+     * For a function f, mapping the type A to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instances of Decoder for type A enabling decoding of complex types.
+     * The eventual throwable error will be wrapped in a [[WrappedError]].
+     */
+    def applyT[A, RR](f: A => Try[RR])(
+      implicit decA: Decoder[A]
+    ): Result[RR] =
+      state.runDecoder[A].flatMap(r => f(r).toEither.left.map(t => WrappedError(t)))
+
+    /**
+     * For a function f, mapping the type A to maybe RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for type A enabling decoding of complex types.
+     * The absence of value RR will be represented by a [[NilSmartConstructorError]].
+     */
+    def applyO[A, RR](f: A => Option[RR])(
+      implicit decA: Decoder[A]
+    ): Result[RR] =
+      state.runDecoder[A].flatMap(r => f(r).toRight(NilSmartConstructorError))
+
+    /**
+     * For a function f, mapping the type A to RR, and that can fail, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
+     * The eventual error RL will be wrapped in a [[WrappedError]].
+     */
+    def applyE[A, RL, RR](f: A => Either[RL, RR])(
+      implicit decA: Decoder[A]
+    ): Result[RR] =
+      state.runDecoder[A].flatMap(r => f(r).left.map(WrappedError(_)))
+
+    /**
+     * For a function f, mapping type A to RR, create an instance of Decoder that will map a [[DynamicRepr]] to RR.
+     * This method can use your own instance of Decoder for type A, enabling decoding of complex types.
+     */
+    def apply[A, RR](f: A => RR)(
+      implicit decA: Decoder[A]
+    ): Result[RR] =
+      state.runDecoder[A].map(f)
+  }
+
   // /start/producthelper/ - DO NOT REMOVE
 // $COVERAGE-OFF$should find a way to test all of them ...
 

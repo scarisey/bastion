@@ -28,7 +28,7 @@ import java.util.UUID
 import bastion.DynamicReprEncode.macroDeriveEncode
 import bastion.derivation.dynamicrepr.AutoUnlock
 import bastion.derivation.dynamicrepr.Configuration
-import bastion.derivation.dynamicrepr.EncodeDerivation
+import bastion.derivation.dynamicrepr.EncoderDerivation
 import magnolia._
 
 import scala.concurrent.duration.Duration
@@ -41,7 +41,7 @@ import scala.reflect.macros.whitebox
 trait DynamicReprEncode[-A] {
   def to(a: A): DynamicRepr
 }
-object DynamicReprEncode extends EncodeDerivation with LowPriorityImplicits {
+object DynamicReprEncode extends EncoderDerivation with LowPriorityImplicits {
   /*
   Any val implicits
    */

@@ -21,7 +21,7 @@ import magnolia._
 
 import scala.language.experimental.macros
 
-package object semiauto extends EncodeDerivation {
+package object semiauto extends EncoderDerivation {
   implicit val configuration: Configuration = Configuration.default
   def deriveEncode[T]: DynamicReprEncode[T] = macro Magnolia.gen[T]
 }

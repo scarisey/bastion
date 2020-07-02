@@ -16,8 +16,8 @@
 
 package bastion
 
-import bastion.uJsonDynamicRepr.parse
-import bastion.json.decode
+import bastion.json.JsonDecoder.parse
+import bastion.json.decodeJson
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -125,10 +125,10 @@ class uJsonDeserializationTest extends AnyFlatSpec with Matchers {
       state.foreach { state =>
         i += 1
         state.selectField(s"foo$i").runDecoder[Foo]
-      }.traverse(identity)
+      }.map(_.toList)
     }
 
-    val decodedItems = decode[List[Foo]](mixedItems)
+    val decodedItems = decodeJson[List[Foo]](mixedItems)
 
     decodedItems.isRight shouldBe true
     decodedItems.foreach(_ should have size 10)

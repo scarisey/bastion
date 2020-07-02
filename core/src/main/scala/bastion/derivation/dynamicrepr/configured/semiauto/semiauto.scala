@@ -17,11 +17,11 @@
 package bastion.derivation.dynamicrepr.configured
 
 import bastion._
-import bastion.derivation.dynamicrepr.EncodeDerivation
+import bastion.derivation.dynamicrepr.EncoderDerivation
 import magnolia._
 
 import scala.language.experimental.macros
 
-package object semiauto extends EncodeDerivation {
+package object semiauto extends EncoderDerivation {
   def deriveEncode[T]: DynamicReprEncode[T] = macro Magnolia.gen[T]
 }

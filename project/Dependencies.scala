@@ -9,9 +9,11 @@ object Dependencies {
   lazy val mercator = "com.propensive" %% "mercator" % "0.2.1"
 
   /* ujson */
-  lazy val ujson = "com.lihaoyi" %% "upickle" % "1.1.0"
+  lazy val ujson = "com.lihaoyi" %% "ujson" % "1.1.0"
 
-  /* circe, for benchmarks */
+  //BENCHMARK DEPENDENCIES
+
+  /* circe */
   lazy val circe = Seq(
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",
@@ -20,4 +22,12 @@ object Dependencies {
   ).map(_ % "0.13.0")
 
   lazy val circeMagnolia = "io.circe" %% "circe-magnolia-derivation" % "0.6.1"
+
+  /* upickle */
+
+  lazy val upickle = "com.lihaoyi" %% "upickle" % "1.1.0"
+
+  /* Jackson */
+
+  lazy val jackson = "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.1"
 }

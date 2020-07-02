@@ -18,7 +18,7 @@ object BastionConversion extends Conversion[DecodeError]{
 
   def encode(person: ExternalPerson)(implicit encode: DynamicReprEncode[ExternalPerson]):DynamicRepr = encode.to(person)
 
-  def decodeFromJson(json:String):Either[DecodeError,Person] = decode[Person](json)
+  def decodeFromJson(json:String):Either[DecodeError,Person] = decodeJson[Person](json)
 
-  def encode(person: Person)(implicit writer:upickle.default.Writer[Person]) = encodeString[Person](person)
+  def encode(person: Person)(implicit encode: JsonEncoder[Person]): String = encodeJson[Person](person)
 }

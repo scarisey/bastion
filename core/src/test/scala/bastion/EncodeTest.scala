@@ -75,6 +75,18 @@ class EncodeTest extends AnyFlatSpec with Matchers {
     repr.aString shouldBe ValueDynamicRepr("a string")
   }
 
+  it should "convert an enum's ADT to a dynamic representation" in {
+    sealed trait AnEnum
+    object AnEnum {
+      case object Enum1 extends AnEnum
+      case object Enum2 extends AnEnum
+    }
+
+    val encode = implicitly[DynamicReprEncode[AnEnum]]
+    encode.to(AnEnum.Enum1) shouldEqual ValueDynamicRepr("Enum1")
+    encode.to(AnEnum.Enum2) shouldEqual ValueDynamicRepr("Enum2")
+  }
+
   it should "convert a recursive ADT to a dynamic representation" in {
     sealed trait Rec
     final case class RecM(text: String)  extends Rec

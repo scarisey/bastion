@@ -22,13 +22,13 @@ import bastion.derivation.decode.auto._
 object AdtMapping extends App {
   case class RecA1(aField1: String)
   case class RecA2(aField2: Int)
-  case class RecA3(aDouble: Double)
+  case class RecA3(aField3: Double)
   sealed trait RecB
-  case class RecB0(aBoolean: Boolean) extends RecB
-  case class RecB1(aField1: String)   extends RecB
-  case class RecB2(aField2: Int)      extends RecB
+  case class RecB0(aField4: Boolean) extends RecB
+  case class RecB1(aField1: String)  extends RecB
+  case class RecB2(aField2: Int)     extends RecB
 
   println(RecA1("foo").convert[RecB])
   println(RecA2(42).convert[RecB])
-  println(RecA3(2.0).convert[RecB]) //will not convert since there is no subtype with aDouble field
+  println(RecA3(2.0).convert[RecB]) //Left(No matching subtypes of RecB for ProductDynamicRepr(RecA3(2.0)))
 }

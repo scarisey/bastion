@@ -17,7 +17,6 @@
 package dev.scarisey.bastionexamples
 import bastion._
 import json._
-import derivation.json._
 import derivation.decode.auto._
 
 object uJsonFeature extends App {
@@ -35,10 +34,10 @@ object uJsonFeature extends App {
                  |  }
                  |}""".stripMargin
 
-  val foo = decode[RootFoo](aJson)
+  val foo = decodeJson[RootFoo](aJson)
   println(foo) //Right(RootFoo(NestedFoo(806.0,FooString(foo again, but not the same),List(first, second, third))))
 
-  val serializedFoo = foo.map(encodeString[RootFoo](_))
+  val serializedFoo = foo.map(encodeJson[RootFoo](_))
   println(
     serializedFoo
   ) //Right({"foo":{"bar":806,"baz":{"foo":"foo again, but not the same"},"items":["first","second","third"]}})

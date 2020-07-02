@@ -20,6 +20,6 @@ import magnolia.Magnolia
 
 import scala.language.experimental.macros
 
-package object semiauto extends DecodeDerivation {
+package object semiauto extends DecoderDerivation {
   def deriveDecode[T]: Decoder[T] = macro Magnolia.gen[T]
 }

@@ -19,22 +19,18 @@ package bastion
 import java.io.File
 import java.net.URI
 import java.net.URL
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.OffsetDateTime
-import java.time.OffsetTime
+import java.time._
 import java.util.UUID
 
-import scala.concurrent.duration.Duration
-import scala.util.Try
 import bastion.derivation.decode.AutoUnlockDecode
-import bastion.derivation.decode.DecodeDerivation
+import bastion.derivation.decode.DecoderDerivation
 import magnolia._
 
+import scala.concurrent.duration.Duration
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
+import scala.util.Try
+import scala.reflect.runtime.universe._
 
 /**
  * Typeclass representing a decoder from a DynamicRepr to a type T.
@@ -43,8 +39,18 @@ import scala.reflect.macros.whitebox
  */
 trait Decoder[T] {
   def from(decodingState: DecodingState): Result[T]
+
+  def collect[U: WeakTypeTag](f: PartialFunction[T, U]): Decoder[U] =
+    Decoder.instance(state =>
+      this
+        .from(state)
+        .flatMap(t =>
+          if (f.isDefinedAt(t)) Right(f(t)) else Left(PartialFunctionCollectError(implicitly[WeakTypeTag[U]].tpe.toString))
+        )
+    )
+
 }
-object Decoder extends DecodeDerivation {
+object Decoder extends DecoderDerivation {
 
   /**
    * Create your own typeclass instance with this method.
@@ -363,7 +369,10 @@ object Decoder extends DecodeDerivation {
   implicit def decoderOption[A: Decoder]: Decoder[Option[A]] = instance { decodeState =>
     decodeState.collect {
       case ProductDynamicRepr(_) | IterableDynamicRepr(_) | ValueDynamicRepr(_) =>
-        decodeState.runDecoder[A].map(Some(_))
+        decodeState.runDecoder[A] match {
+          case Left(_)      => Right(None)
+          case Right(value) => Right(Some(value))
+        }
       case NilDynamicRepr => decodeState.succeed(None)
     }
 
@@ -384,7 +393,7 @@ object Decoder extends DecodeDerivation {
       case ValueDynamicRepr(_) | ProductDynamicRepr(_) =>
         decodeState.runDecoder[A].map(List(_))
       case IterableDynamicRepr(_) =>
-        decodeState.foreach(state => state.runDecoder[A]).traverse(identity)
+        decodeState.foreach(state => state.runDecoder[A]).map(_.toList)
     }
   }
 

@@ -19,7 +19,6 @@ package bastion
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.util.Success
 import scala.util.Try
 
 class DecodingStateTuplesTest extends AnyFlatSpec with Matchers {
