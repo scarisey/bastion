@@ -29,5 +29,6 @@ object Dependencies {
 
   /* Jackson */
 
-  lazy val jackson = "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.1"
+  lazy val jackson =Seq( "com.fasterxml.jackson.core" % "jackson-databind","com.fasterxml.jackson.module" % "jackson-module-scala_2.12"
+  ).map(_ % "2.11.1")
 }
