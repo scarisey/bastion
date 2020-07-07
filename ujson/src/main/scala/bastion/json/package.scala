@@ -18,15 +18,20 @@ package bastion
 
 import bastion.json.JsonDecoder.parse
 import ujson.Readable
-import ujson.Value
 
 package object json {
-  def decodeJson[T: Decoder](t: Readable): Result[T]                 = parse(t).convert[T]
-  def encodeJsonAst[T](t: T)(implicit encode: JsonEncoder[T]): Value = encode.write(t)
-  def encodeJson[T](t: T)(implicit encode: JsonEncoder[T]): String   = encode.write(t).render()
+
+  /**
+   * Decode a JSON using uJson and Bastion. The input must be [[Readable]].
+   */
+  def decodeJson[T: Decoder](t: Readable): Result[T] = parse(t).convert[T]
+
+  /**
+   * Encode the input T to String, using uJson.
+   */
+  def encodeJson[T](t: T)(implicit encode: BasicJsonEncoder[T]): String = encode.write(t)
 
   implicit class EncodeToJson[A](a: A) {
-    def asJson(implicit encode: JsonEncoder[A]): String   = encode.write(a).render()
-    def asJsonAst(implicit encode: JsonEncoder[A]): Value = encode.write(a)
+    def asJson(implicit encode: BasicJsonEncoder[A]): String = encode.write(a)
   }
 }

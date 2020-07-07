@@ -5,22 +5,22 @@
 These results help me to investigate where are the bottlenecks in Bastion implementation, not to incriminate other libraries.
 
 ```text
-Benchmark                                                         Mode  Cnt    Score    Error   Units
-CirceVsUpickleVsJacksonVsBastion.decodeJsonUsingBastionAndUJson  thrpt   10    1,170 ±  0,009  ops/us
-CirceVsUpickleVsJacksonVsBastion.decodeJsonUsingCirceGenerics    thrpt   10    1,276 ±  0,014  ops/us
-CirceVsUpickleVsJacksonVsBastion.decodeJsonUsingCirceMagnolia    thrpt   10    0,847 ±  0,008  ops/us
-CirceVsUpickleVsJacksonVsBastion.decodeJsonUsingCirceOptics      thrpt   10    1,424 ±  0,029  ops/us
-CirceVsUpickleVsJacksonVsBastion.decodeUsingJackson              thrpt   10    1,485 ±  0,004  ops/us
-CirceVsUpickleVsJacksonVsBastion.decodeUsingUPickle              thrpt   10    1,769 ±  0,038  ops/us
-CirceVsUpickleVsJacksonVsBastion.encodeJsonUsingBastion          thrpt   10    1,046 ±  0,014  ops/us
-CirceVsUpickleVsJacksonVsBastion.encodeJsonUsingCirce            thrpt   10    1,535 ±  0,018  ops/us
-CirceVsUpickleVsJacksonVsBastion.encodeUsingJackson              thrpt   10    1,582 ±  0,020  ops/us
-CirceVsUpickleVsJacksonVsBastion.encodeUsingUPickle              thrpt   10    2,950 ±  0,073  ops/us
-EncodeDynamicRepr.encodeToDynamicReprWithAutoDerivedEncoder      thrpt   10  407,005 ±  5,798  ops/us
-EncodeDynamicRepr.specificManualEncodeToDynamicRepr              thrpt   10  473,455 ± 18,917  ops/us
-ManualVsBastion.convertManually                                  thrpt   10    2,881 ±  0,011  ops/us
-ManualVsBastion.convertUsingDerivedEncodersAndDecoders           thrpt   10    1,538 ±  0,025  ops/us
-ManualVsBastion.decodeDynamicReprUsingDerivedDecoders            thrpt   10    1,790 ±  0,026  ops/us
+[info] Benchmark                                                         Mode  Cnt    Score   Error   Units
+[info] CirceVsUpickleVsJacksonVsBastion.decodeJsonUsingBastionAndUJson  thrpt   10    1,170 ± 0,013  ops/us
+[info] CirceVsUpickleVsJacksonVsBastion.decodeJsonUsingCirceGenerics    thrpt   10    1,268 ± 0,010  ops/us
+[info] CirceVsUpickleVsJacksonVsBastion.decodeJsonUsingCirceMagnolia    thrpt   10    0,816 ± 0,012  ops/us
+[info] CirceVsUpickleVsJacksonVsBastion.decodeJsonUsingCirceOptics      thrpt   10    1,455 ± 0,005  ops/us
+[info] CirceVsUpickleVsJacksonVsBastion.decodeUsingJackson              thrpt   10    1,465 ± 0,022  ops/us
+[info] CirceVsUpickleVsJacksonVsBastion.decodeUsingUPickle              thrpt   10    1,724 ± 0,022  ops/us
+[info] CirceVsUpickleVsJacksonVsBastion.encodeJsonUsingBastion          thrpt   10    1,927 ± 0,006  ops/us
+[info] CirceVsUpickleVsJacksonVsBastion.encodeJsonUsingCirce            thrpt   10    1,408 ± 0,018  ops/us
+[info] CirceVsUpickleVsJacksonVsBastion.encodeUsingJackson              thrpt   10    1,654 ± 0,013  ops/us
+[info] CirceVsUpickleVsJacksonVsBastion.encodeUsingUPickle              thrpt   10    2,163 ± 0,005  ops/us
+[info] EncodeDynamicRepr.encodeToDynamicReprWithAutoDerivedEncoder      thrpt   10  377,705 ± 4,267  ops/us
+[info] EncodeDynamicRepr.specificManualEncodeToDynamicRepr              thrpt   10  356,985 ± 3,441  ops/us
+[info] ManualVsBastion.convertManually                                  thrpt   10    2,843 ± 0,044  ops/us
+[info] ManualVsBastion.convertUsingDerivedEncodersAndDecoders           thrpt   10    1,475 ± 0,022  ops/us
+[info] ManualVsBastion.decodeDynamicReprUsingDerivedDecoders            thrpt   10    1,886 ± 0,032  ops/us
 ```
 
 Compared to a hand written converter, bastion seems to be 2x times slower.

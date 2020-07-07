@@ -118,6 +118,22 @@ class DecodeTest extends AnyFlatSpec with Matchers {
 
     SomeType1.convert[AnEnum] shouldEqual Right(AnEnum.SomeType1)
     SomeType3.convert[AnEnum] shouldEqual Left(PartialFunctionCollectError("AnEnum"))
+
+    sealed trait AnEnum2
+    object AnEnum2 {
+      case object SomeType1 extends AnEnum2
+      case object SomeType2 extends AnEnum2
+      case object SomeType3 extends AnEnum2
+    }
+
+    implicit val decodeAnEnum2: Decoder[AnEnum2] = Decoder.decodeString.map {
+      case "SomeType1" => AnEnum2.SomeType1
+      case "SomeType2" => AnEnum2.SomeType2
+      case "SomeType3" => AnEnum2.SomeType3
+    }
+
+    SomeType1.convert[AnEnum2] shouldEqual Right(AnEnum2.SomeType1)
+    SomeType3.convert[AnEnum2] shouldEqual Right(AnEnum2.SomeType3)
   }
 
   it should "convert from a recursive structure to another one" in {
@@ -260,6 +276,19 @@ class DecodeTest extends AnyFlatSpec with Matchers {
     case class RecordA(field1: Int, field2: String)
 
     aMap.convert[RecordA] shouldBe Right(RecordA(42, "description"))
+  }
+
+  it should "convert to Array[Byte] in different cases" in {
+    case class RecA(anArrayByte: Int)
+    case class RecBSource(anArrayByte: Array[Byte])
+    case class RecBTarget(anArrayByte: Array[Byte])
+
+    val actualNumber = RecA(42).convert[RecBTarget]
+    actualNumber.fold(_ => fail(), v => v.anArrayByte.apply(0) shouldBe 42)
+    List(42, 43).convert[Array[Byte]].fold(_ => fail(), v => v should be(Array(42.toByte, 43.toByte)))
+
+    val actual = RecBSource("foo".getBytes).convert[RecBTarget]
+    actual.fold(_ => fail(), v => new String(v.anArrayByte) shouldBe "foo")
   }
 
   it should "convert those specific instances - same shape and types, just verifying decode(encode(t)) = t" in {

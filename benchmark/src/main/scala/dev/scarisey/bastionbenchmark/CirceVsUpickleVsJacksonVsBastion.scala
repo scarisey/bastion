@@ -27,16 +27,16 @@ import bastion.json._
 @State(Scope.Benchmark)
 class CirceVsUpickleVsJacksonVsBastion {
   val aJson = """{"name":"John","birthdate":"1985-01-01"}"""
-  val aPerson = for {
+  val aPerson = (for {
     name <- Name("John")
     birthdate <- Birthdate(LocalDate.of(1985, 1, 1))
-  } yield Person(name, birthdate)
+  } yield Person(name, birthdate)).fold(t=>throw new IllegalStateException(t.toString),identity)
 
   implicit val circeNameEncoder: Encoder[Name] = Encoder.encodeString.contramap(_.toString)
   implicit val circeBirthdateEncoder: Encoder[Birthdate] = Encoder.encodeString.contramap(_.toString)
 
   val circePersonEncoder: Encoder[Person] = deriveEncoder[Person]
-  val bastionJsonEncoder = JsonEncoder.deriveJsonEncoder[Person]
+  val bastionJsonEncoder = BasicJsonEncoder.deriveBasicJsonEncoder[Person]
 
   @Benchmark
   def decodeJsonUsingCirceOptics(): Unit = CirceConversion.decodeUsingOptics(aJson)
@@ -51,19 +51,19 @@ class CirceVsUpickleVsJacksonVsBastion {
   def decodeJsonUsingBastionAndUJson(): Unit = BastionConversion.decodeFromJson(aJson)
 
   @Benchmark
-  def encodeJsonUsingCirce(): Unit = aPerson.map(CirceConversion.encode(_)(circePersonEncoder))
+  def encodeJsonUsingCirce(): Unit = CirceConversion.encode(aPerson)(circePersonEncoder)
 
   @Benchmark
-  def encodeJsonUsingBastion(): Unit = aPerson.map(BastionConversion.encode(_)(bastionJsonEncoder))
+  def encodeJsonUsingBastion(): Unit = BastionConversion.encode(aPerson)(bastionJsonEncoder)
 
   @Benchmark
-  def encodeUsingJackson(): Unit = aPerson.map(JacksonConversion.encode)
+  def encodeUsingJackson(): Unit = JacksonConversion.encode(aPerson)
 
   @Benchmark
   def decodeUsingJackson(): Unit = JacksonConversion.decode(aJson)
 
   @Benchmark
-  def encodeUsingUPickle(): Unit = aPerson.map(UPickleConversion.encode)
+  def encodeUsingUPickle(): Unit = UPickleConversion.encode(aPerson)
 
   @Benchmark
   def decodeUsingUPickle(): Unit = UPickleConversion.decode(aJson)

@@ -40,14 +40,24 @@ import scala.reflect.runtime.universe._
 trait Decoder[T] {
   def from(decodingState: DecodingState): Result[T]
 
+  /**
+   * Create an instance of Decoder[U] from a Decoder[T], using a partial function T=>U.
+   * Inputs where the function is not defined will result in a PartialFunctionCollectError.
+   */
   def collect[U: WeakTypeTag](f: PartialFunction[T, U]): Decoder[U] =
     Decoder.instance(state =>
       this
         .from(state)
         .flatMap(t =>
-          if (f.isDefinedAt(t)) Right(f(t)) else Left(PartialFunctionCollectError(implicitly[WeakTypeTag[U]].tpe.toString))
+          if (f.isDefinedAt(t)) state.succeed(f(t))
+          else Left(PartialFunctionCollectError(implicitly[WeakTypeTag[U]].tpe.toString))
         )
     )
+
+  /**
+   * Create an instance of Decoder[U] from a Decoder[T], using a total function T=>U.
+   */
+  def map[U](f: T => U): Decoder[U] = Decoder.instance(state => this.from(state).map(f))
 
 }
 object Decoder extends DecoderDerivation {
@@ -94,9 +104,25 @@ object Decoder extends DecoderDerivation {
     state.collect {
       case ValueDynamicRepr(a) =>
         a match {
-          case x: Byte => state.succeed(x)
-          case _       => state.fail
+          case x: Byte   => state.succeed(x)
+          case c: Char   => state.succeed(c.toByte)
+          case x: Short  => state.succeed(x.toByte)
+          case x: Int    => state.succeed(x.toByte)
+          case x: Long   => state.succeed(x.toByte)
+          case x: Float  => state.succeed(x.toByte)
+          case x: Double => state.succeed(x.toByte)
+          case _         => state.fail
         }
+    }
+  }
+
+  implicit val decoderByteArray: Decoder[Array[Byte]] = instance { decodeState =>
+    decodeState.collect {
+      case ValueDynamicRepr(a: Array[Byte]) => decodeState.succeed(a)
+      case ValueDynamicRepr(_) | ProductDynamicRepr(_) =>
+        decodeByte.from(decodeState).map(a => Array(a))
+      case IterableDynamicRepr(_) =>
+        decodeState.foreach(state => decodeByte.from(state)).map(_.toArray)
     }
   }
 
@@ -107,6 +133,9 @@ object Decoder extends DecoderDerivation {
           case x: Int    => state.succeed(x)
           case x: Short  => state.attempt(x.toInt)
           case x: String => state.attempt(x.toInt)
+          case x: Double => state.attempt(x.toInt)
+          case x: Long   => state.attempt(x.toInt)
+          case x: Float  => state.attempt(x.toInt)
           case _         => state.fail
         }
     }
@@ -118,6 +147,10 @@ object Decoder extends DecoderDerivation {
         a match {
           case x: Short  => state.succeed(x)
           case x: String => state.attempt(x.toShort)
+          case x: Int    => state.attempt(x.toShort)
+          case x: Double => state.attempt(x.toShort)
+          case x: Long   => state.attempt(x.toShort)
+          case x: Float  => state.attempt(x.toShort)
           case _         => state.fail
         }
     }
@@ -131,6 +164,8 @@ object Decoder extends DecoderDerivation {
           case x: Int    => state.attempt(x.toLong)
           case x: Short  => state.attempt(x.toLong)
           case x: String => state.attempt(x.toLong)
+          case x: Float  => state.attempt(x.toLong)
+          case x: Double => state.attempt(x.toLong)
           case _         => state.fail
         }
     }
@@ -141,6 +176,7 @@ object Decoder extends DecoderDerivation {
       case ValueDynamicRepr(a) =>
         a match {
           case x: Float  => state.succeed(x)
+          case x: Double => state.attempt(x.toFloat)
           case x: Int    => state.attempt(x.toFloat)
           case x: Short  => state.attempt(x.toFloat)
           case x: Long   => state.attempt(x.toFloat)
@@ -154,8 +190,9 @@ object Decoder extends DecoderDerivation {
     state.collect {
       case ValueDynamicRepr(a) =>
         a match {
-          case x: Char => state.succeed(x)
-          case _       => state.fail
+          case x: Char   => state.succeed(x)
+          case x: String => state.attempt(x.charAt(0))
+          case _         => state.fail
         }
     }
   }
@@ -209,6 +246,8 @@ object Decoder extends DecoderDerivation {
           case x: Short  => state.succeed(BigInt(x))
           case x: Long   => state.succeed(BigInt(x))
           case x: String => state.attempt(BigInt(x))
+          case x: Float  => state.attempt(BigInt(x.toLong))
+          case x: Double => state.attempt(BigInt(x.toLong))
           case _         => state.fail
         }
     }
@@ -370,8 +409,8 @@ object Decoder extends DecoderDerivation {
     decodeState.collect {
       case ProductDynamicRepr(_) | IterableDynamicRepr(_) | ValueDynamicRepr(_) =>
         decodeState.runDecoder[A] match {
-          case Left(_)      => Right(None)
-          case Right(value) => Right(Some(value))
+          case Left(_)      => decodeState.succeed(None)
+          case Right(value) => decodeState.succeed(Some(value))
         }
       case NilDynamicRepr => decodeState.succeed(None)
     }
@@ -394,6 +433,15 @@ object Decoder extends DecoderDerivation {
         decodeState.runDecoder[A].map(List(_))
       case IterableDynamicRepr(_) =>
         decodeState.foreach(state => state.runDecoder[A]).map(_.toList)
+    }
+  }
+
+  implicit def decoderMap[V: Decoder]: Decoder[Map[String, V]] = instance { decodeState =>
+    decodeState.collect {
+      case ProductDynamicRepr(m: collection.Map[String, DynamicRepr]) =>
+        m.map { case (k, _) => implicitly[Decoder[V]].from(decodeState.selectField(k)).map((k, _)) }
+          .traverse(identity)
+          .map(_.toMap)
     }
   }
 

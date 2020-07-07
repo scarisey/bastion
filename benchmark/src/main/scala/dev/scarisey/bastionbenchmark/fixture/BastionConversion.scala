@@ -20,5 +20,5 @@ object BastionConversion extends Conversion[DecodeError]{
 
   def decodeFromJson(json:String):Either[DecodeError,Person] = decodeJson[Person](json)
 
-  def encode(person: Person)(implicit encode: JsonEncoder[Person]): String = encodeJson[Person](person)
+  def encode(person: Person)(implicit encode: BasicJsonEncoder[Person]): String = encodeJson[Person](person)
 }

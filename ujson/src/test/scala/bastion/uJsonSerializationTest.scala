@@ -18,7 +18,6 @@ package bastion
 import bastion.json._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import ujson._
 
 class uJsonSerializationTest extends AnyFlatSpec with Matchers {
   behavior of "uJson module when serializing"
@@ -26,10 +25,8 @@ class uJsonSerializationTest extends AnyFlatSpec with Matchers {
     case class FooString(foo: String)
     case class Foo(bar: Double, baz: FooString, items: List[String])
 
-    val foo    = Foo(42.0, FooString("aFoo"), List.apply("baz", "bar"))
-    val astFoo = foo.asJsonAst
-    astFoo shouldEqual Obj(("bar", Num(42.0)), ("baz", Obj(("foo", "aFoo"))), ("items", Arr(Str("baz"), Str("bar"))))
-    val expectedJsonString = """{"bar":42,"baz":{"foo":"aFoo"},"items":["baz","bar"]}"""
+    val foo                = Foo(42.0, FooString("aFoo"), List.apply("baz", "bar"))
+    val expectedJsonString = """{"bar":42.0,"baz":{"foo":"aFoo"},"items":["baz","bar"]}"""
     foo.asJson shouldEqual expectedJsonString
   }
 

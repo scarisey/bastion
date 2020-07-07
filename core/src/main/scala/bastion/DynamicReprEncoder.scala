@@ -45,15 +45,16 @@ object DynamicReprEncode extends EncoderDerivation with LowPriorityImplicits {
   /*
   Any val implicits
    */
-  implicit val encodeByte: DynamicReprEncode[Byte]       = (a: Byte) => ValueDynamicRepr(a)
-  implicit val encodeInt: DynamicReprEncode[Int]         = (a: Int) => ValueDynamicRepr(a)
-  implicit val encodeShort: DynamicReprEncode[Short]     = (a: Short) => ValueDynamicRepr(a)
-  implicit val encodeLong: DynamicReprEncode[Long]       = (a: Long) => ValueDynamicRepr(a)
-  implicit val encodeFloat: DynamicReprEncode[Float]     = (a: Float) => ValueDynamicRepr(a)
-  implicit val encodeChar: DynamicReprEncode[Char]       = (a: Char) => ValueDynamicRepr(a)
-  implicit val encodeBoolean: DynamicReprEncode[Boolean] = (a: Boolean) => ValueDynamicRepr(a)
-  implicit val encodeDouble: DynamicReprEncode[Double]   = (a: Double) => ValueDynamicRepr(a)
-  implicit val encodeUnit: DynamicReprEncode[Unit]       = (a: Unit) => ValueDynamicRepr(a)
+  implicit val encodeByte: DynamicReprEncode[Byte]             = (a: Byte) => ValueDynamicRepr(a)
+  implicit val encodeByteArray: DynamicReprEncode[Array[Byte]] = (a: Array[Byte]) => ValueDynamicRepr(a)
+  implicit val encodeInt: DynamicReprEncode[Int]               = (a: Int) => ValueDynamicRepr(a)
+  implicit val encodeShort: DynamicReprEncode[Short]           = (a: Short) => ValueDynamicRepr(a)
+  implicit val encodeLong: DynamicReprEncode[Long]             = (a: Long) => ValueDynamicRepr(a)
+  implicit val encodeFloat: DynamicReprEncode[Float]           = (a: Float) => ValueDynamicRepr(a)
+  implicit val encodeChar: DynamicReprEncode[Char]             = (a: Char) => ValueDynamicRepr(a)
+  implicit val encodeBoolean: DynamicReprEncode[Boolean]       = (a: Boolean) => ValueDynamicRepr(a)
+  implicit val encodeDouble: DynamicReprEncode[Double]         = (a: Double) => ValueDynamicRepr(a)
+  implicit val encodeUnit: DynamicReprEncode[Unit]             = (a: Unit) => ValueDynamicRepr(a)
 
   /*
   Other basic types
