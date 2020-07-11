@@ -115,4 +115,19 @@ class DecodingStateTuplesTest extends AnyFlatSpec with Matchers {
     tuple22.applyT(f) shouldEqual Right(253)
   }
 
+  it should "apply one DynamicRepr argument to a total function" in {
+    DecodingState.init(ValueDynamicRepr(42)).apply[Int, Int](_ + 1) shouldEqual Right(43)
+  }
+
+  it should "apply one DynamicRepr argument to a function returnin Option" in {
+    DecodingState.init(ValueDynamicRepr(42)).applyO[Int, Int](x => Some(x + 1)) shouldEqual Right(43)
+  }
+
+  it should "apply one DynamicRepr argument to a function returning Either" in {
+    DecodingState.init(ValueDynamicRepr(42)).applyE[Int, Int, Int](x => Right(x + 1)) shouldEqual Right(43)
+  }
+
+  it should "apply one DynamicRepr argument to a function returning Try" in {
+    DecodingState.init(ValueDynamicRepr(42)).applyT[Int, Int](x => Try(x + 1)) shouldEqual Right(43)
+  }
 }
