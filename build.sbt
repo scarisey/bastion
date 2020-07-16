@@ -97,6 +97,17 @@ lazy val benchmark = (project in file("benchmark"))
   .settings(moduleName := "bastion-benchmark")
   .settings(buildSettings)
   .settings(libraryDependencies ++= (circe :+ circeMagnolia :+ upickle ) ++ jackson)
+  .settings(
+    test in assembly := {},
+    mainClass in assembly := Some("org.openjdk.jmh.Main"),
+    assemblyJarName in assembly := "benchmarks.jar",
+    assemblyMergeStrategy in assembly := {
+      case "module-info.class"                                => MergeStrategy.discard
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    }
+  )
   .settings(publish / skip := true)
   .dependsOn(core, ujsonModule)
   .enablePlugins(JmhPlugin)
@@ -123,5 +134,5 @@ lazy val buildSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(core, examples, ujsonModule)
+  .aggregate(core, examples, ujsonModule,benchmark)
   .settings(crossScalaVersions := Nil, publish / skip := true)
