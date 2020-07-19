@@ -101,136 +101,109 @@ object Decoder extends DecoderDerivation {
    * AnyVal specific instances
    */
   implicit val decodeByte: Decoder[Byte] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Byte   => state.succeed(x)
-          case c: Char   => state.succeed(c.toByte)
-          case x: Short  => state.succeed(x.toByte)
-          case x: Int    => state.succeed(x.toByte)
-          case x: Long   => state.succeed(x.toByte)
-          case x: Float  => state.succeed(x.toByte)
-          case x: Double => state.succeed(x.toByte)
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Byte   => state.succeed(x)
+      case c: Char   => state.succeed(c.toByte)
+      case x: Short  => state.succeed(x.toByte)
+      case x: Int    => state.succeed(x.toByte)
+      case x: Long   => state.succeed(x.toByte)
+      case x: Float  => state.succeed(x.toByte)
+      case x: Double => state.succeed(x.toByte)
+      case _         => state.fail
+    })
   }
 
-  implicit val decoderByteArray: Decoder[Array[Byte]] = instance { decodeState =>
-    decodeState.collect {
-      case ValueDynamicRepr(a: Array[Byte]) => decodeState.succeed(a)
-      case ValueDynamicRepr(_) | ProductDynamicRepr(_) =>
-        decodeByte.from(decodeState).map(a => Array(a))
-      case IterableDynamicRepr(_) =>
-        decodeState.foreach(state => decodeByte.from(state)).map(_.toArray)
-    }
+  implicit val decoderByteArray: Decoder[Array[Byte]] = instance { state =>
+    state.fold(
+      fromValue = {
+        case a: Array[Byte] => state.succeed(a)
+        case _              => decodeByte.from(state).map(a => Array(a))
+      },
+      fromIterable = (_: Any) => state.foreach(state => decodeByte.from(state)).map(_.toArray)
+    )
   }
 
   implicit val decodeInt: Decoder[Int] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Int    => state.succeed(x)
-          case x: Short  => state.attempt(x.toInt)
-          case x: String => state.attempt(x.toInt)
-          case x: Double => state.attempt(x.toInt)
-          case x: Long   => state.attempt(x.toInt)
-          case x: Float  => state.attempt(x.toInt)
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Int    => state.succeed(x)
+      case x: Short  => state.attempt(x.toInt)
+      case x: String => state.attempt(x.toInt)
+      case x: Double => state.attempt(x.toInt)
+      case x: Long   => state.attempt(x.toInt)
+      case x: Float  => state.attempt(x.toInt)
+      case _         => state.fail
+    })
   }
 
   implicit val decodeShort: Decoder[Short] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Short  => state.succeed(x)
-          case x: String => state.attempt(x.toShort)
-          case x: Int    => state.attempt(x.toShort)
-          case x: Double => state.attempt(x.toShort)
-          case x: Long   => state.attempt(x.toShort)
-          case x: Float  => state.attempt(x.toShort)
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Short  => state.succeed(x)
+      case x: String => state.attempt(x.toShort)
+      case x: Int    => state.attempt(x.toShort)
+      case x: Double => state.attempt(x.toShort)
+      case x: Long   => state.attempt(x.toShort)
+      case x: Float  => state.attempt(x.toShort)
+      case _         => state.fail
+    })
   }
 
   implicit val decodeLong: Decoder[Long] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Long   => state.succeed(x)
-          case x: Int    => state.attempt(x.toLong)
-          case x: Short  => state.attempt(x.toLong)
-          case x: String => state.attempt(x.toLong)
-          case x: Float  => state.attempt(x.toLong)
-          case x: Double => state.attempt(x.toLong)
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Long   => state.succeed(x)
+      case x: Int    => state.attempt(x.toLong)
+      case x: Short  => state.attempt(x.toLong)
+      case x: String => state.attempt(x.toLong)
+      case x: Float  => state.attempt(x.toLong)
+      case x: Double => state.attempt(x.toLong)
+      case _         => state.fail
+    })
   }
 
   implicit val decodeFloat: Decoder[Float] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Float  => state.succeed(x)
-          case x: Double => state.attempt(x.toFloat)
-          case x: Int    => state.attempt(x.toFloat)
-          case x: Short  => state.attempt(x.toFloat)
-          case x: Long   => state.attempt(x.toFloat)
-          case x: String => state.attempt(x.toFloat)
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Float  => state.succeed(x)
+      case x: Double => state.attempt(x.toFloat)
+      case x: Int    => state.attempt(x.toFloat)
+      case x: Short  => state.attempt(x.toFloat)
+      case x: Long   => state.attempt(x.toFloat)
+      case x: String => state.attempt(x.toFloat)
+      case _         => state.fail
+    })
   }
 
   implicit val decodeChar: Decoder[Char] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Char   => state.succeed(x)
-          case x: String => state.attempt(x.charAt(0))
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Char   => state.succeed(x)
+      case x: String => state.attempt(x.charAt(0))
+      case _         => state.fail
+    })
   }
 
   implicit val decodeBoolean: Decoder[Boolean] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Boolean => state.succeed(x)
-          case x: String  => state.attempt(x.toBoolean)
-          case _          => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Boolean => state.succeed(x)
+      case x: String  => state.attempt(x.toBoolean)
+      case _          => state.fail
+    })
   }
 
   implicit val decodeDouble: Decoder[Double] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Double => state.succeed(x)
-          case x: Int    => state.attempt(x.toDouble)
-          case x: Short  => state.attempt(x.toDouble)
-          case x: Long   => state.attempt(x.toDouble)
-          case x: Float  => state.attempt(x.toDouble)
-          case x: String => state.attempt(x.toDouble)
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Double => state.succeed(x)
+      case x: Int    => state.attempt(x.toDouble)
+      case x: Short  => state.attempt(x.toDouble)
+      case x: Long   => state.attempt(x.toDouble)
+      case x: Float  => state.attempt(x.toDouble)
+      case x: String => state.attempt(x.toDouble)
+      case _         => state.fail
+    })
   }
 
   implicit val decodeUnit: Decoder[Unit] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Unit => state.succeed(x)
-          case _       => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Unit => state.succeed(x)
+      case _       => state.fail
+    })
   }
 
   /*
@@ -238,41 +211,35 @@ object Decoder extends DecoderDerivation {
    */
 
   implicit val decodeBigInt: Decoder[BigInt] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: BigInt => state.succeed(x)
-          case x: Int    => state.succeed(BigInt(x))
-          case x: Short  => state.succeed(BigInt(x))
-          case x: Long   => state.succeed(BigInt(x))
-          case x: String => state.attempt(BigInt(x))
-          case x: Float  => state.attempt(BigInt(x.toLong))
-          case x: Double => state.attempt(BigInt(x.toLong))
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: BigInt => state.succeed(x)
+      case x: Int    => state.succeed(BigInt(x))
+      case x: Short  => state.succeed(BigInt(x))
+      case x: Long   => state.succeed(BigInt(x))
+      case x: String => state.attempt(BigInt(x))
+      case x: Float  => state.attempt(BigInt(x.toLong))
+      case x: Double => state.attempt(BigInt(x.toLong))
+      case _         => state.fail
+    })
   }
 
   implicit val decodeBigDecimal: Decoder[BigDecimal] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: BigDecimal => state.succeed(x)
-          case x: Int        => state.succeed(BigDecimal(x))
-          case x: Short      => state.succeed(BigDecimal(x))
-          case x: Long       => state.succeed(BigDecimal(x))
-          case x: Float      => state.succeed(BigDecimal(x.toDouble))
-          case x: Double     => state.succeed(BigDecimal(x))
-          case x: BigInt     => state.succeed(BigDecimal(x))
-          case x: String     => state.attempt(BigDecimal(x))
-          case _             => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: BigDecimal => state.succeed(x)
+      case x: Int        => state.succeed(BigDecimal(x))
+      case x: Short      => state.succeed(BigDecimal(x))
+      case x: Long       => state.succeed(BigDecimal(x))
+      case x: Float      => state.succeed(BigDecimal(x.toDouble))
+      case x: Double     => state.succeed(BigDecimal(x))
+      case x: BigInt     => state.succeed(BigDecimal(x))
+      case x: String     => state.attempt(BigDecimal(x))
+      case _             => state.fail
+    })
   }
 
   implicit val decodeString: Decoder[String] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
+    state.fold(
+      fromValue = a =>
         a match {
           case x: String => state.succeed(x)
           case _: Int | _: Short | _: Long | _: Float | _: Double | _: Char | _: Boolean | _: BigInt | _: BigDecimal =>
@@ -281,168 +248,151 @@ object Decoder extends DecoderDerivation {
             state.succeed(a.toString)
           case _ => state.fail
         }
-    }
+    )
   }
 
   implicit val decodeUri: Decoder[URI] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: URI    => state.succeed(x)
-          case x: String => state.attempt(URI.create(x))
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: URI    => state.succeed(x)
+      case x: String => state.attempt(URI.create(x))
+      case _         => state.fail
+    })
   }
 
   implicit val decodeUrl: Decoder[URL] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: URL    => state.succeed(x)
-          case x: String => state.attempt(URI.create(x).toURL)
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: URL    => state.succeed(x)
+      case x: String => state.attempt(URI.create(x).toURL)
+      case _         => state.fail
+    })
   }
 
   implicit val decodeDuration: Decoder[Duration] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Duration => state.succeed(x)
-          case x: String   => state.attempt(Duration(x))
-          case _           => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Duration => state.succeed(x)
+      case x: String   => state.attempt(Duration(x))
+      case _           => state.fail
+    })
   }
 
   implicit val decodeUuid: Decoder[UUID] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: UUID   => state.succeed(x)
-          case x: String => state.attempt(UUID.fromString(x))
-          case _         => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: UUID   => state.succeed(x)
+      case x: String => state.attempt(UUID.fromString(x))
+      case _         => state.fail
+    })
   }
 
   implicit val decodeInstant: Decoder[Instant] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: Instant => state.succeed(x)
-          case x: String  => state.attempt(Instant.parse(x))
-          case _          => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: Instant => state.succeed(x)
+      case x: String  => state.attempt(Instant.parse(x))
+      case _          => state.fail
+    })
   }
 
   implicit val decodeLocalDate: Decoder[LocalDate] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: LocalDate => state.succeed(x)
-          case x: String    => state.attempt(LocalDate.parse(x))
-          case _            => state.fail
-        }
-    }
+    state.fold(
+      fromValue = {
+        case x: LocalDate => state.succeed(x)
+        case x: String    => state.attempt(LocalDate.parse(x))
+        case _            => state.fail
+      }
+    )
   }
 
   implicit val decodeLocalDateTime: Decoder[LocalDateTime] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: LocalDateTime => state.succeed(x)
-          case x: String        => state.attempt(LocalDateTime.parse(x))
-          case _                => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: LocalDateTime => state.succeed(x)
+      case x: String        => state.attempt(LocalDateTime.parse(x))
+      case _                => state.fail
+    })
   }
 
   implicit val decodeLocalTime: Decoder[LocalTime] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: LocalTime => state.succeed(x)
-          case x: String    => state.attempt(LocalTime.parse(x))
-          case _            => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: LocalTime => state.succeed(x)
+      case x: String    => state.attempt(LocalTime.parse(x))
+      case _            => state.fail
+    })
   }
 
   implicit val decodeOffsetDateTime: Decoder[OffsetDateTime] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: OffsetDateTime => state.succeed(x)
-          case x: String         => state.attempt(OffsetDateTime.parse(x))
-          case _                 => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: OffsetDateTime => state.succeed(x)
+      case x: String         => state.attempt(OffsetDateTime.parse(x))
+      case _                 => state.fail
+    })
   }
 
   implicit val decodeOffsetTime: Decoder[OffsetTime] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: OffsetTime => state.succeed(x)
-          case x: String     => state.attempt(OffsetTime.parse(x))
-          case _             => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: OffsetTime => state.succeed(x)
+      case x: String     => state.attempt(OffsetTime.parse(x))
+      case _             => state.fail
+    })
   }
 
   implicit val decodeFile: Decoder[File] = instance { state =>
-    state.collect {
-      case ValueDynamicRepr(a) =>
-        a match {
-          case x: File                => state.succeed(x)
-          case x: String if x != null => state.succeed(new File(x))
-          case _                      => state.fail
-        }
-    }
+    state.fold(fromValue = {
+      case x: File                => state.succeed(x)
+      case x: String if x != null => state.succeed(new File(x))
+      case _                      => state.fail
+    })
   }
 
   implicit def decoderOption[A: Decoder]: Decoder[Option[A]] = instance { decodeState =>
-    decodeState.collect {
-      case ProductDynamicRepr(_) | IterableDynamicRepr(_) | ValueDynamicRepr(_) =>
+    decodeState.fold(
+      fromValue = (_: Any) =>
         decodeState.runDecoder[A] match {
           case Left(_)      => decodeState.succeed(None)
           case Right(value) => decodeState.succeed(Some(value))
-        }
-      case NilDynamicRepr => decodeState.succeed(None)
-    }
+        },
+      fromProduct = (_: Any) =>
+        decodeState.runDecoder[A] match {
+          case Left(_)      => decodeState.succeed(None)
+          case Right(value) => decodeState.succeed(Some(value))
+        },
+      fromIterable = (_: Any) =>
+        decodeState.runDecoder[A] match {
+          case Left(_)      => decodeState.succeed(None)
+          case Right(value) => decodeState.succeed(Some(value))
+        },
+      fromNil = decodeState.succeed(None)
+    )
 
   }
 
   implicit def decoderEither[L: Decoder, R: Decoder]: Decoder[Either[L, R]] = instance { decodeState =>
-    decodeState.collect {
-      case ValueDynamicRepr(_) | ProductDynamicRepr(_) =>
+    decodeState.fold(
+      fromValue = (_: Any) =>
+        decodeState.runDecoder[L].map(Left(_)) match {
+          case Left(_)      => decodeState.runDecoder[R].map(Right(_))
+          case r @ Right(_) => r
+        },
+      fromProduct = (_: Any) =>
         decodeState.runDecoder[L].map(Left(_)) match {
           case Left(_)      => decodeState.runDecoder[R].map(Right(_))
           case r @ Right(_) => r
         }
-    }
+    )
   }
 
   implicit def decoderList[A: Decoder]: Decoder[List[A]] = instance { decodeState =>
-    decodeState.collect {
-      case ValueDynamicRepr(_) | ProductDynamicRepr(_) =>
-        decodeState.runDecoder[A].map(List(_))
-      case IterableDynamicRepr(_) =>
-        decodeState.foreach(state => state.runDecoder[A]).map(_.toList)
-    }
+    decodeState.foreach(state => state.runDecoder[A]).map(_.toList)
   }
 
   implicit def decoderMap[V: Decoder]: Decoder[Map[String, V]] = instance { decodeState =>
-    decodeState.collect {
-      case ProductDynamicRepr(m: collection.Map[String, DynamicRepr]) =>
-        m.map { case (k, _) => implicitly[Decoder[V]].from(decodeState.selectField(k)).map((k, _)) }
-          .traverse(identity)
-          .map(_.toMap)
-    }
+    decodeState.fold(
+      fromProduct = a =>
+        a match {
+          case (m: collection.Map[String, DynamicRepr]) =>
+            m.map { case (k, _) => implicitly[Decoder[V]].from(decodeState.selectField(k)).map((k, _)) }
+              .traverse(identity)
+              .map(_.toMap)
+          case _ => decodeState.fail
+        }
+    )
   }
 
   implicit def deriveDecode[T](implicit u: AutoUnlockDecode): Decoder[T] = macro macroDeriveDecode[T]

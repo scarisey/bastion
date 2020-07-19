@@ -74,8 +74,8 @@ final case class DecodingState(aggregatedPath: Path, initialDynamicRepr: Dynamic
    * It is intended to be used like a traverse function for an Iterable, combining all Results.
    */
   def foreach[A](f: DecodingState => Result[A]): Result[Iterable[A]] =
-    actualDynamicRepr match {
-      case IterableDynamicRepr(items) =>
+    actualDynamicRepr.fold(
+      fromIterable = items =>
         items.zipWithIndex.traverse {
           case (g, i) =>
             f(
@@ -84,9 +84,11 @@ final case class DecodingState(aggregatedPath: Path, initialDynamicRepr: Dynamic
                 actualDynamicRepr = g
               )
             )
-        }
-      case _ => f(this).map(Iterable(_))
-    }
+        },
+      fromValue = (_: Any) => f(this).map(Iterable(_)),
+      fromProduct = (_: Any) => f(this).map(Iterable(_)),
+      fromNil = Right(Iterable.empty)
+    )
 
   /**
    * Will invoke an instance of a Decoder[D] on the current DynamicRepr being decoded, as long as this instance is in the implicit scope.
@@ -100,6 +102,12 @@ final case class DecodingState(aggregatedPath: Path, initialDynamicRepr: Dynamic
   def collect[T](f: PartialFunction[DynamicRepr, Result[T]]): Result[T] =
     f.applyOrElse(this.actualDynamicRepr, { _: DynamicRepr => this.fail[T] })
 
+  def fold[R](
+    fromNil: => Result[R] = this.fail[R],
+    fromValue: actualDynamicRepr.T => Result[R] = (_: actualDynamicRepr.T) => this.fail[R],
+    fromProduct: actualDynamicRepr.T => Result[R] = (_: actualDynamicRepr.T) => this.fail[R],
+    fromIterable: Iterable[DynamicRepr] => Result[R] = (_: Iterable[DynamicRepr]) => this.fail[R]
+  ): Result[R] = actualDynamicRepr.fold(fromNil, fromValue, fromProduct, fromIterable)
 }
 object DecodingState {
   def init(dynamicRepr: DynamicRepr): DecodingState = DecodingState(Path(), dynamicRepr, dynamicRepr)

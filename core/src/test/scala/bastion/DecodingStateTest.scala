@@ -37,7 +37,7 @@ class DecodingStateTest extends AnyFlatSpec with Matchers {
   behavior of "DecodingState"
 
   it should "traverse current dynamicrepr" in {
-    stateNil.foreach(_.runDecoder[Int]) shouldEqual stateNil.fail[Int]
+    stateNil.foreach(_.runDecoder[Int]) shouldEqual stateNil.succeed(List.empty)
     stateValue.foreach(_.runDecoder[Int]) shouldEqual stateValue.succeed(List(42))
     stateIterable.foreach(_.runDecoder[Int]) shouldEqual stateIterable.succeed(List(42, 43))
     stateProduct.foreach(_.runDecoder[Map[String, Int]]) shouldEqual stateProduct.succeed(

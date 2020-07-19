@@ -23,8 +23,14 @@ import scala.language.dynamics
  * For data as product, fields are accessed dynamically using scala.language.dynamics.
  */
 sealed trait DynamicRepr extends Dynamic { self =>
+  type T
   def selectDynamic(field: String): DynamicRepr
-
+  def fold[R](
+    fromNil: => Result[R],
+    fromValue: T => Result[R],
+    fromProduct: T => Result[R],
+    fromIterable: Iterable[DynamicRepr] => Result[R]
+  ): Result[R]
 }
 object DynamicRepr {
   val nil: DynamicRepr = NilDynamicRepr
@@ -35,12 +41,20 @@ object DynamicRepr {
  * The data it encodes is the public field a.
  */
 abstract class ProductDynamicRepr[A](val a: A) extends DynamicRepr {
+  override type T = A
   override def toString: String = s"ProductDynamicRepr(${a.toString})"
 
   override def equals(obj: Any): Boolean = obj match {
     case ProductDynamicRepr(otherA) => a.equals(otherA)
     case _                          => false
   }
+
+  override def fold[R](
+    fromNil: => Result[R],
+    fromValue: A => Result[R],
+    fromProduct: A => Result[R],
+    fromIterable: Iterable[DynamicRepr] => Result[R]
+  ): Result[R] = fromProduct(a)
 }
 object ProductDynamicRepr {
   def unapply[A](arg: ProductDynamicRepr[A]): Option[A] = Some(arg.a)
@@ -51,8 +65,16 @@ object ProductDynamicRepr {
  * The data it encodes is the public field items.
  */
 final case class IterableDynamicRepr(items: Iterable[DynamicRepr]) extends DynamicRepr {
+  override type T = DynamicRepr
   override def selectDynamic(field: String): DynamicRepr = NilDynamicRepr
   override def toString: String                          = s"IterableDynamicRepr(${items.toString})"
+
+  override def fold[R](
+    fromNil: => Result[R],
+    fromValue: DynamicRepr => Result[R],
+    fromProduct: DynamicRepr => Result[R],
+    fromIterable: Iterable[DynamicRepr] => Result[R]
+  ): Result[R] = fromIterable(items)
 }
 
 /**
@@ -60,16 +82,33 @@ final case class IterableDynamicRepr(items: Iterable[DynamicRepr]) extends Dynam
  * The data it encodes is the public field a. Its selectDynamic method will always return NilDynamicRepr.
  */
 final case class ValueDynamicRepr[A](a: A) extends DynamicRepr {
+  override type T = A
   override def selectDynamic(field: String): DynamicRepr = NilDynamicRepr
   override def toString: String                          = s"ValueDynamicRepr(${a.toString})"
+
+  override def fold[R](
+    fromNil: => Result[R],
+    fromValue: A => Result[R],
+    fromProduct: A => Result[R],
+    fromIterable: Iterable[DynamicRepr] => Result[R]
+  ): Result[R] =
+    fromValue(a)
 }
 
 /**
  * The absence of data is encoded as NilDynamicRepr.
  */
 case object NilDynamicRepr extends DynamicRepr {
+  override type T = NilDynamicRepr.type
   override def selectDynamic(field: String): DynamicRepr = this
   override def toString: String                          = "NilDynamicRepr"
+
+  override def fold[R](
+    fromNil: => Result[R],
+    fromValue: this.T => Result[R],
+    fromProduct: this.T => Result[R],
+    fromIterable: Iterable[DynamicRepr] => Result[R]
+  ): Result[R] = fromNil
 }
 
 /**
