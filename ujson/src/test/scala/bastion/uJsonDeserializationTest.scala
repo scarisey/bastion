@@ -28,8 +28,8 @@ class uJsonDeserializationTest extends AnyFlatSpec with Matchers {
     case class Foo(bar: Double, baz: FooString, items: List[String])
 
     val mixed = (i: Int) => s"""{
-                               |  "foo$i": {
-                               |    "bar": 806,
+                               |  "foo": {
+                               |    "bar": ${806 + i},
                                |    "baz": {
                                |      "foo": "foo again, but not the same"
                                |    },
@@ -42,8 +42,8 @@ class uJsonDeserializationTest extends AnyFlatSpec with Matchers {
          |]""".stripMargin
 
     val itemAssert = (repr: DynamicRepr, i: Int) => {
-      val fooi = repr.selectDynamic(s"foo$i")
-      fooi.bar shouldEqual ValueDynamicRepr(806)
+      val fooi = repr.selectDynamic("foo")
+      fooi.bar shouldEqual ValueDynamicRepr(806 + i)
       fooi.baz.foo shouldEqual ValueDynamicRepr("foo again, but not the same")
       fooi.items shouldEqual IterableDynamicRepr(
         ValueDynamicRepr("first") :: ValueDynamicRepr("second") :: ValueDynamicRepr("third") :: Nil
@@ -120,22 +120,15 @@ class uJsonDeserializationTest extends AnyFlatSpec with Matchers {
   it should "decode to a case class" in new MixedJsonFixture {
     import derivation.decode.auto._
 
-    implicit val d: Decoder[List[Foo]] = Decoder.instance { state =>
-      var i = 0
-      state.foreach { state =>
-        val r = state.selectField(s"foo$i").runDecoder[Foo]
-        i += 1
-        r
-      }.map(_.toList)
-    }
+    implicit val decodeFoo: Decoder[List[Foo]] =
+      Decoder.instance(state => state.foreach(itemState => itemState.foo.runDecoder[Foo]).map(_.toList))
 
     val decodedItems = decodeJson[List[Foo]](mixedItems)
 
     decodedItems.isRight shouldBe true
     decodedItems.foreach(_ should have size 10)
-    decodedItems.foreach(
-      _.forall(x => x == Foo(806.0, FooString("foo again, but not the same"), List("first", "second", "third"))) shouldBe true
-    )
+    decodedItems.map(_.foldLeft(0.0)((acc, i) => acc + i.bar)) shouldEqual Right(8105.0)
+
   }
 
 }

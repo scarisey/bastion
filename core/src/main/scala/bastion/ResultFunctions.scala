@@ -19,9 +19,9 @@ package bastion
 object ResultFunctions {
   def traverse[A, B](xs: Iterable[A])(f: A => Result[B]): Result[List[B]] = {
     val zero: Result[List[B]] = Right(List.empty[B])
-    xs.foldLeft(zero) {
-      case (acc, x) =>
-        acc.flatMap(rs => f(x).map(r => rs :+ r))
+    xs.foldRight(zero) {
+      case (x, acc) =>
+        acc.flatMap(rs => f(x).map(r => r :: rs))
     }
   }
 }
