@@ -5,7 +5,11 @@ import java.util.concurrent.TimeUnit
 import dev.scarisey.bastionbenchmark.fixture.Domain.Birthdate
 import dev.scarisey.bastionbenchmark.fixture.Domain.Name
 import dev.scarisey.bastionbenchmark.fixture.Domain.Person
-import dev.scarisey.bastionbenchmark.fixture.{BastionConversion, CirceConversion, CirceMagnoliaConversion, JacksonConversion, UPickleConversion}
+import dev.scarisey.bastionbenchmark.fixture.BastionConversion
+import dev.scarisey.bastionbenchmark.fixture.CirceConversion
+import dev.scarisey.bastionbenchmark.fixture.CirceMagnoliaConversion
+import dev.scarisey.bastionbenchmark.fixture.JacksonConversion
+import dev.scarisey.bastionbenchmark.fixture.UPickleConversion
 import io.circe.Encoder
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
@@ -28,15 +32,15 @@ import bastion.json._
 class CirceVsUpickleVsJacksonVsBastion {
   val aJson = """{"name":"John","birthdate":"1985-01-01"}"""
   val aPerson = (for {
-    name <- Name("John")
+    name      <- Name("John")
     birthdate <- Birthdate(LocalDate.of(1985, 1, 1))
-  } yield Person(name, birthdate)).fold(t=>throw new IllegalStateException(t.toString),identity)
+  } yield Person(name, birthdate)).fold(t => throw new IllegalStateException(t.toString), identity)
 
-  implicit val circeNameEncoder: Encoder[Name] = Encoder.encodeString.contramap(_.toString)
+  implicit val circeNameEncoder: Encoder[Name]           = Encoder.encodeString.contramap(_.toString)
   implicit val circeBirthdateEncoder: Encoder[Birthdate] = Encoder.encodeString.contramap(_.toString)
 
   val circePersonEncoder: Encoder[Person] = deriveEncoder[Person]
-  val bastionJsonEncoder = BasicJsonEncoder.deriveBasicJsonEncoder[Person]
+  val bastionJsonEncoder                  = BasicJsonEncoder.deriveBasicJsonEncoder[Person]
 
   @Benchmark
   def decodeJsonUsingCirceOptics(): Unit = CirceConversion.decodeUsingOptics(aJson)

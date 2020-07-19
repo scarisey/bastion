@@ -17,7 +17,6 @@
 package bastion.derivation.dynamicrepr
 import bastion.DynamicRepr
 import bastion.DynamicReprEncode
-import bastion.FieldKeyRepr
 import bastion.NilDynamicRepr
 import bastion.ProductDynamicRepr
 import bastion.ValueDynamicRepr
@@ -26,28 +25,18 @@ import magnolia._
 trait EncoderDerivation {
   type Typeclass[T] = DynamicReprEncode[T]
 
-  def combine[T](ctx: ReadOnlyCaseClass[DynamicReprEncode, T])(implicit configuration: Configuration): DynamicReprEncode[T] =
+  def combine[T](ctx: ReadOnlyCaseClass[DynamicReprEncode, T]): DynamicReprEncode[T] =
     new DynamicReprEncode[T] {
-      val fieldsKeyRepr: Map[FieldKeyRepr, ReadOnlyParam[DynamicReprEncode, T]] = if (configuration.lenientCase) {
-        ctx.parameters.map(p => (FieldKeyRepr(p.label), p)).toMap
-      } else {
-        Map.empty
-      }
       override def to(a: T): DynamicRepr =
         if (ctx.isObject) {
           ValueDynamicRepr(ctx.typeName.short)
         } else {
           new ProductDynamicRepr[T](a) { self =>
-            override def selectDynamic(field: String): DynamicRepr = {
-              val foundParam = if (configuration.lenientCase) {
-                fieldsKeyRepr.find { case (k, _) => k === field }.map { case (_, v) => v }
-              } else {
-                ctx.parameters.find(p => p.label == field)
-              }
-              foundParam
+            override def selectDynamic(field: String): DynamicRepr =
+              ctx.parameters
+                .find(p => p.label == field)
                 .map(p => p.typeclass.to(p.dereference(a)))
                 .getOrElse(NilDynamicRepr)
-            }
           }
         }
     }

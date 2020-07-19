@@ -24,5 +24,4 @@ object ResultFunctions {
         acc.flatMap(rs => f(x).map(r => rs :+ r))
     }
   }
-
 }

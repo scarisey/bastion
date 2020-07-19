@@ -1,6 +1,8 @@
 package dev.scarisey.bastionbenchmark.fixture
 
-import dev.scarisey.bastionbenchmark.fixture.Domain.{Birthdate, Name, Person}
+import dev.scarisey.bastionbenchmark.fixture.Domain.Birthdate
+import dev.scarisey.bastionbenchmark.fixture.Domain.Name
+import dev.scarisey.bastionbenchmark.fixture.Domain.Person
 import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
 import upickle.default
 import upickle.default._
@@ -11,9 +13,9 @@ object UPickleConversion {
 
   implicit val rw: default.ReadWriter[ExternalPerson] = macroRW[ExternalPerson]
 
-  implicit val wName = writer[String].comap[Name](name => name.value)
+  implicit val wName      = writer[String].comap[Name](name => name.value)
   implicit val wBirthdate = writer[String].comap[Birthdate](date => date.value.toString)
-  implicit val w = macroW[Person]
+  implicit val w          = macroW[Person]
 
   def encode(person: Person): String = write[Person](person)
 

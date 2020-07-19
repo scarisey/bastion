@@ -121,10 +121,11 @@ class uJsonDeserializationTest extends AnyFlatSpec with Matchers {
     import derivation.decode.auto._
 
     implicit val d: Decoder[List[Foo]] = Decoder.instance { state =>
-      var i = -1
+      var i = 0
       state.foreach { state =>
+        val r = state.selectField(s"foo$i").runDecoder[Foo]
         i += 1
-        state.selectField(s"foo$i").runDecoder[Foo]
+        r
       }.map(_.toList)
     }
 

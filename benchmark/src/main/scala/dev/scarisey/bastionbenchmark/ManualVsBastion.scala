@@ -3,7 +3,8 @@ package dev.scarisey.bastionbenchmark
 import java.util.concurrent.TimeUnit
 
 import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
-import dev.scarisey.bastionbenchmark.fixture.{BastionConversion, ManualConversion}
+import dev.scarisey.bastionbenchmark.fixture.BastionConversion
+import dev.scarisey.bastionbenchmark.fixture.ManualConversion
 import org.openjdk.jmh.annotations._
 
 @BenchmarkMode(Array(Mode.Throughput))
@@ -22,5 +23,5 @@ class ManualVsBastion {
 
   @Benchmark
   def decodeDynamicReprUsingDerivedDecoders: Unit =
-    BastionConversion.decodeFromRepr(ManualConversion.encode(ExternalPerson("John","1985-01-01")))
+    BastionConversion.decodeFromRepr(ManualConversion.encode(ExternalPerson("John", "1985-01-01")))
 }

@@ -17,8 +17,7 @@
 package bastion.derivation.dynamicrepr
 
 package object auto {
-  implicit val autoUnlock: AutoUnlock       = new AutoUnlock {}
-  implicit val configuration: Configuration = Configuration.default
+  implicit val autoUnlock: AutoUnlock = new AutoUnlock {}
 }
 
 trait AutoUnlock

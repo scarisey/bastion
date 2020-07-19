@@ -15,7 +15,7 @@ import scala.util.Try
 sealed trait SomeInfraError
 case object ParsingError                   extends SomeInfraError
 case class WrapDomainError(e: DomainError) extends SomeInfraError
-case class WrapOtherError[T](e:T) extends SomeInfraError
+case class WrapOtherError[T](e: T)         extends SomeInfraError
 
 object ManualConversion extends Conversion[SomeInfraError] {
 

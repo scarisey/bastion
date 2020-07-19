@@ -3,5 +3,5 @@ import dev.scarisey.bastionbenchmark.fixture.Domain.Person
 import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
 
 trait Conversion[+E] {
-  def convert(externalPerson: ExternalPerson):Either[E,Person]
+  def convert(externalPerson: ExternalPerson): Either[E, Person]
 }

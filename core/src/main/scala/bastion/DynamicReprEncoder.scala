@@ -27,7 +27,6 @@ import java.util.UUID
 
 import bastion.DynamicReprEncode.macroDeriveEncode
 import bastion.derivation.dynamicrepr.AutoUnlock
-import bastion.derivation.dynamicrepr.Configuration
 import bastion.derivation.dynamicrepr.EncoderDerivation
 import magnolia._
 
@@ -89,8 +88,8 @@ object DynamicReprEncode extends EncoderDerivation with LowPriorityImplicits {
           a.get(field).map(implicitly[DynamicReprEncode[V]].to(_)).getOrElse(NilDynamicRepr)
       }
 
-  def macroDeriveEncode[T: c.WeakTypeTag](c: whitebox.Context)(u: c.Tree, configuration: c.Tree): c.Tree = {
-    val _ = (u, configuration)
+  def macroDeriveEncode[T: c.WeakTypeTag](c: whitebox.Context)(u: c.Tree): c.Tree = {
+    val _ = u
     Magnolia.gen[T](c)
   }
 
@@ -102,6 +101,6 @@ trait LowPriorityImplicits extends LowPriorityImplicits2 {
 }
 
 trait LowPriorityImplicits2 {
-  implicit def deriveEncode[T](implicit u: AutoUnlock, configuration: Configuration): DynamicReprEncode[T] =
+  implicit def deriveEncode[T](implicit u: AutoUnlock): DynamicReprEncode[T] =
     macro macroDeriveEncode[T]
 }

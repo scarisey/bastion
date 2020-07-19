@@ -3,7 +3,6 @@ import dev.scarisey.bastionbenchmark.fixture.Domain.Person
 import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
 import io.circe.Encoder
 
-
 object CirceConversion {
   import io.circe.generic.auto._
   import io.circe.optics.JsonPath._
@@ -26,7 +25,7 @@ object CirceConversion {
       person   <- ManualConversion.convert(external)
     } yield person
 
-  def encode(person: Person)(implicit encode:Encoder[Person]):String = person.asJson.toString()
+  def encode(person: Person)(implicit encode: Encoder[Person]): String = person.asJson.toString()
 }
 
 object CirceMagnoliaConversion {

@@ -7,7 +7,7 @@ import dev.scarisey.bastionbenchmark.fixture.Domain.DomainError.BlankName
 object Domain {
   sealed trait DomainError
   object DomainError {
-    case object BlankName   extends DomainError
+    case object BlankName         extends DomainError
     case object BirthdateInFuture extends DomainError
   }
 
@@ -26,5 +26,5 @@ object Domain {
     )
   }
 
-  final case class Person(name: Name,birthdate: Birthdate)
+  final case class Person(name: Name, birthdate: Birthdate)
 }

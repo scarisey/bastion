@@ -28,9 +28,7 @@ trait DecoderDerivation {
   def combine[T](ctx: CaseClass[Decoder, T]): Decoder[T] = new Decoder[T] {
     override def from(state: DecodingState): Result[T] =
       ctx
-        .constructEither(param => param.typeclass.from(state.selectDynamic(param.label)))
-        .left
-        .map(_.reduce((e1, e2) => e1.combine(e2)))
+        .constructMonadic(param => param.typeclass.from(state.selectDynamic(param.label)))
   }
 
   def dispatch[T](ctx: SealedTrait[Decoder, T]): Decoder[T] = new Decoder[T] {

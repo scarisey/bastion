@@ -18,8 +18,7 @@ package bastion
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import derivation.dynamicrepr.Configuration.lenient
-import derivation.dynamicrepr.configured.auto._
+import derivation.dynamicrepr.auto._
 
 class EncodeTest extends AnyFlatSpec with Matchers {
   trait Fixture {
@@ -111,19 +110,6 @@ class EncodeTest extends AnyFlatSpec with Matchers {
     }
   }
 
-  it should "be case insensitive" in new Fixture {
-    val recordA = RecordA(SubA2(true, 2.0), "foo", SubA1("s1", 42))
-    val repr    = encodeA.to(recordA)
-    repr match {
-      case ProductDynamicRepr(a) => a shouldBe recordA
-      case _                     => fail()
-    }
-    repr.sub1.subString1 shouldBe ValueDynamicRepr("s1")
-    //incorrect path
-    repr.subX.subString1 shouldBe NilDynamicRepr
-    repr.subX.subString1 shouldBe NilDynamicRepr
-  }
-
   it should "works with monadic wrapper" in new Fixture {
     val subA1: SubA1      = SubA1("aString", 42)
     val subA2: SubA2      = SubA2(true, 3.0)
@@ -141,7 +127,7 @@ class EncodeTest extends AnyFlatSpec with Matchers {
       case ProductDynamicRepr(a) => a shouldBe subA1
       case _                     => fail()
     }
-    repr.subA1.subString1 shouldBe ValueDynamicRepr(subA1.sub_string_1)
+    repr.subA1.sub_string_1 shouldBe ValueDynamicRepr(subA1.sub_string_1)
     repr.subA2s match {
       case IterableDynamicRepr(items) => {
         items should have size 1
