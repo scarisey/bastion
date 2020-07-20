@@ -24,14 +24,14 @@ class ResultFunctionsTest extends AnyFlatSpec with Matchers {
   it should "produce a Result of Iterable when all results are ok" in {
     val xs: List[Result[Int]] = List(Right(1), Right(2), Right(3))
 
-    val actualResults: Result[List[Int]] = xs.traverse(identity)
+    val actualResults: Result[Iterable[Int]] = xs.traverse(identity)
     actualResults shouldEqual Right(List(1, 2, 3))
   }
 
   it should "produce Left when one result is ko" in {
     val xs: List[Result[Int]] = List(Right(1), Left(NilSmartConstructorError), Right(3))
 
-    val actualResults: Result[List[Int]] = xs.traverse(identity)
+    val actualResults: Result[Iterable[Int]] = xs.traverse(identity)
     actualResults shouldEqual Left(NilSmartConstructorError)
   }
 }

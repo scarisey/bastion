@@ -16,8 +16,21 @@
 
 package bastion
 
+import scala.reflect.ClassTag
+
 object ResultFunctions {
-  def traverse[A, B](xs: Iterable[A])(f: A => Result[B]): Result[List[B]] = {
+  //imperative implementation for performance reasons ! see https://www.lihaoyi.com/post/MicrooptimizingyourScalacode.html
+  def traverse[A:ClassTag, B](xs: Iterable[A])(f: A => Result[B]): Result[Iterable[B]] = {
+//    val arraySource: Array[Any] = xs.toArray
+//    val length                  = arraySource.size
+//    val arrayTarget: Array[Any] = new Array[Any](length)
+//    var i                       = 0
+//    var acc: Result[Array[Any]] = Right(arrayTarget)
+//    while (i < length) {
+//      f(arraySource(i).asInstanceOf[A]).fold(err => acc = Left(err), b => arrayTarget(i) = b.asInstanceOf[Object])
+//      i += 1
+//    }
+//    acc.asInstanceOf[Result[Array[B]]].map(_.toIterable)
     val zero: Result[List[B]] = Right(List.empty[B])
     xs.foldRight(zero) {
       case (x, acc) =>

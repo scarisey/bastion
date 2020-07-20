@@ -29,6 +29,8 @@ object BastionConversion extends Conversion[DecodeError] {
 
   implicit val decodeName: Decoder[Name]           = Decoder.wrapE(Name.apply)
   implicit val decodeBirthdate: Decoder[Birthdate] = Decoder.wrapE(Birthdate.apply)
+  implicit val decodePhone: Decoder[Phone]         = Decoder.wrapE(Phone.apply)
+  implicit val decodeEmail: Decoder[Email]         = Decoder.wrapE(Email.apply)
   implicit val decodeContacts: Decoder[Domain.Contacts] = Decoder.instance(state =>
     state.contacts
       .foreach(stateContact => stateContact.runDecoder[Domain.Contact])

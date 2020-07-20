@@ -1,3 +1,5 @@
+import scala.reflect.ClassTag
+
 /*
  * Copyright 2020 dev.scarisey
  *
@@ -40,7 +42,7 @@ package object bastion extends DecodingStateTuples {
     def convert[A](implicit decode: Decoder[A]): Result[A] = decode.from(DecodingState.init(d))
   }
 
-  implicit class IterableOps[A](xs: Iterable[A]) {
-    def traverse[B](f: A => Result[B]): Result[List[B]] = ResultFunctions.traverse(xs)(f)
+  implicit class IterableOps[A:ClassTag](xs: Iterable[A]) {
+    def traverse[B](f: A => Result[B]): Result[Iterable[B]] = ResultFunctions.traverse(xs)(f)
   }
 }

@@ -101,6 +101,6 @@ trait LowPriorityImplicits extends LowPriorityImplicits2 {
 }
 
 trait LowPriorityImplicits2 {
-  implicit def deriveEncode[T](implicit u: AutoUnlock): DynamicReprEncode[T] =
+  implicit def derive[T](implicit u: AutoUnlock): DynamicReprEncode[T] =
     macro macroDeriveEncode[T]
 }

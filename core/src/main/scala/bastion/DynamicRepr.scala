@@ -110,17 +110,3 @@ case object NilDynamicRepr extends DynamicRepr {
     fromIterable: Iterable[DynamicRepr] => Result[R]
   ): Result[R] = fromNil
 }
-
-/**
- * Internal class to encode field representation.
- */
-case class FieldKeyRepr(s: String) {
-  val repr: List[String] = {
-    val tokens = StringCases.tokenize(s)
-    StringCases.transformations.map(f => f(tokens)) :+ s
-  }
-
-  def ===(other: String): Boolean = repr.contains(other)
-
-  override def toString: String = repr.toString()
-}

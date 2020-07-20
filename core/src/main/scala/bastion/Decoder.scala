@@ -387,15 +387,14 @@ object Decoder extends DecoderDerivation {
       fromProduct = a =>
         a match {
           case (m: collection.Map[String, DynamicRepr]) =>
-            m.map { case (k, _) => implicitly[Decoder[V]].from(decodeState.selectField(k)).map((k, _)) }
-              .traverse(identity)
+            m.traverse { case (k, _) => implicitly[Decoder[V]].from(decodeState.selectField(k)).map((k, _)) }
               .map(_.toMap)
           case _ => decodeState.fail
         }
     )
   }
 
-  implicit def deriveDecode[T](implicit u: AutoUnlockDecode): Decoder[T] = macro macroDeriveDecode[T]
+  implicit def derive[T](implicit u: AutoUnlockDecode): Decoder[T] = macro macroDeriveDecode[T]
 
   def macroDeriveDecode[T: c.WeakTypeTag](c: whitebox.Context)(u: c.Tree): c.Tree = {
     val _ = u

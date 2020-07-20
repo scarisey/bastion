@@ -132,7 +132,7 @@ class EncodeDecodeTest extends AnyFlatSpec with Matchers {
     implicit val encodeC = BasicJsonEncoder.deriveBasicJsonEncoder[Containers]
     val json             = containers.asJson
 
-    implicit val decoder = Decoder.deriveDecode[Containers]
+    implicit val decoder = Decoder.derive[Containers]
     val actual           = decodeJson[Containers](json)
 
     actual shouldBe Right(containers)

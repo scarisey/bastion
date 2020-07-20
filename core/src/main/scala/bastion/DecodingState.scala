@@ -97,11 +97,14 @@ final case class DecodingState(aggregatedPath: Path, initialDynamicRepr: Dynamic
     implicitly[Decoder[D]].from(this)
 
   /**
-   * Will apply the partial function f on the current DynamicRepr being decoded.
+   * Will apply the partial function f on the current DynamicRepr being decoded. You may use fold instead to avoid coupling with DynamicRepr and the overhead of pattern matching.
    */
   def collect[T](f: PartialFunction[DynamicRepr, Result[T]]): Result[T] =
     f.applyOrElse(this.actualDynamicRepr, { _: DynamicRepr => this.fail[T] })
 
+  /**
+   * Will apply one of the functions to the actual DynamicRepr. Should be more efficient than collect.
+   */
   def fold[R](
     fromNil: => Result[R] = this.fail[R],
     fromValue: actualDynamicRepr.T => Result[R] = (_: actualDynamicRepr.T) => this.fail[R],
