@@ -24,6 +24,8 @@ import dev.scarisey.bastionbenchmark.fixture.Domain.Birthdate
 import dev.scarisey.bastionbenchmark.fixture.Domain.DomainError
 import dev.scarisey.bastionbenchmark.fixture.Domain.Name
 import dev.scarisey.bastionbenchmark.fixture.Domain.Person
+import dev.scarisey.bastionbenchmark.fixture.External.ExternalContact
+import dev.scarisey.bastionbenchmark.fixture.External.ExternalContacts
 import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
 
 import scala.util.Try
@@ -55,4 +57,21 @@ object ManualConversion extends Conversion[SomeInfraError] {
       case "birthdate" => ValueDynamicRepr(a.birthdate)
     }
   }
+
+  def convertFromContact(externalContact: ExternalContact): Either[SomeInfraError, Domain.Contact] =
+    for {
+      person <- convert(externalContact.person)
+      phone  <- Domain.Phone.apply(externalContact.phone).left.map(WrapDomainError(_))
+      email  <- Domain.Email.apply(externalContact.email).left.map(WrapDomainError(_))
+    } yield Domain.Contact.apply(person, phone, email)
+
+  def convertFromExternalContacts(externalContacts: ExternalContacts): Either[SomeInfraError, Domain.Contacts] =
+    (for {
+      contact <- externalContacts.contacts
+    } yield convertFromContact(contact))
+      .foldLeft(Right(List.empty).asInstanceOf[Either[SomeInfraError, List[Domain.Contact]]]) {
+        case (acc, ctc) =>
+          acc.flatMap(cs => ctc.map(c => c :: cs))
+      }
+      .map(Domain.Contacts.apply(List.empty, _))
 }

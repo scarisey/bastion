@@ -17,8 +17,8 @@
 package dev.scarisey.bastionbenchmark.fixture
 import bastion.DecodeError
 import dev.scarisey.bastionbenchmark.fixture.Domain.Birthdate
-import dev.scarisey.bastionbenchmark.fixture.Domain.Name
-import dev.scarisey.bastionbenchmark.fixture.Domain.Person
+import dev.scarisey.bastionbenchmark.fixture.Domain._
+import dev.scarisey.bastionbenchmark.fixture.External.ExternalContacts
 import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
 
 object BastionConversion extends Conversion[DecodeError] {
@@ -29,6 +29,11 @@ object BastionConversion extends Conversion[DecodeError] {
 
   implicit val decodeName: Decoder[Name]           = Decoder.wrapE(Name.apply)
   implicit val decodeBirthdate: Decoder[Birthdate] = Decoder.wrapE(Birthdate.apply)
+  implicit val decodeContacts: Decoder[Domain.Contacts] = Decoder.instance(state =>
+    state.contacts
+      .foreach(stateContact => stateContact.runDecoder[Domain.Contact])
+      .map(cs => Domain.Contacts(List.empty, cs.toList))
+  )
 
   override def convert(source: ExternalPerson): Either[DecodeError, Person] = source.convert[Person]
 
@@ -39,4 +44,6 @@ object BastionConversion extends Conversion[DecodeError] {
   def decodeFromJson(json: String): Either[DecodeError, Person] = decodeJson[Person](json)
 
   def encode(person: Person)(implicit encode: BasicJsonEncoder[Person]): String = encodeJson[Person](person)
+
+  def convertExternalContacts(source: ExternalContacts): Either[DecodeError, Domain.Contacts] = source.convert[Domain.Contacts]
 }
