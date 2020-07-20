@@ -134,5 +134,5 @@ lazy val buildSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(core, examples, ujsonModule,benchmark)
+  .aggregate(core, examples, ujsonModule)
   .settings(crossScalaVersions := Nil, publish / skip := true)
