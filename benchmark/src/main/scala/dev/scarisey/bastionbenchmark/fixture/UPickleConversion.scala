@@ -16,10 +16,8 @@
 
 package dev.scarisey.bastionbenchmark.fixture
 
-import dev.scarisey.bastionbenchmark.fixture.Domain.Birthdate
-import dev.scarisey.bastionbenchmark.fixture.Domain.Name
-import dev.scarisey.bastionbenchmark.fixture.Domain.Person
-import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
+import dev.scarisey.bastionbenchmark.fixture.Domain.{Birthdate, Contacts, Name, Person}
+import dev.scarisey.bastionbenchmark.fixture.External.{ExternalContact, ExternalContacts, ExternalPerson}
 import upickle.default
 import upickle.default._
 
@@ -27,7 +25,9 @@ import scala.util.Try
 
 object UPickleConversion {
 
-  implicit val rw: default.ReadWriter[ExternalPerson] = macroRW[ExternalPerson]
+  implicit val rw: default.ReadWriter[ExternalPerson]   = macroRW[ExternalPerson]
+  implicit val rwContact: default.ReadWriter[ExternalContact]   = macroRW[ExternalContact]
+  implicit val rwContacts: default.ReadWriter[ExternalContacts] = macroRW[ExternalContacts]
 
   implicit val wName      = writer[String].comap[Name](name => name.value)
   implicit val wBirthdate = writer[String].comap[Birthdate](date => date.value.toString)
@@ -39,5 +39,10 @@ object UPickleConversion {
     Try(read[ExternalPerson](person)).toEither.left
       .map(WrapOtherError(_))
       .flatMap(ManualConversion.convert(_))
+
+  def decodeContacts(contacts: String): Either[SomeInfraError, Contacts] =
+    Try(read[ExternalContacts](contacts)).toEither.left
+      .map(WrapOtherError(_))
+      .flatMap(ManualConversion.convertFromExternalContacts(_))
 
 }

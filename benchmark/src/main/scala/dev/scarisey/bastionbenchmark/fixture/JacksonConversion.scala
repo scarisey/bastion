@@ -18,8 +18,8 @@ package dev.scarisey.bastionbenchmark.fixture
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import dev.scarisey.bastionbenchmark.fixture.Domain.Person
-import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
+import dev.scarisey.bastionbenchmark.fixture.Domain.{Contacts, Person}
+import dev.scarisey.bastionbenchmark.fixture.External.{ExternalContacts, ExternalPerson}
 
 import scala.util.Try
 
@@ -32,4 +32,8 @@ object JacksonConversion {
     Try(objectMapper.readValue(person, classOf[ExternalPerson])).toEither.left
       .map(WrapOtherError(_))
       .flatMap(ManualConversion.convert)
+  def decodeContacts(person: String): Either[SomeInfraError, Contacts] =
+    Try(objectMapper.readValue(person, classOf[ExternalContacts])).toEither.left
+      .map(WrapOtherError(_))
+      .flatMap(ManualConversion.convertFromExternalContacts)
 }

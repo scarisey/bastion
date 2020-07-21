@@ -41,12 +41,27 @@ import bastion.json._
 
 @BenchmarkMode(Array(Mode.Throughput))
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-@Warmup(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
 @State(Scope.Benchmark)
 class CirceVsUpickleVsJacksonVsBastion {
   val aJson = """{"name":"John","birthdate":"1985-01-01"}"""
+  val jsonContacts =
+    """{
+      |"contacts":[
+      |{"person":{"name":"John1","birthdate":"1990-01-01"},"phone":"01 02 03 04 05","email":"j.doe1@foo.com"},
+      |{"person":{"name":"John2","birthdate":"1990-01-02"},"phone":"02 02 03 04 05","email":"j.doe2@foo.com"},
+      |{"person":{"name":"John3","birthdate":"1990-01-03"},"phone":"03 02 03 04 05","email":"j.doe3@foo.com"},
+      |{"person":{"name":"John4","birthdate":"1990-01-04"},"phone":"04 02 03 04 05","email":"j.doe4@foo.com"},
+      |{"person":{"name":"John5","birthdate":"1990-01-05"},"phone":"05 02 03 04 05","email":"j.doe5@foo.com"},
+      |{"person":{"name":"John6","birthdate":"1990-01-06"},"phone":"06 02 03 04 05","email":"j.doe6@foo.com"},
+      |{"person":{"name":"John7","birthdate":"1990-01-07"},"phone":"07 02 03 04 05","email":"j.doe7@foo.com"},
+      |{"person":{"name":"John8","birthdate":"1990-01-08"},"phone":"08 02 03 04 05","email":"j.doe8@foo.com"},
+      |{"person":{"name":"John9","birthdate":"1990-01-09"},"phone":"09 02 03 04 05","email":"j.doe9@foo.com"},
+      |{"person":{"name":"John0","birthdate":"1990-01-00"},"phone":"00 02 03 04 05","email":"j.doe0@foo.com"}
+      |]
+      |}""".stripMargin
   val aPerson = (for {
     name      <- Name("John")
     birthdate <- Birthdate(LocalDate.of(1985, 1, 1))
@@ -71,6 +86,36 @@ class CirceVsUpickleVsJacksonVsBastion {
   def decodeJsonUsingBastionAndUJson(): Unit = BastionConversion.decodeFromJson(aJson)
 
   @Benchmark
+  def decodeUsingJackson(): Unit = JacksonConversion.decode(aJson)
+
+  @Benchmark
+  def decodeUsingUPickle(): Unit = UPickleConversion.decode(aJson)
+
+  @Benchmark
+  def decodeContactsJsonUsingCirceGenerics(): Unit =
+    println(
+      CirceConversion.decodeContactsUsingGenerics(jsonContacts)
+    )
+
+  @Benchmark
+  def decodeContactsUsingBastionAndUJson(): Unit =
+    println(
+      BastionConversion.decodeContactsFromJson(jsonContacts)
+    )
+
+  @Benchmark
+  def decodeContactsUsingJackson(): Unit =
+    println(
+      JacksonConversion.decodeContacts(jsonContacts)
+    )
+
+  @Benchmark
+  def decodeContactsUsingUPickle(): Unit =
+    println(
+      UPickleConversion.decodeContacts(jsonContacts)
+    )
+
+  @Benchmark
   def encodeJsonUsingCirce(): Unit = CirceConversion.encode(aPerson)(circePersonEncoder)
 
   @Benchmark
@@ -80,12 +125,5 @@ class CirceVsUpickleVsJacksonVsBastion {
   def encodeUsingJackson(): Unit = JacksonConversion.encode(aPerson)
 
   @Benchmark
-  def decodeUsingJackson(): Unit = JacksonConversion.decode(aJson)
-
-  @Benchmark
   def encodeUsingUPickle(): Unit = UPickleConversion.encode(aPerson)
-
-  @Benchmark
-  def decodeUsingUPickle(): Unit = UPickleConversion.decode(aJson)
-
 }

@@ -15,8 +15,8 @@
  */
 
 package dev.scarisey.bastionbenchmark.fixture
-import dev.scarisey.bastionbenchmark.fixture.Domain.Person
-import dev.scarisey.bastionbenchmark.fixture.External.ExternalPerson
+import dev.scarisey.bastionbenchmark.fixture.Domain.{Contacts, Person}
+import dev.scarisey.bastionbenchmark.fixture.External.{ExternalContacts, ExternalPerson}
 import io.circe.Encoder
 
 object CirceConversion {
@@ -40,6 +40,12 @@ object CirceConversion {
       external <- decode[ExternalPerson](json).left.map(WrapOtherError(_))
       person   <- ManualConversion.convert(external)
     } yield person
+
+  def decodeContactsUsingGenerics(json: String): Either[SomeInfraError, Contacts] =
+    for {
+      external <- decode[ExternalContacts](json).left.map(WrapOtherError(_))
+      contacts <- ManualConversion.convertFromExternalContacts(external)
+    } yield contacts
 
   def encode(person: Person)(implicit encode: Encoder[Person]): String = person.asJson.toString()
 }

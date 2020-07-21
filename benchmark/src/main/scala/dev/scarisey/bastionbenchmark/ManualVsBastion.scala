@@ -44,6 +44,7 @@ class ManualVsBastion {
       ExternalContact(ExternalPerson("Foo10", "1990-01-10"), "00 01 02 03 04", "foo10@bar.dev")
     )
   )
+
   @Benchmark
   def convertManually: Unit = ManualConversion.convert(ExternalPerson("John", "1985-01-01"))
 

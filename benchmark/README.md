@@ -25,8 +25,9 @@ These results help me to investigate where are the bottlenecks in Bastion implem
 
 Compared to a hand written converter, bastion seems to be 2x times slower.
 
-Decoding json using Circe and the specific handwritten converter is about the same performance as bastion + uJson,
-but I guess we need more benchmarks on this point.
+Decoding json using Circe + a specific handwritten function to convert the Case Class representation of json to Domain Case Class
+is about the same performance as bastion + uJson that made this labor automatically. 
+
 
 Encoding json using Circe cannot be compared directly with Bastion when case class constructors are private, 
 since Circe derivation cannot be involved in auto mode. 

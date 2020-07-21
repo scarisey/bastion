@@ -46,7 +46,7 @@ final case class DecodingState(aggregatedPath: Path, initialDynamicRepr: Dynamic
   def succeed[T](t: T): Result[T] = Right(t)
 
   /**
-   * Will terminate decoding, raising an error with the current path, type and DynamicRepr being decoded.
+   * Will terminate decoding, raising an error with the current path and DynamicRepr being decoded.
    */
   def fail[T]: Result[T] = Left(IncorrectPath(this))
 

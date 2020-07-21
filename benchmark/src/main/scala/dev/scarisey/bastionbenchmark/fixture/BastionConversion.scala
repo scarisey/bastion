@@ -39,13 +39,17 @@ object BastionConversion extends Conversion[DecodeError] {
 
   override def convert(source: ExternalPerson): Either[DecodeError, Person] = source.convert[Person]
 
+  def convertExternalContacts(source: ExternalContacts): Either[DecodeError, Domain.Contacts] = source.convert[Domain.Contacts]
+
   def decodeFromRepr(dynamicRepr: DynamicRepr): Either[DecodeError, Person] = dynamicRepr.convert[Person]
 
-  def encode(person: ExternalPerson)(implicit encode: DynamicReprEncode[ExternalPerson]): DynamicRepr = encode.to(person)
+  def decodeFromJson(json: String): Either[DecodeError, Person]           = decodeJson[Person](json)
 
-  def decodeFromJson(json: String): Either[DecodeError, Person] = decodeJson[Person](json)
+  def decodeContactsFromJson(json: String): Either[DecodeError, Contacts] = decodeJson[Contacts](json)
 
   def encode(person: Person)(implicit encode: BasicJsonEncoder[Person]): String = encodeJson[Person](person)
 
-  def convertExternalContacts(source: ExternalContacts): Either[DecodeError, Domain.Contacts] = source.convert[Domain.Contacts]
+  def encode(person: ExternalPerson)(implicit encode: DynamicReprEncode[ExternalPerson]): DynamicRepr = encode.to(person)
+
+  def encode(contacts: ExternalContacts)(implicit encode: DynamicReprEncode[ExternalContacts]): DynamicRepr = encode.to(contacts)
 }
